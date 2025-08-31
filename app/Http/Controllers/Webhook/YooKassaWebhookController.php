@@ -8,21 +8,18 @@ use Illuminate\Http\Response;
 
 class YooKassaWebhookController
 {
-    public function __invoke(Request $request, YooKassaService $service): Response
+    public function __construct(private YooKassaService $service)
     {
-        $signature = $request->header('sha256');
-        $payload = $request->getContent();
-        $secret = config('services.yookassa.webhook_secret');
+    }
 
-        if (! $signature || ! $secret || ! hash_equals(hash_hmac('sha256', $payload, $secret), $signature)) {
-            return response()->json(['message' => 'Invalid signature'], Response::HTTP_FORBIDDEN);
-        }
+    public function __invoke(Request $request): Response
+    {
+        $signature = $request->header('sha256', '');
 
-        try {
-            $service->handleWebhook($request->json()->all());
-        } catch (\Throwable $e) {
-            return response()->json(['message' => 'Processing failed'], Response::HTTP_BAD_REQUEST);
-        }
+        $this->service->handleWebhook($request->json()->all(), $signature);
+
+        return response()->noContent();
+    }
 
         return response()->noContent();
     }

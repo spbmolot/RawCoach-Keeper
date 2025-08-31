@@ -8,23 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Payment extends Model
 {
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = [
-        'user_id',
-        'provider',
-        'external_id',
-        'amount',
-        'currency',
-        'status',
-        'payload',
-        'paid_at',
-    ];
-
-    /**
-     * Get the user that owns the payment.
+     * Пользователь, которому принадлежит платёж.
      */
     public function user(): BelongsTo
     {
@@ -32,7 +16,7 @@ class Payment extends Model
     }
 
     /**
-     * Get the subscription associated with the payment.
+     * Подписка, связанная с платёжом.
      */
     public function subscription(): BelongsTo
     {
@@ -40,7 +24,7 @@ class Payment extends Model
     }
 
     /**
-     * Get the plan associated with the payment.
+     * Тарифный план, связанный с платёжом.
      */
     public function plan(): BelongsTo
     {
@@ -48,7 +32,7 @@ class Payment extends Model
     }
 
     /**
-     * Get the attributes that should be cast.
+     * Атрибуты, которые должны быть приведены к определённым типам.
      *
      * @return array<string, string>
      */
@@ -59,4 +43,6 @@ class Payment extends Model
             'paid_at' => 'datetime',
         ];
     }
+}
+
 }

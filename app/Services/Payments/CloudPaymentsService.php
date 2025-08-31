@@ -2,15 +2,51 @@
 
 namespace App\Services\Payments;
 
+use App\Models\Payment;
+use RuntimeException;
+
 class CloudPaymentsService
 {
-    public function createPayment(array $data): void
+    public function __construct(private $sdk, private string $apiSecret)
     {
-        // TODO: implement payment creation via CloudPayments SDK
     }
 
-    public function handleWebhook(array $payload): void
+    public function createPayment(array $data): Payment
     {
-        // TODO: handle CloudPayments webhook payload
+        $response = $this->sdk->createPayment($data);
+
+        return Payment::create([
+            'user_id' => $data['user_id'],
+            'provider' => 'cloudpayments',
+            'external_id' => $response['TransactionId'] ?? null,
+            'amount' => $data['amount'],
+            'currency' => $data['currency'] ?? 'RUB',
+            'status' => $response['Status'] ?? 'pending',
+            'payload' => $response,
+        ]);
+    }
+
+    public function handleWebhook(array $payload, string $signature): void
+    {
+        $expected = base64_encode(hash_hmac('sha256', json_encode($payload), $this->apiSecret, true));
+
+        if (!hash_equals($expected, $signature)) {
+            throw new RuntimeException('Invalid signature');
+        }
+
+        $payment = Payment::where('external_id', $payload['TransactionId'] ?? null)->first();
+
+        if ($payment) {
+            $update = [
+                'status' => $payload['Status'] ?? $payment->status,
+                'payload' => $payload,
+            ];
+
+            if (($payload['Status'] ?? '') === 'Completed') {
+                $update['paid_at'] = now();
+            }
+
+            $payment->update($update);
+        }
     }
 }
