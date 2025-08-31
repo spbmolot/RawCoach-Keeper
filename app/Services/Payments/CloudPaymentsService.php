@@ -28,6 +28,7 @@ class CloudPaymentsService
 
     public function handleWebhook(array $payload, string $signature): void
     {
+
         $expected = base64_encode(hash_hmac('sha256', json_encode($payload), $this->apiSecret, true));
 
         if (!hash_equals($expected, $signature)) {

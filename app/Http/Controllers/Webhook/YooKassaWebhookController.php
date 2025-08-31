@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Webhook;
 use App\Services\Payments\YooKassaService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use App\Services\Payments\YooKassaService;
 
 class YooKassaWebhookController
 {
@@ -20,6 +21,7 @@ class YooKassaWebhookController
 
         return response()->noContent();
     }
+
 
         return response()->noContent();
     }

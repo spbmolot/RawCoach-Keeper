@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Webhook;
 use App\Services\Payments\CloudPaymentsService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use App\Services\Payments\CloudPaymentsService;
 
 class CloudPaymentsWebhookController
 {
+
     public function __construct(private CloudPaymentsService $service)
     {
     }
