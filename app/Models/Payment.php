@@ -7,6 +7,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Payment extends Model
 {
+    protected $fillable = [
+        'user_id',
+        'subscription_id',
+        'plan_id',
+        'provider',
+        'external_id',
+        'amount',
+        'currency',
+        'status',
+        'payload',
+        'paid_at',
+    ];
+
     /**
      * Пользователь, которому принадлежит платёж.
      */
@@ -43,6 +56,4 @@ class Payment extends Model
             'paid_at' => 'datetime',
         ];
     }
-}
-
 }
