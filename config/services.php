@@ -36,8 +36,8 @@ return [
     ],
 
     'cloudpayments' => [
-        'api_key' => env('CLOUDPAYMENTS_API_KEY'),
-
+        'public_id' => env('CLOUDPAYMENTS_PUBLIC_ID'),
+        'secret_key' => env('CLOUDPAYMENTS_SECRET_KEY'),
     ],
 
 ];
