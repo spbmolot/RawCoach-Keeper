@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'yookassa' => [
+        'webhook_secret' => env('YOOKASSA_WEBHOOK_SECRET'),
+    ],
+
 ];
