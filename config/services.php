@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'cloudpayments' => [
+        'api_key' => env('CLOUDPAYMENTS_API_KEY'),
+    ],
+
 ];
