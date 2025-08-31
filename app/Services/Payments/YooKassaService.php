@@ -2,15 +2,51 @@
 
 namespace App\Services\Payments;
 
+use App\Models\Payment;
+use RuntimeException;
+
 class YooKassaService
 {
-    public function createPayment(array $data): void
+    public function __construct(private $sdk, private string $webhookSecret)
     {
-        // TODO: implement payment creation via YooKassa SDK
     }
 
-    public function handleWebhook(array $payload): void
+    public function createPayment(array $data): Payment
     {
-        // TODO: handle YooKassa webhook payload
+        $response = $this->sdk->createPayment($data);
+
+        return Payment::create([
+            'user_id' => $data['user_id'],
+            'provider' => 'yookassa',
+            'external_id' => $response['id'] ?? null,
+            'amount' => $data['amount'],
+            'currency' => $data['currency'] ?? 'RUB',
+            'status' => $response['status'] ?? 'pending',
+            'payload' => $response,
+        ]);
+    }
+
+    public function handleWebhook(array $payload, string $signature): void
+    {
+        $expected = hash_hmac('sha256', json_encode($payload), $this->webhookSecret);
+
+        if (!hash_equals($expected, $signature)) {
+            throw new RuntimeException('Invalid signature');
+        }
+
+        $payment = Payment::where('external_id', $payload['object']['id'] ?? null)->first();
+
+        if ($payment) {
+            $update = [
+                'status' => $payload['object']['status'] ?? $payment->status,
+                'payload' => $payload,
+            ];
+
+            if (($payload['object']['status'] ?? '') === 'succeeded') {
+                $update['paid_at'] = now();
+            }
+
+            $payment->update($update);
+        }
     }
 }
