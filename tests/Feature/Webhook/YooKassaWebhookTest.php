@@ -11,7 +11,7 @@ class YooKassaWebhookTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_controller_uses_service_via_di(): void
+    public function test_controller_extracts_signature_from_header(): void
     {
         $payload = ['object' => ['id' => 'yk_1', 'status' => 'succeeded']];
         $signature = 'test-signature';
@@ -21,7 +21,20 @@ class YooKassaWebhookTest extends TestCase
 
         $this->app->instance(YooKassaService::class, $service);
 
-        $this->postJson('/webhook/yookassa', $payload, ['sha256' => $signature])
+        $this->postJson('/webhook/yookassa', $payload, ['Content-Signature' => 'sha256='.$signature])
+            ->assertNoContent();
+    }
+
+    public function test_controller_passes_empty_signature_if_wrong_format(): void
+    {
+        $payload = ['object' => ['id' => 'yk_1', 'status' => 'succeeded']];
+
+        $service = Mockery::mock(YooKassaService::class);
+        $service->shouldReceive('handleWebhook')->once()->with($payload, '');
+
+        $this->app->instance(YooKassaService::class, $service);
+
+        $this->postJson('/webhook/yookassa', $payload, ['Content-Signature' => 'invalid-format'])
             ->assertNoContent();
     }
 }
