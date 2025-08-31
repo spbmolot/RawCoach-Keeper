@@ -14,10 +14,11 @@ class YooKassaWebhookTest extends TestCase
     public function test_controller_extracts_signature_from_header(): void
     {
         $payload = ['object' => ['id' => 'yk_1', 'status' => 'succeeded']];
+        $rawBody = json_encode($payload);
         $signature = 'test-signature';
 
         $service = Mockery::mock(YooKassaService::class);
-        $service->shouldReceive('handleWebhook')->once()->with($payload, $signature);
+        $service->shouldReceive('handleWebhook')->once()->with($payload, $rawBody, $signature);
 
         $this->app->instance(YooKassaService::class, $service);
 
@@ -28,9 +29,10 @@ class YooKassaWebhookTest extends TestCase
     public function test_controller_passes_empty_signature_if_wrong_format(): void
     {
         $payload = ['object' => ['id' => 'yk_1', 'status' => 'succeeded']];
+        $rawBody = json_encode($payload);
 
         $service = Mockery::mock(YooKassaService::class);
-        $service->shouldReceive('handleWebhook')->once()->with($payload, '');
+        $service->shouldReceive('handleWebhook')->once()->with($payload, $rawBody, '');
 
         $this->app->instance(YooKassaService::class, $service);
 

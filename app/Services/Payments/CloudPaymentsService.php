@@ -26,10 +26,10 @@ class CloudPaymentsService
         ]);
     }
 
-    public function handleWebhook(array $payload, string $signature): void
+    public function handleWebhook(array $payload, string $rawBody, string $signature): void
     {
 
-        $expected = base64_encode(hash_hmac('sha256', json_encode($payload), $this->apiSecret, true));
+        $expected = base64_encode(hash_hmac('sha256', $rawBody, $this->apiSecret, true));
 
         if (!hash_equals($expected, $signature)) {
             throw new RuntimeException('Invalid signature');

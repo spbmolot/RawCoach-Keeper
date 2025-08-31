@@ -66,11 +66,12 @@ class YooKassaServiceTest extends TestCase
             ],
         ];
 
-        $signature = hash_hmac('sha256', json_encode($payload), 'secret');
+        $rawBody = json_encode($payload);
+        $signature = hash_hmac('sha256', $rawBody, 'secret');
 
         $service = new YooKassaService(Mockery::mock(), 'secret');
 
-        $service->handleWebhook($payload, $signature);
+        $service->handleWebhook($payload, $rawBody, $signature);
 
         $this->assertDatabaseHas('payments', [
             'id' => $payment->id,

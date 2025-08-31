@@ -26,9 +26,9 @@ class YooKassaService
         ]);
     }
 
-    public function handleWebhook(array $payload, string $signature): void
+    public function handleWebhook(array $payload, string $rawBody, string $signature): void
     {
-        $expected = hash_hmac('sha256', json_encode($payload), $this->webhookSecret);
+        $expected = hash_hmac('sha256', $rawBody, $this->webhookSecret);
 
         if (!hash_equals($expected, $signature)) {
             throw new RuntimeException('Invalid signature');

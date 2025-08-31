@@ -64,11 +64,12 @@ class CloudPaymentsServiceTest extends TestCase
             'Status' => 'Completed',
         ];
 
-        $signature = base64_encode(hash_hmac('sha256', json_encode($payload), 'secret', true));
+        $rawBody = json_encode($payload);
+        $signature = base64_encode(hash_hmac('sha256', $rawBody, 'secret', true));
 
         $service = new CloudPaymentsService(Mockery::mock(), 'secret');
 
-        $service->handleWebhook($payload, $signature);
+        $service->handleWebhook($payload, $rawBody, $signature);
 
         $this->assertDatabaseHas('payments', [
             'id' => $payment->id,

@@ -17,7 +17,10 @@ class YooKassaWebhookController
             ? substr($signatureHeader, 7)
             : '';
 
-        $this->service->handleWebhook($request->json()->all(), $signature);
+        $payload = $request->json()->all();
+        $rawBody = $request->getContent();
+
+        $this->service->handleWebhook($payload, $rawBody, $signature);
 
         return response()->noContent();
     }
