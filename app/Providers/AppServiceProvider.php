@@ -31,7 +31,7 @@ class AppServiceProvider extends ServiceProvider
                 config('services.yookassa.secret_key')
             );
 
-            return new YooKassaService($sdk, config('services.yookassa.secret_key'));
+            return new YooKassaService($sdk, config('services.yookassa.webhook_secret'));
         });
     }
 
