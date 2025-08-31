@@ -9,7 +9,9 @@ use Illuminate\Http\Response;
 
 class CloudPaymentsWebhookController
 {
-    public function __invoke(Request $request, CloudPaymentsService $service): JsonResponse
+    public function __construct(private CloudPaymentsService $service) {}
+
+    public function __invoke(Request $request): JsonResponse
     {
         $signature = $request->header('Content-HMAC');
         $apiKey = config('services.cloudpayments.api_key');
@@ -20,7 +22,7 @@ class CloudPaymentsWebhookController
         }
 
         $payload = $request->json()->all();
-        $service->handleWebhook($payload);
+        $this->service->handleWebhook($payload);
 
         return response()->json(['code' => 0]);
     }
