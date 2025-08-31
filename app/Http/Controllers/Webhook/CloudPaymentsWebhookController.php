@@ -14,8 +14,9 @@ class CloudPaymentsWebhookController
     {
         $signature = $request->header('Content-HMAC');
         $payload = $request->json()->all();
+        $rawBody = $request->getContent();
 
-        $this->service->handleWebhook($payload, (string) $signature);
+        $this->service->handleWebhook($payload, $rawBody, (string) $signature);
 
         return response()->json(['code' => 0]);
     }

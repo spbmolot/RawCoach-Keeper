@@ -14,10 +14,11 @@ class CloudPaymentsWebhookTest extends TestCase
     public function test_controller_uses_service_via_di(): void
     {
         $payload = ['TransactionId' => 'cp_1', 'Status' => 'Completed'];
+        $rawBody = json_encode($payload);
         $signature = 'test-signature';
 
         $service = Mockery::mock(CloudPaymentsService::class);
-        $service->shouldReceive('handleWebhook')->once()->with($payload, $signature);
+        $service->shouldReceive('handleWebhook')->once()->with($payload, $rawBody, $signature);
 
         $this->app->instance(CloudPaymentsService::class, $service);
 
