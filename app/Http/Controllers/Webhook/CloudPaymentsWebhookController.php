@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Webhook;
 use App\Services\Payments\CloudPaymentsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use RuntimeException;
 
 class CloudPaymentsWebhookController
 {
@@ -16,7 +18,15 @@ class CloudPaymentsWebhookController
         $payload = $request->json()->all();
         $rawBody = $request->getContent();
 
-        $this->service->handleWebhook($payload, $rawBody, (string) $signature);
+        try {
+            $this->service->handleWebhook($payload, $rawBody, (string) $signature);
+        } catch (RuntimeException $e) {
+            Log::error('CloudPayments webhook error: ' . $e->getMessage(), [
+                'exception' => $e,
+            ]);
+
+            return response()->json(['code' => 13], 200);
+        }
 
         return response()->json(['code' => 0]);
     }

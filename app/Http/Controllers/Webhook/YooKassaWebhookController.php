@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Webhook;
 use App\Services\Payments\YooKassaService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
+use RuntimeException;
 
 class YooKassaWebhookController
 {
@@ -20,7 +22,15 @@ class YooKassaWebhookController
         $payload = $request->json()->all();
         $rawBody = $request->getContent();
 
-        $this->service->handleWebhook($payload, $rawBody, $signature);
+        try {
+            $this->service->handleWebhook($payload, $rawBody, $signature);
+        } catch (RuntimeException $e) {
+            Log::error('YooKassa webhook error: ' . $e->getMessage(), [
+                'exception' => $e,
+            ]);
+
+            return response('', 400);
+        }
 
         return response()->noContent();
     }
