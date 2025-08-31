@@ -36,11 +36,11 @@ php artisan migrate
 5. Start queue worker: `php artisan queue:work`.
 6. Start scheduler: `php artisan schedule:work` or cron `* * * * * php artisan schedule:run`.
 
-## Webhooks
+## Вебхуки
 
-Payment providers send notifications to:
+Платёжные провайдеры отправляют уведомления на:
 
 - `POST /webhook/yookassa`
 - `POST /webhook/cloudpayments`
 
-Controllers currently contain TODOs for future implementation.
+Контроллеры вебхуков используют внедрение зависимостей и проверяют подписи.
