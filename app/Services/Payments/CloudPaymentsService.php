@@ -2,15 +2,36 @@
 
 namespace App\Services\Payments;
 
+use CloudPayments\Manager;
+
 class CloudPaymentsService
 {
-    public function createPayment(array $data): void
+    protected Manager $manager;
+
+    public function __construct()
     {
-        // TODO: implement payment creation via CloudPayments SDK
+        $this->manager = new Manager(
+            config('services.cloudpayments.public_id'),
+            config('services.cloudpayments.secret_key')
+        );
+    }
+
+    public function createPayment(array $data): array
+    {
+        return $this->manager->chargeCard(
+            $data['amount'],
+            $data['currency'] ?? 'RUB',
+            $data['ip_address'],
+            $data['name'],
+            $data['cryptogram'],
+            $data['params'] ?? []
+        );
     }
 
     public function handleWebhook(array $payload): void
     {
-        // TODO: handle CloudPayments webhook payload
+        if (($payload['Status'] ?? '') === 'Completed') {
+            // handle successful payment
+        }
     }
 }
