@@ -3,32 +3,46 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Payment extends Model
 {
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
+     * Пользователь, которому принадлежит платёж.
      */
-    protected $fillable = [
-        'user_id',
-        'provider',
-        'external_id',
-        'amount',
-        'currency',
-        'status',
-        'payload',
-        'paid_at',
-    ];
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
     /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
+     * Подписка, связанная с платёжом.
      */
-    protected $casts = [
-        'payload' => 'array',
-        'paid_at' => 'datetime',
-    ];
+    public function subscription(): BelongsTo
+    {
+        return $this->belongsTo(UserSubscription::class);
+    }
+
+    /**
+     * Тарифный план, связанный с платёжом.
+     */
+    public function plan(): BelongsTo
+    {
+        return $this->belongsTo(Plan::class);
+    }
+
+    /**
+     * Атрибуты, которые должны быть приведены к определённым типам.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'payload' => 'array',
+            'paid_at' => 'datetime',
+        ];
+    }
+}
+
 }

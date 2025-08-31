@@ -14,9 +14,12 @@ class YooKassaWebhookController
 
     public function __invoke(Request $request): Response
     {
-        $signature = $request->header('X-Webhook-Signature', '');
+        $signature = $request->header('sha256', '');
 
-        $this->service->handleWebhook($request->all(), $signature);
+        $this->service->handleWebhook($request->json()->all(), $signature);
+
+        return response()->noContent();
+    }
 
         return response()->noContent();
     }
