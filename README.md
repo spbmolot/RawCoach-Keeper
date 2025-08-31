@@ -19,6 +19,23 @@ npm run build
 php artisan migrate
 ```
 
+## Infrastructure Requirements
+
+- PHP 8.2+
+- Database (MySQL, PostgreSQL, etc.)
+- Redis for cache and queues
+- Queue worker (e.g. Supervisor)
+- SSL/TLS termination
+
+## Production Deployment
+
+1. Configure `.env` with database, Redis, queue and other production settings.
+2. Run migrations: `php artisan migrate --force`.
+3. Build assets: `npm run build`.
+4. Optimize configuration and routes: `php artisan config:cache` and `php artisan route:cache`.
+5. Start queue worker: `php artisan queue:work`.
+6. Start scheduler: `php artisan schedule:work` or cron `* * * * * php artisan schedule:run`.
+
 ## Webhooks
 
 Payment providers send notifications to:

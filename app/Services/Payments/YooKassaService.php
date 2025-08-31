@@ -2,41 +2,51 @@
 
 namespace App\Services\Payments;
 
-use YooKassa\Client;
-use YooKassa\Model\NotificationEventType;
+use App\Models\Payment;
+use RuntimeException;
 
 class YooKassaService
 {
-    protected Client $client;
-
-    public function __construct()
+    public function __construct(private $sdk, private string $webhookSecret)
     {
-        $this->client = new Client();
-        $this->client->setAuth(
-            config('services.yookassa.shop_id'),
-            config('services.yookassa.secret_key')
-        );
     }
 
-    public function createPayment(array $data): array
+    public function createPayment(array $data): Payment
     {
-        return $this->client->createPayment([
-            'amount' => [
-                'value' => $data['amount'],
-                'currency' => $data['currency'] ?? 'RUB',
-            ],
-            'confirmation' => [
-                'type' => 'redirect',
-                'return_url' => $data['return_url'],
-            ],
-            'description' => $data['description'] ?? '',
-        ], uniqid('', true));
+        $response = $this->sdk->createPayment($data);
+
+        return Payment::create([
+            'user_id' => $data['user_id'],
+            'provider' => 'yookassa',
+            'external_id' => $response['id'] ?? null,
+            'amount' => $data['amount'],
+            'currency' => $data['currency'] ?? 'RUB',
+            'status' => $response['status'] ?? 'pending',
+            'payload' => $response,
+        ]);
     }
 
-    public function handleWebhook(array $payload): void
+    public function handleWebhook(array $payload, string $signature): void
     {
-        if (($payload['event'] ?? null) === NotificationEventType::PAYMENT_SUCCEEDED) {
-            // handle successful payment
+        $expected = hash_hmac('sha256', json_encode($payload), $this->webhookSecret);
+
+        if (!hash_equals($expected, $signature)) {
+            throw new RuntimeException('Invalid signature');
+        }
+
+        $payment = Payment::where('external_id', $payload['object']['id'] ?? null)->first();
+
+        if ($payment) {
+            $update = [
+                'status' => $payload['object']['status'] ?? $payment->status,
+                'payload' => $payload,
+            ];
+
+            if (($payload['object']['status'] ?? '') === 'succeeded') {
+                $update['paid_at'] = now();
+            }
+
+            $payment->update($update);
         }
     }
 }

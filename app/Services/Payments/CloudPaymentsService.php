@@ -2,36 +2,52 @@
 
 namespace App\Services\Payments;
 
-use CloudPayments\Manager;
+use App\Models\Payment;
+use RuntimeException;
 
 class CloudPaymentsService
 {
-    protected Manager $manager;
-
-    public function __construct()
+    public function __construct(private $sdk, private string $apiSecret)
     {
-        $this->manager = new Manager(
-            config('services.cloudpayments.public_id'),
-            config('services.cloudpayments.secret_key')
-        );
     }
 
-    public function createPayment(array $data): array
+    public function createPayment(array $data): Payment
     {
-        return $this->manager->chargeCard(
-            $data['amount'],
-            $data['currency'] ?? 'RUB',
-            $data['ip_address'],
-            $data['name'],
-            $data['cryptogram'],
-            $data['params'] ?? []
-        );
+        $response = $this->sdk->createPayment($data);
+
+        return Payment::create([
+            'user_id' => $data['user_id'],
+            'provider' => 'cloudpayments',
+            'external_id' => $response['TransactionId'] ?? null,
+            'amount' => $data['amount'],
+            'currency' => $data['currency'] ?? 'RUB',
+            'status' => $response['Status'] ?? 'pending',
+            'payload' => $response,
+        ]);
     }
 
-    public function handleWebhook(array $payload): void
+    public function handleWebhook(array $payload, string $signature): void
     {
-        if (($payload['Status'] ?? '') === 'Completed') {
-            // handle successful payment
+
+        $expected = base64_encode(hash_hmac('sha256', json_encode($payload), $this->apiSecret, true));
+
+        if (!hash_equals($expected, $signature)) {
+            throw new RuntimeException('Invalid signature');
+        }
+
+        $payment = Payment::where('external_id', $payload['TransactionId'] ?? null)->first();
+
+        if ($payment) {
+            $update = [
+                'status' => $payload['Status'] ?? $payment->status,
+                'payload' => $payload,
+            ];
+
+            if (($payload['Status'] ?? '') === 'Completed') {
+                $update['paid_at'] = now();
+            }
+
+            $payment->update($update);
         }
     }
 }

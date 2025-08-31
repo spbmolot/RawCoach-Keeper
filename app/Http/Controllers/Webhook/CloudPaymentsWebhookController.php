@@ -2,15 +2,23 @@
 
 namespace App\Http\Controllers\Webhook;
 
+use App\Services\Payments\CloudPaymentsService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Services\Payments\CloudPaymentsService;
 
 class CloudPaymentsWebhookController
 {
-    public function __invoke(Request $request, CloudPaymentsService $service): Response
+
+    public function __construct(private CloudPaymentsService $service)
     {
-        $service->handleWebhook($request->all());
+    }
+
+    public function __invoke(Request $request): Response
+    {
+        $signature = $request->header('Content-HMAC', '');
+
+        $this->service->handleWebhook($request->all(), $signature);
 
         return response()->noContent();
     }
