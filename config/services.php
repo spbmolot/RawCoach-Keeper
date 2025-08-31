@@ -35,8 +35,10 @@ return [
         ],
     ],
 
-    'yookassa' => [
-        'webhook_secret' => env('YOOKASSA_WEBHOOK_SECRET'),
+codex/implement-cloudpayments-webhook-handling
+    'cloudpayments' => [
+        'api_key' => env('CLOUDPAYMENTS_API_KEY'),
+
     ],
 
 ];
