@@ -8,6 +8,7 @@ use App\Services\Payments\YooKassaService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use YooKassa\Client as YooKassaClient;
 use Mockery;
+use RuntimeException;
 use Tests\TestCase;
 
 class YooKassaServiceTest extends TestCase
@@ -80,5 +81,24 @@ class YooKassaServiceTest extends TestCase
         ]);
 
         $this->assertNotNull($payment->fresh()->paid_at);
+    }
+
+    public function test_handle_webhook_throws_exception_on_invalid_signature(): void
+    {
+        $payload = [
+            'object' => [
+                'id' => 'yk_1',
+                'status' => 'succeeded',
+            ],
+        ];
+
+        $rawBody = json_encode($payload);
+        $signature = hash_hmac('sha256', $rawBody, 'wrong_secret');
+
+        $service = new YooKassaService(Mockery::mock(YooKassaClient::class), 'secret');
+
+        $this->expectException(RuntimeException::class);
+
+        $service->handleWebhook($payload, $rawBody, $signature);
     }
 }
