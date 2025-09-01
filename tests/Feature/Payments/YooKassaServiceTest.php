@@ -6,6 +6,7 @@ use App\Models\Payment;
 use App\Models\User;
 use App\Services\Payments\YooKassaService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use YooKassa\Client as YooKassaClient;
 use Mockery;
 use Tests\TestCase;
 
@@ -17,7 +18,7 @@ class YooKassaServiceTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $sdk = Mockery::mock();
+        $sdk = Mockery::mock(YooKassaClient::class);
         $sdk->shouldReceive('createPayment')
             ->once()
             ->with([
@@ -69,7 +70,7 @@ class YooKassaServiceTest extends TestCase
         $rawBody = json_encode($payload);
         $signature = hash_hmac('sha256', $rawBody, 'secret');
 
-        $service = new YooKassaService(Mockery::mock(), 'secret');
+        $service = new YooKassaService(Mockery::mock(YooKassaClient::class), 'secret');
 
         $service->handleWebhook($payload, $rawBody, $signature);
 
