@@ -7,7 +7,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
-        "cloudpayments/cloud-payments-client": "^1.0",
+        "cloudpayments/cloud-payments-client": "dev-master as 1.0.0",
         "filament/filament": "^3.2",
         "laravel/framework": "^11.31",
         "laravel/jetstream": "^5.1",
