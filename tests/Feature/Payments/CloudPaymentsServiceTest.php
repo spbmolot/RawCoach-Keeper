@@ -8,6 +8,7 @@ use App\Services\Payments\CloudPaymentsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use CloudPayments\Manager as CloudPaymentsManager;
 use Mockery;
+use RuntimeException;
 use Tests\TestCase;
 
 class CloudPaymentsServiceTest extends TestCase
@@ -78,5 +79,22 @@ class CloudPaymentsServiceTest extends TestCase
         ]);
 
         $this->assertNotNull($payment->fresh()->paid_at);
+    }
+
+    public function test_handle_webhook_throws_exception_on_invalid_signature(): void
+    {
+        $payload = [
+            'TransactionId' => 'cp_1',
+            'Status' => 'Completed',
+        ];
+
+        $rawBody = json_encode($payload);
+        $signature = base64_encode(hash_hmac('sha256', $rawBody, 'wrong_secret', true));
+
+        $service = new CloudPaymentsService(Mockery::mock(CloudPaymentsManager::class), 'secret');
+
+        $this->expectException(RuntimeException::class);
+
+        $service->handleWebhook($payload, $rawBody, $signature);
     }
 }
