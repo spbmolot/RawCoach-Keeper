@@ -38,4 +38,18 @@ class CloudPaymentsWebhookTest extends TestCase
             ->assertOk()
             ->assertJson(['code' => 13]);
     }
+
+    public function test_returns_code_13_when_signature_missing(): void
+    {
+        $payload = ['TransactionId' => 'cp_1', 'Status' => 'Completed'];
+
+        $service = Mockery::mock(CloudPaymentsService::class);
+        $service->shouldNotReceive('handleWebhook');
+
+        $this->app->instance(CloudPaymentsService::class, $service);
+
+        $this->postJson('/webhook/cloudpayments', $payload)
+            ->assertOk()
+            ->assertJson(['code' => 13]);
+    }
 }

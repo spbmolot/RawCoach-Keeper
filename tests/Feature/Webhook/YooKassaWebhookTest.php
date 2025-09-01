@@ -61,4 +61,17 @@ class YooKassaWebhookTest extends TestCase
         $this->postJson('/webhook/yookassa', $payload, ['Content-Signature' => 'sha256=неверный-хэш'])
             ->assertStatus(400);
     }
+
+    public function test_returns_400_when_signature_missing(): void
+    {
+        $payload = ['object' => ['id' => 'yk_1', 'status' => 'succeeded']];
+
+        $service = Mockery::mock(YooKassaService::class);
+        $service->shouldNotReceive('handleWebhook');
+
+        $this->app->instance(YooKassaService::class, $service);
+
+        $this->postJson('/webhook/yookassa', $payload)
+            ->assertStatus(400);
+    }
 }
