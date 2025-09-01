@@ -6,6 +6,7 @@ use App\Models\Payment;
 use App\Models\User;
 use App\Services\Payments\CloudPaymentsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use CloudPayments\Manager as CloudPaymentsManager;
 use Mockery;
 use Tests\TestCase;
 
@@ -17,7 +18,7 @@ class CloudPaymentsServiceTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $sdk = Mockery::mock();
+        $sdk = Mockery::mock(CloudPaymentsManager::class);
         $sdk->shouldReceive('createPayment')
             ->once()
             ->with([
@@ -67,7 +68,7 @@ class CloudPaymentsServiceTest extends TestCase
         $rawBody = json_encode($payload);
         $signature = base64_encode(hash_hmac('sha256', $rawBody, 'secret', true));
 
-        $service = new CloudPaymentsService(Mockery::mock(), 'secret');
+        $service = new CloudPaymentsService(Mockery::mock(CloudPaymentsManager::class), 'secret');
 
         $service->handleWebhook($payload, $rawBody, $signature);
 

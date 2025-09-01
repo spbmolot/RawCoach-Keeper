@@ -3,11 +3,12 @@
 namespace App\Services\Payments;
 
 use App\Models\Payment;
+use YooKassa\Client as YooKassaClient;
 use RuntimeException;
 
 class YooKassaService
 {
-    public function __construct(private $sdk, private string $webhookSecret)
+    public function __construct(private YooKassaClient $sdk, private string $webhookSecret)
     {
     }
 

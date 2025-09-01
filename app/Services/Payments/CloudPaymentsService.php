@@ -3,11 +3,12 @@
 namespace App\Services\Payments;
 
 use App\Models\Payment;
+use CloudPayments\Manager as CloudPaymentsManager;
 use RuntimeException;
 
 class CloudPaymentsService
 {
-    public function __construct(private $sdk, private string $apiSecret)
+    public function __construct(private CloudPaymentsManager $sdk, private string $apiSecret)
     {
     }
 
