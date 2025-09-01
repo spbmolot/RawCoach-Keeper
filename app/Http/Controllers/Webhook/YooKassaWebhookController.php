@@ -15,10 +15,12 @@ class YooKassaWebhookController
     public function __invoke(Request $request): Response
     {
         $signatureHeader = $request->header('Content-Signature', '');
-        $signature = str_starts_with($signatureHeader, 'sha256=')
-            ? substr($signatureHeader, 7)
-            : '';
 
+        if (!str_starts_with($signatureHeader, 'sha256=')) {
+            return response('', 400);
+        }
+
+        $signature = substr($signatureHeader, 7);
         $payload = $request->json()->all();
         $rawBody = $request->getContent();
 
