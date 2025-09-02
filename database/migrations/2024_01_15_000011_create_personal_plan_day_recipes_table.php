@@ -21,7 +21,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->unique(['personal_plan_day_id', 'recipe_id', 'meal_type'], 'personal_plan_day_recipe_unique');
-            $table->index(['personal_plan_day_id', 'meal_type', 'order']);
+            $table->index(['personal_plan_day_id', 'meal_type', 'order'], 'ppdr_day_meal_order_idx');
         });
     }
 
