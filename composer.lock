@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "988e4d93f4138c5bb3f306e2605bba8e",
+    "content-hash": "475e1f95fdd42d0ce548844e00e42123",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -4273,6 +4273,62 @@
             "time": "2024-05-08T12:36:18+00:00"
         },
         {
+            "name": "php-ds/php-ds",
+            "version": "v1.7.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-ds/polyfill.git",
+                "reference": "017fb5cdfa52a1f13126c94987b04b884c44f9cd"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-ds/polyfill/zipball/017fb5cdfa52a1f13126c94987b04b884c44f9cd",
+                "reference": "017fb5cdfa52a1f13126c94987b04b884c44f9cd",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "php": ">=7.4"
+            },
+            "provide": {
+                "ext-ds": "1.5.0"
+            },
+            "require-dev": {
+                "php-ds/tests": "^1.5"
+            },
+            "suggest": {
+                "ext-ds": "to improve performance and reduce memory usage"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Ds\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Rudi Theunissen",
+                    "email": "rudolf.theunissen@gmail.com"
+                }
+            ],
+            "description": "Specialized data structures as alternatives to the PHP array",
+            "keywords": [
+                "data structures",
+                "ds",
+                "php",
+                "polyfill"
+            ],
+            "support": {
+                "issues": "https://github.com/php-ds/polyfill/issues",
+                "source": "https://github.com/php-ds/polyfill/tree/v1.7.0"
+            },
+            "time": "2025-05-18T04:50:53+00:00"
+        },
+        {
             "name": "phpoption/phpoption",
             "version": "1.9.4",
             "source": {
@@ -8143,12 +8199,12 @@
             "version": "3.9.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/yoomoney/yookassa-sdk-php.git",
+                "url": "https://git.yoomoney.ru/scm/sdk/yookassa-sdk-php.git",
                 "reference": "b5e17ed22142b14cb90ce000995924c33540173a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://codeload.github.com/yoomoney/yookassa-sdk-php/zip/refs/tags/3.9.1",
+                "url": "https://git.yoomoney.ru/rest/api/latest/projects/SDK/repos/yookassa-sdk-php/archive?at=refs%2Ftags%2F3.9.1&format=zip",
                 "reference": "b5e17ed22142b14cb90ce000995924c33540173a"
             },
             "require": {
@@ -8156,7 +8212,9 @@
                 "ext-json": "*",
                 "ext-mbstring": "*",
                 "php": ">=8.0",
-                "psr/log": "^2.0 || ^3.0"
+                "php-ds/php-ds": "^1.4",
+                "psr/log": "^2.0 || ^3.0",
+                "yoomoney/yookassa-sdk-validator": "^1.0"
             },
             "require-dev": {
                 "ext-xml": "*",
@@ -8194,6 +8252,45 @@
                 "yoomoney"
             ],
             "time": "2025-07-31T13:17:04+00:00"
+        },
+        {
+            "name": "yoomoney/yookassa-sdk-validator",
+            "version": "1.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://git.yoomoney.ru/scm/sdk/yookassa-sdk-validator-php.git",
+                "reference": "1068864a5179dcbb93b244bff43c0e6bc531b62a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://git.yoomoney.ru/rest/api/latest/projects/SDK/repos/yookassa-sdk-validator-php/archive?at=refs%2Ftags%2F1.0.3&format=zip"
+            },
+            "require": {
+                "ext-mbstring": "*",
+                "php": ">=8.0.0"
+            },
+            "require-dev": {
+                "ext-xml": "*",
+                "phpunit/phpunit": "^9.6"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "YooKassa\\Validator\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "YooMoney",
+                    "email": "cms@yoomoney.ru"
+                }
+            ],
+            "description": "This is a developer tool for validating with YooMoney.",
+            "time": "2024-12-16T16:29:49+00:00"
         }
     ],
     "packages-dev": [
