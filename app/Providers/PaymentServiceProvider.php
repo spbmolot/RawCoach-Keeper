@@ -97,7 +97,7 @@ class PaymentServiceProvider extends ServiceProvider
         if ($defaultProvider === 'yookassa') {
             if (!config('payments.providers.yookassa.shop_id') || 
                 !config('payments.providers.yookassa.secret_key')) {
-                throw new \InvalidArgumentException('Не настроены обязательные параметры для YooKassa');
+                \Log::warning('Не настроены обязательные параметры для YooKassa. Платежи могут не работать корректно.');
             }
         }
 
@@ -105,7 +105,7 @@ class PaymentServiceProvider extends ServiceProvider
         if ($defaultProvider === 'cloudpayments') {
             if (!config('payments.providers.cloudpayments.public_id') || 
                 !config('payments.providers.cloudpayments.api_secret')) {
-                throw new \InvalidArgumentException('Не настроены обязательные параметры для CloudPayments');
+                \Log::warning('Не настроены обязательные параметры для CloudPayments. Платежи могут не работать корректно.');
             }
         }
     }
