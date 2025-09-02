@@ -1,0 +1,296 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Payment;
+use App\Models\UserSubscription;
+use App\Services\Payments\YooKassaService;
+use App\Services\Payments\CloudPaymentsService;
+use Illuminate\Support\Facades\Log;
+use RuntimeException;
+
+class PaymentService
+{
+    public function __construct(
+        private YooKassaService $yooKassaService,
+        private CloudPaymentsService $cloudPaymentsService
+    ) {
+    }
+
+    /**
+     * Создание платежа через выбранного провайдера
+     */
+    public function createPayment(array $data): Payment
+    {
+        $provider = $data['provider'] ?? config('payments.default_provider', 'yookassa');
+
+        return match ($provider) {
+            'yookassa' => $this->yooKassaService->createPayment($data),
+            'cloudpayments' => $this->cloudPaymentsService->createPayment($data),
+            default => throw new RuntimeException("Неподдерживаемый провайдер: {$provider}"),
+        };
+    }
+
+    /**
+     * Создание платежа для подписки
+     */
+    public function createSubscriptionPayment(UserSubscription $subscription, array $additionalData = []): Payment
+    {
+        $user = $subscription->user;
+        $plan = $subscription->plan;
+
+        $paymentData = array_merge([
+            'user_id' => $user->id,
+            'subscription_id' => $subscription->id,
+            'amount' => $subscription->price,
+            'currency' => 'RUB',
+            'description' => "Оплата подписки '{$plan->name}' для {$user->name}",
+            'email' => $user->email,
+            'metadata' => [
+                'subscription_id' => $subscription->id,
+                'plan_id' => $plan->id,
+                'user_id' => $user->id,
+            ],
+        ], $additionalData);
+
+        return $this->createPayment($paymentData);
+    }
+
+    /**
+     * Получение информации о платеже
+     */
+    public function getPayment(Payment $payment): ?array
+    {
+        return match ($payment->provider) {
+            'yookassa' => $this->yooKassaService->getPayment($payment->external_id),
+            'cloudpayments' => $this->cloudPaymentsService->getPayment($payment->external_id),
+            default => null,
+        };
+    }
+
+    /**
+     * Возврат платежа
+     */
+    public function refundPayment(Payment $payment, float $amount = null, string $reason = null): bool
+    {
+        $refundAmount = $amount ?? $payment->amount;
+
+        $success = match ($payment->provider) {
+            'yookassa' => $this->yooKassaService->refundPayment($payment->external_id, $refundAmount, $reason),
+            'cloudpayments' => $this->cloudPaymentsService->refundPayment($payment->external_id, $refundAmount, $reason),
+            default => false,
+        };
+
+        if ($success) {
+            $payment->update([
+                'status' => 'refunded',
+                'refunded_at' => now(),
+                'failure_reason' => $reason,
+            ]);
+
+            // Деактивируем подписку при возврате
+            if ($payment->subscription_id) {
+                $this->deactivateSubscription($payment);
+            }
+
+            Log::info('Payment refunded successfully', [
+                'payment_id' => $payment->id,
+                'amount' => $refundAmount,
+                'reason' => $reason,
+            ]);
+        }
+
+        return $success;
+    }
+
+    /**
+     * Обработка webhook от провайдера
+     */
+    public function handleWebhook(string $provider, array $payload, string $rawBody, string $signature): void
+    {
+        match ($provider) {
+            'yookassa' => $this->yooKassaService->handleWebhook($payload, $rawBody, $signature),
+            'cloudpayments' => $this->cloudPaymentsService->handleWebhook($payload, $rawBody, $signature),
+            default => throw new RuntimeException("Неподдерживаемый провайдер: {$provider}"),
+        };
+    }
+
+    /**
+     * Получение статистики платежей
+     */
+    public function getPaymentStats(array $filters = []): array
+    {
+        $query = Payment::query();
+
+        // Применяем фильтры
+        if (isset($filters['date_from'])) {
+            $query->whereDate('created_at', '>=', $filters['date_from']);
+        }
+
+        if (isset($filters['date_to'])) {
+            $query->whereDate('created_at', '<=', $filters['date_to']);
+        }
+
+        if (isset($filters['provider'])) {
+            $query->where('provider', $filters['provider']);
+        }
+
+        if (isset($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        $payments = $query->get();
+
+        return [
+            'total_count' => $payments->count(),
+            'total_amount' => $payments->sum('amount'),
+            'succeeded_count' => $payments->where('status', 'succeeded')->count(),
+            'succeeded_amount' => $payments->where('status', 'succeeded')->sum('amount'),
+            'failed_count' => $payments->where('status', 'failed')->count(),
+            'pending_count' => $payments->where('status', 'pending')->count(),
+            'refunded_count' => $payments->where('status', 'refunded')->count(),
+            'refunded_amount' => $payments->where('status', 'refunded')->sum('amount'),
+            'by_provider' => $payments->groupBy('provider')->map(function ($providerPayments) {
+                return [
+                    'count' => $providerPayments->count(),
+                    'amount' => $providerPayments->sum('amount'),
+                    'succeeded_amount' => $providerPayments->where('status', 'succeeded')->sum('amount'),
+                ];
+            }),
+            'conversion_rate' => $payments->count() > 0 
+                ? round(($payments->where('status', 'succeeded')->count() / $payments->count()) * 100, 2)
+                : 0,
+        ];
+    }
+
+    /**
+     * Получение активных подписок пользователя
+     */
+    public function getUserActiveSubscriptions(int $userId): array
+    {
+        return UserSubscription::where('user_id', $userId)
+            ->where('status', 'active')
+            ->where('ends_at', '>', now())
+            ->with(['plan', 'payments'])
+            ->get()
+            ->toArray();
+    }
+
+    /**
+     * Проверка доступа пользователя к контенту
+     */
+    public function hasContentAccess(int $userId, string $contentType = null): bool
+    {
+        $activeSubscriptions = UserSubscription::where('user_id', $userId)
+            ->where('status', 'active')
+            ->where('ends_at', '>', now())
+            ->with('plan')
+            ->get();
+
+        if ($activeSubscriptions->isEmpty()) {
+            return false;
+        }
+
+        // Если не указан тип контента, проверяем общий доступ
+        if (!$contentType) {
+            return true;
+        }
+
+        // Проверяем доступ к конкретному типу контента
+        foreach ($activeSubscriptions as $subscription) {
+            $planFeatures = $subscription->plan->features ?? [];
+            
+            if (in_array($contentType, $planFeatures) || in_array('all_content', $planFeatures)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Деактивация подписки при возврате платежа
+     */
+    private function deactivateSubscription(Payment $payment): void
+    {
+        $subscription = UserSubscription::find($payment->subscription_id);
+        
+        if ($subscription && $subscription->status === 'active') {
+            $subscription->update([
+                'status' => 'cancelled',
+                'cancelled_at' => now(),
+                'cancellation_reason' => 'Возврат платежа',
+            ]);
+
+            Log::info('Subscription deactivated due to refund', [
+                'subscription_id' => $subscription->id,
+                'payment_id' => $payment->id,
+            ]);
+        }
+    }
+
+    /**
+     * Автоматическое продление подписок
+     */
+    public function processAutoRenewals(): array
+    {
+        $results = [
+            'processed' => 0,
+            'succeeded' => 0,
+            'failed' => 0,
+            'errors' => [],
+        ];
+
+        // Получаем подписки, которые истекают в течение 3 дней и имеют автопродление
+        $expiringSubscriptions = UserSubscription::where('status', 'active')
+            ->where('auto_renewal', true)
+            ->where('ends_at', '<=', now()->addDays(3))
+            ->where('ends_at', '>', now())
+            ->with(['user', 'plan'])
+            ->get();
+
+        foreach ($expiringSubscriptions as $subscription) {
+            $results['processed']++;
+
+            try {
+                // Создаем новую подписку
+                $newSubscription = UserSubscription::create([
+                    'user_id' => $subscription->user_id,
+                    'plan_id' => $subscription->plan_id,
+                    'status' => 'pending',
+                    'price' => $subscription->plan->price,
+                    'starts_at' => $subscription->ends_at,
+                    'ends_at' => $subscription->ends_at->addMonth(),
+                    'auto_renewal' => true,
+                ]);
+
+                // Создаем платеж для новой подписки
+                $payment = $this->createSubscriptionPayment($newSubscription, [
+                    'description' => 'Автопродление подписки ' . $subscription->plan->name,
+                ]);
+
+                $results['succeeded']++;
+
+                Log::info('Auto-renewal processed', [
+                    'old_subscription_id' => $subscription->id,
+                    'new_subscription_id' => $newSubscription->id,
+                    'payment_id' => $payment->id,
+                ]);
+
+            } catch (\Exception $e) {
+                $results['failed']++;
+                $results['errors'][] = [
+                    'subscription_id' => $subscription->id,
+                    'error' => $e->getMessage(),
+                ];
+
+                Log::error('Auto-renewal failed', [
+                    'subscription_id' => $subscription->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return $results;
+    }
+}
