@@ -10,11 +10,11 @@ return [
     |
     */
 
-    'default_provider' => env('PAYMENT_DEFAULT_PROVIDER', 'yookassa'),
+    'default_provider' => env('PAYMENT_DEFAULT_PROVIDER', null),
 
     'providers' => [
         'yookassa' => [
-            'enabled' => env('YOOKASSA_ENABLED', true),
+            'enabled' => env('YOOKASSA_ENABLED', false),
             'shop_id' => env('YOOKASSA_SHOP_ID'),
             'secret_key' => env('YOOKASSA_SECRET_KEY'),
             'webhook_secret' => env('YOOKASSA_WEBHOOK_SECRET'),
@@ -24,7 +24,7 @@ return [
         ],
 
         'cloudpayments' => [
-            'enabled' => env('CLOUDPAYMENTS_ENABLED', true),
+            'enabled' => env('CLOUDPAYMENTS_ENABLED', false),
             'public_id' => env('CLOUDPAYMENTS_PUBLIC_ID'),
             'api_secret' => env('CLOUDPAYMENTS_API_SECRET'),
             'webhook_secret' => env('CLOUDPAYMENTS_WEBHOOK_SECRET'),
