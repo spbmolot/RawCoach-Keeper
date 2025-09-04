@@ -30,6 +30,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->brandName('RawPlan Admin')
+            ->authGuard('web')
             ->colors([
                 'primary' => Color::Amber,
             ])
