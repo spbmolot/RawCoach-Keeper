@@ -15,7 +15,7 @@ return new class extends Migration
             $table->foreignId('coupon_id')->nullable()->after('plan_id')->constrained()->onDelete('set null');
             $table->decimal('original_amount', 10, 2)->nullable()->after('amount');
             $table->decimal('discount_amount', 10, 2)->default(0)->after('original_amount');
-            $table->json('webhook_payload')->nullable()->after('provider_payment_id');
+            $table->json('webhook_payload')->nullable()->after('payload');
             $table->datetime('failed_at')->nullable()->after('webhook_payload');
             $table->datetime('refunded_at')->nullable()->after('failed_at');
             $table->decimal('refund_amount', 10, 2)->default(0)->after('refunded_at');
