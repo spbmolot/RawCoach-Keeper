@@ -312,4 +312,13 @@ class User extends Authenticatable
     {
         $this->update(['is_active' => true]);
     }
+
+    /**
+     * Проверка доступа к панели администратора Filament
+     */
+    public function canAccessPanel(\Filament\Panel $panel): bool
+    {
+        // Разрешаем доступ пользователям с ролями admin, editor
+        return $this->hasRole(['admin', 'editor']) && $this->is_active;
+    }
 }
