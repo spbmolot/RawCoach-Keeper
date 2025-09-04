@@ -22,7 +22,11 @@ class PaymentService
      */
     public function createPayment(array $data): Payment
     {
-        $provider = $data['provider'] ?? config('payments.default_provider', 'yookassa');
+        $provider = $data['provider'] ?? config('payments.default_provider');
+
+        if (!$provider || !config("payments.providers.{$provider}.enabled")) {
+            throw new RuntimeException('Платежный провайдер не настроен');
+        }
 
         return match ($provider) {
             'yookassa' => $this->yooKassaService->createPayment($data),
