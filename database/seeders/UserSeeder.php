@@ -29,12 +29,10 @@ class UserSeeder extends Seeder
             'gender' => 'male',
             'height' => 180,
             'weight' => 75.5,
-            'activity_level' => 'moderate',
-            'goal' => 'maintain',
+            'activity_level' => 'moderately_active',
             'timezone' => 'Europe/Moscow',
             'language' => 'ru',
             'is_active' => true,
-            'profile_completed_at' => now(),
         ]);
         $admin->assignRole('admin');
 
@@ -53,12 +51,10 @@ class UserSeeder extends Seeder
             'gender' => 'female',
             'height' => 165,
             'weight' => 58.0,
-            'activity_level' => 'active',
-            'goal' => 'maintain',
+            'activity_level' => 'very_active',
             'timezone' => 'Europe/Moscow',
             'language' => 'ru',
             'is_active' => true,
-            'profile_completed_at' => now(),
             'bio' => 'Сертифицированный нутрициолог с 5-летним опытом работы',
         ]);
         $editor->assignRole('editor');
@@ -79,7 +75,6 @@ class UserSeeder extends Seeder
             'timezone' => 'Europe/Moscow',
             'language' => 'ru',
             'is_active' => true,
-            'profile_completed_at' => now(),
         ]);
         $advertiser->assignRole('advertiser');
 
@@ -98,16 +93,14 @@ class UserSeeder extends Seeder
             'gender' => 'female',
             'height' => 170,
             'weight' => 65.0,
-            'activity_level' => 'moderate',
-            'goal' => 'lose_weight',
+            'activity_level' => 'moderately_active',
             'target_weight' => 60.0,
-            'allergies' => ['глютен', 'лактоза'],
-            'dislikes' => ['грибы', 'морепродукты'],
-            'dietary_preferences' => ['vegetarian'],
+            'allergies' => json_encode(['глютен', 'лактоза']),
+            'disliked_foods' => json_encode(['грибы', 'морепродукты']),
+            'dietary_preferences' => json_encode(['vegetarian']),
             'timezone' => 'Europe/Moscow',
             'language' => 'ru',
             'is_active' => true,
-            'profile_completed_at' => now(),
         ]);
         $premiumUser->assignRole('subscriber_premium');
 
@@ -127,15 +120,13 @@ class UserSeeder extends Seeder
             'height' => 185,
             'weight' => 90.0,
             'activity_level' => 'very_active',
-            'goal' => 'gain_muscle',
             'target_weight' => 85.0,
-            'allergies' => ['орехи'],
-            'dislikes' => ['рыба'],
-            'dietary_preferences' => ['high_protein'],
+            'allergies' => json_encode(['орехи']),
+            'disliked_foods' => json_encode(['рыба']),
+            'dietary_preferences' => json_encode(['high_protein']),
             'timezone' => 'Europe/Moscow',
             'language' => 'ru',
             'is_active' => true,
-            'profile_completed_at' => now(),
         ]);
         $personalUser->assignRole('subscriber_personal');
 
@@ -154,12 +145,10 @@ class UserSeeder extends Seeder
             'gender' => 'female',
             'height' => 160,
             'weight' => 55.0,
-            'activity_level' => 'light',
-            'goal' => 'maintain',
+            'activity_level' => 'lightly_active',
             'timezone' => 'Europe/Moscow',
             'language' => 'ru',
             'is_active' => true,
-            'profile_completed_at' => now(),
         ]);
         $standardUser->assignRole('subscriber_standard');
 
@@ -178,8 +167,7 @@ class UserSeeder extends Seeder
             'gender' => 'male',
             'height' => 175,
             'weight' => 70.0,
-            'activity_level' => 'moderate',
-            'goal' => 'lose_weight',
+            'activity_level' => 'moderately_active',
             'target_weight' => 65.0,
             'timezone' => 'Europe/Moscow',
             'language' => 'ru',
