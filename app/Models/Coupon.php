@@ -9,32 +9,32 @@ class Coupon extends Model
 {
     protected $fillable = [
         'code',
-        'name',
         'description',
-        'type', // percentage, fixed_amount
+        'type', // percentage, fixed
         'value',
-        'currency',
         'minimum_amount',
+        'maximum_discount',
         'usage_limit',
-        'usage_count',
-        'user_usage_limit',
-        'starts_at',
-        'expires_at',
+        'used_count', // соответствует миграции
+        'usage_limit_per_user', // соответствует миграции
+        'valid_from', // соответствует миграции
+        'valid_until', // соответствует миграции
         'is_active',
         'applicable_plans', // JSON array of plan IDs
-        'first_time_only',
+        'created_by_type',
+        'created_by_id',
     ];
 
     protected function casts(): array
     {
         return [
-            'starts_at' => 'datetime',
-            'expires_at' => 'datetime',
+            'valid_from' => 'datetime', // соответствует миграции
+            'valid_until' => 'datetime', // соответствует миграции
             'is_active' => 'boolean',
-            'first_time_only' => 'boolean',
             'applicable_plans' => 'array',
             'value' => 'decimal:2',
             'minimum_amount' => 'decimal:2',
+            'maximum_discount' => 'decimal:2',
         ];
     }
 
@@ -61,12 +61,12 @@ class Coupon extends Model
     {
         return $query->where('is_active', true)
                     ->where(function ($q) {
-                        $q->whereNull('starts_at')
-                          ->orWhere('starts_at', '<=', now());
+                        $q->whereNull('valid_from')
+                          ->orWhere('valid_from', '<=', now());
                     })
                     ->where(function ($q) {
-                        $q->whereNull('expires_at')
-                          ->orWhere('expires_at', '>', now());
+                        $q->whereNull('valid_until')
+                          ->orWhere('valid_until', '>', now());
                     });
     }
 
@@ -87,11 +87,11 @@ class Coupon extends Model
             return false;
         }
 
-        if ($this->starts_at && $this->starts_at > now()) {
+        if ($this->valid_from && $this->valid_from > now()) {
             return false;
         }
 
-        if ($this->expires_at && $this->expires_at <= now()) {
+        if ($this->valid_until && $this->valid_until <= now()) {
             return false;
         }
 
@@ -103,7 +103,7 @@ class Coupon extends Model
      */
     public function hasUsageLimit(): bool
     {
-        return $this->usage_limit && $this->usage_count >= $this->usage_limit;
+        return $this->usage_limit && $this->used_count >= $this->usage_limit;
     }
 
     /**
@@ -120,20 +120,20 @@ class Coupon extends Model
         }
 
         // Проверка лимита на пользователя
-        if ($this->user_usage_limit) {
+        if ($this->usage_limit_per_user) {
             $userUsageCount = $this->usages()
                 ->where('user_id', $user->id)
                 ->count();
             
-            if ($userUsageCount >= $this->user_usage_limit) {
+            if ($userUsageCount >= $this->usage_limit_per_user) {
                 return false;
             }
         }
 
-        // Проверка только для новых пользователей
-        if ($this->first_time_only && $user->payments()->successful()->exists()) {
-            return false;
-        }
+        // Проверка только для новых пользователей (можно добавить логику позже)
+        // if ($this->first_time_only && $user->payments()->successful()->exists()) {
+        //     return false;
+        // }
 
         // Проверка применимости к плану
         if ($plan && $this->applicable_plans && !in_array($plan->id, $this->applicable_plans)) {
@@ -156,8 +156,13 @@ class Coupon extends Model
             return $amount * ($this->value / 100);
         }
 
-        if ($this->type === 'fixed_amount') {
-            return min($this->value, $amount);
+        if ($this->type === 'fixed') {
+            $discount = min($this->value, $amount);
+            // Применяем максимальную скидку если она установлена
+            if ($this->maximum_discount) {
+                $discount = min($discount, $this->maximum_discount);
+            }
+            return $discount;
         }
 
         return 0;
@@ -191,14 +196,15 @@ class Coupon extends Model
     /**
      * Отметить использование купона
      */
-    public function markAsUsed(User $user): void
+    public function markAsUsed(User $user, Payment $payment): void
     {
-        $this->increment('usage_count');
+        $this->increment('used_count');
         
         CouponUsage::create([
             'coupon_id' => $this->id,
             'user_id' => $user->id,
-            'used_at' => now(),
+            'payment_id' => $payment->id,
+            'discount_amount' => $this->calculateDiscount($payment->original_amount ?? $payment->amount),
         ]);
     }
 
@@ -211,7 +217,7 @@ class Coupon extends Model
             return $this->value . '% скидка';
         }
 
-        if ($this->type === 'fixed_amount') {
+        if ($this->type === 'fixed') {
             return number_format($this->value, 0, ',', ' ') . ' ₽ скидка';
         }
 
@@ -223,7 +229,7 @@ class Coupon extends Model
      */
     public function isExpired(): bool
     {
-        return $this->expires_at && $this->expires_at <= now();
+        return $this->valid_until && $this->valid_until <= now();
     }
 
     /**
@@ -231,10 +237,30 @@ class Coupon extends Model
      */
     public function getDaysUntilExpiry(): ?int
     {
-        if (!$this->expires_at) {
+        if (!$this->valid_until) {
             return null;
         }
 
-        return max(0, now()->diffInDays($this->expires_at, false));
+        return max(0, now()->diffInDays($this->valid_until, false));
+    }
+
+    /**
+     * Получить количество использований
+     */
+    public function getUsageCount(): int
+    {
+        return $this->used_count ?? 0;
+    }
+
+    /**
+     * Получить оставшиеся использования
+     */
+    public function getRemainingUsages(): ?int
+    {
+        if (!$this->usage_limit) {
+            return null;
+        }
+        
+        return max(0, $this->usage_limit - $this->getUsageCount());
     }
 }

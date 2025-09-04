@@ -11,26 +11,25 @@ class Plan extends Model
         'name',
         'slug',
         'description',
-        'type', // month, year, personal
-        'period_days',
+        'type', // monthly, yearly, individual, trial
+        'duration_days', // соответствует миграции
         'price',
+        'original_price', // добавлено из миграции
         'currency',
         'features',
-        'is_popular',
+        'limits', // добавлено из миграции
         'is_active',
         'sort_order',
-        'discount_percentage',
-        'trial_days',
     ];
 
     protected function casts(): array
     {
         return [
             'features' => 'array',
-            'is_popular' => 'boolean',
+            'limits' => 'array', // добавлено из миграции
             'is_active' => 'boolean',
             'price' => 'decimal:2',
-            'discount_percentage' => 'decimal:2',
+            'original_price' => 'decimal:2', // добавлено из миграции
         ];
     }
 
@@ -67,14 +66,33 @@ class Plan extends Model
     }
 
     /**
-     * Получить цену со скидкой
+     * Получить цену со скидкой (если есть original_price)
      */
     public function getDiscountedPrice(): float
     {
-        if ($this->discount_percentage > 0) {
-            return $this->price * (1 - $this->discount_percentage / 100);
+        return $this->price; // цена уже с учетом скидки
+    }
+
+    /**
+     * Получить размер скидки в рублях
+     */
+    public function getDiscountAmount(): float
+    {
+        if ($this->original_price && $this->original_price > $this->price) {
+            return $this->original_price - $this->price;
         }
-        return $this->price;
+        return 0;
+    }
+
+    /**
+     * Получить процент скидки
+     */
+    public function getDiscountPercentage(): float
+    {
+        if ($this->original_price && $this->original_price > $this->price) {
+            return round((($this->original_price - $this->price) / $this->original_price) * 100, 2);
+        }
+        return 0;
     }
 
     /**
@@ -90,7 +108,23 @@ class Plan extends Model
      */
     public function isYearly(): bool
     {
-        return $this->type === 'year';
+        return $this->type === 'yearly';
+    }
+
+    /**
+     * Проверка является ли план месячным
+     */
+    public function isMonthly(): bool
+    {
+        return $this->type === 'monthly';
+    }
+
+    /**
+     * Проверка является ли план пробным
+     */
+    public function isTrial(): bool
+    {
+        return $this->type === 'trial';
     }
 
     /**
@@ -98,10 +132,11 @@ class Plan extends Model
      */
     public function getPeriodDays(): int
     {
-        return match($this->type) {
-            'month' => 30,
-            'year' => 365,
-            'personal' => $this->period_days ?? 30,
+        return $this->duration_days ?? match($this->type) {
+            'monthly' => 30,
+            'yearly' => 365,
+            'trial' => 7,
+            'personal' => 30,
             default => 30,
         };
     }
@@ -116,13 +151,26 @@ class Plan extends Model
     }
 
     /**
-     * Экономия при годовой подписке
+     * Экономия при покупке этого плана
      */
     public function getSavingsAmount(): float
     {
-        if ($this->discount_percentage > 0) {
-            return $this->price * ($this->discount_percentage / 100);
-        }
-        return 0;
+        return $this->getDiscountAmount();
+    }
+
+    /**
+     * Получить лимиты плана
+     */
+    public function getLimit(string $key, $default = null)
+    {
+        return $this->limits[$key] ?? $default;
+    }
+
+    /**
+     * Проверить доступность функции
+     */
+    public function hasFeature(string $feature): bool
+    {
+        return in_array($feature, $this->features ?? []);
     }
 }
