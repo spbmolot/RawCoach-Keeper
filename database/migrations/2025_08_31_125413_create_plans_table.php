@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->string('type'); // monthly, yearly, individual
             $table->decimal('price', 8, 2);
+            $table->decimal('original_price', 8, 2)->nullable(); // для отображения скидок
             $table->string('currency', 3)->default('RUB');
             $table->integer('duration_days');
             $table->boolean('is_active')->default(true);
