@@ -9,6 +9,7 @@ use App\Models\Payment;
 use App\Models\Coupon;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use App\Events\SubscriptionStatusChanged;
 
 class SubscriptionController extends Controller
 {
@@ -33,7 +34,7 @@ class SubscriptionController extends Controller
         $user = auth()->user();
         
         // Проверяем, нет ли уже активной подписки
-        $activeSubscription = $user->activeSubscription();
+        $activeSubscription = $user->activeSubscription()->first();
         if ($activeSubscription) {
             return redirect()->route('dashboard')
                 ->with('error', 'У вас уже есть активная подписка');
@@ -61,7 +62,7 @@ class SubscriptionController extends Controller
                 'user_id' => $user->id,
                 'plan_id' => $plan->id,
                 'status' => 'pending',
-                'starts_at' => Carbon::now(),
+                'started_at' => Carbon::now(),
                 'ends_at' => Carbon::now()->addDays($plan->duration_days),
                 'auto_renew' => true,
                 'trial_ends_at' => $plan->type === 'trial' ? Carbon::now()->addDays(7) : null,
@@ -83,10 +84,11 @@ class SubscriptionController extends Controller
 
             // Если это бесплатный план (trial)
             if ($price == 0) {
-                $payment->update(['status' => 'completed']);
+                $payment->update(['status' => 'paid']);
                 $subscription->update(['status' => 'active']);
                 
                 DB::commit();
+                event(new SubscriptionStatusChanged($subscription->fresh(), 'active'));
                 
                 return redirect()->route('dashboard')
                     ->with('success', 'Пробная подписка успешно активирована!');
@@ -119,6 +121,7 @@ class SubscriptionController extends Controller
             'cancelled_at' => Carbon::now(),
             'auto_renew' => false,
         ]);
+        event(new SubscriptionStatusChanged($subscription->fresh(), 'cancelled'));
 
         return back()->with('success', 'Подписка успешно отменена');
     }
@@ -130,7 +133,7 @@ class SubscriptionController extends Controller
     {
         $this->authorize('pause', $subscription);
 
-        if (!in_array($subscription->status, ['active', 'trial'])) {
+        if (!$subscription->isActive()) {
             return back()->with('error', 'Нельзя приостановить неактивную подписку');
         }
 
@@ -138,6 +141,7 @@ class SubscriptionController extends Controller
             'status' => 'paused',
             'paused_at' => Carbon::now(),
         ]);
+        event(new SubscriptionStatusChanged($subscription->fresh(), 'paused'));
 
         return back()->with('success', 'Подписка приостановлена');
     }
@@ -157,6 +161,7 @@ class SubscriptionController extends Controller
             'status' => 'active',
             'paused_at' => null,
         ]);
+        event(new SubscriptionStatusChanged($subscription->fresh(), 'active'));
 
         return back()->with('success', 'Подписка возобновлена');
     }
@@ -167,7 +172,7 @@ class SubscriptionController extends Controller
     public function upgrade(Request $request, Plan $newPlan)
     {
         $user = auth()->user();
-        $currentSubscription = $user->activeSubscription();
+        $currentSubscription = $user->activeSubscription()->first();
 
         if (!$currentSubscription) {
             return redirect()->route('plans.index')
@@ -189,17 +194,19 @@ class SubscriptionController extends Controller
                 'status' => 'upgraded',
                 'cancelled_at' => Carbon::now(),
             ]);
+            event(new SubscriptionStatusChanged($currentSubscription->fresh(), 'upgraded'));
 
             // Создаем новую подписку
             $newSubscription = UserSubscription::create([
                 'user_id' => $user->id,
                 'plan_id' => $newPlan->id,
                 'status' => 'active',
-                'starts_at' => Carbon::now(),
+                'started_at' => Carbon::now(),
                 'ends_at' => Carbon::now()->addDays($newPlan->duration_days),
                 'auto_renew' => true,
                 'upgraded_from_id' => $currentSubscription->id,
             ]);
+            event(new SubscriptionStatusChanged($newSubscription->fresh(), 'active'));
 
             // Если нужна доплата
             if ($prorationAmount > 0) {

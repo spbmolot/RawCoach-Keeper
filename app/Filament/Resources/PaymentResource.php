@@ -73,18 +73,17 @@ class PaymentResource extends Resource
                             ->label('Статус')
                             ->options([
                                 'pending' => 'Ожидает оплаты',
-                                'succeeded' => 'Успешно',
+                                'paid' => 'Оплачен',
                                 'failed' => 'Неудачно',
                                 'cancelled' => 'Отменен',
                                 'refunded' => 'Возвращен',
                             ])
                             ->required(),
-                        
-                        Forms\Components\TextInput::make('fee')
-                            ->label('Комиссия')
-                            ->numeric()
-                            ->prefix('₽')
-                            ->default(0),
+
+                        Forms\Components\TextInput::make('payment_url')
+                            ->label('URL оплаты')
+                            ->maxLength(2048)
+                            ->columnSpanFull(),
                     ])->columns(2),
                 
                 Forms\Components\Section::make('Даты')
@@ -97,6 +96,9 @@ class PaymentResource extends Resource
                         
                         Forms\Components\DateTimePicker::make('refunded_at')
                             ->label('Дата возврата'),
+
+                        Forms\Components\DateTimePicker::make('processed_at')
+                            ->label('Дата обработки'),
                     ])->columns(3),
                 
                 Forms\Components\Section::make('Дополнительная информация')
@@ -111,8 +113,8 @@ class PaymentResource extends Resource
                             ->rows(2)
                             ->maxLength(500),
                         
-                        Forms\Components\KeyValue::make('provider_data')
-                            ->label('Данные провайдера')
+                        Forms\Components\KeyValue::make('payload')
+                            ->label('Данные провайдера (payload)')
                             ->keyLabel('Параметр')
                             ->valueLabel('Значение'),
                         
@@ -156,14 +158,14 @@ class PaymentResource extends Resource
                     ->label('Статус')
                     ->colors([
                         'warning' => 'pending',
-                        'success' => 'succeeded',
+                        'success' => 'paid',
                         'danger' => 'failed',
                         'secondary' => 'cancelled',
                         'info' => 'refunded',
                     ])
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'pending' => 'Ожидает',
-                        'succeeded' => 'Успешно',
+                        'paid' => 'Оплачен',
                         'failed' => 'Неудачно',
                         'cancelled' => 'Отменен',
                         'refunded' => 'Возвращен',
@@ -189,9 +191,8 @@ class PaymentResource extends Resource
                     ->searchable()
                     ->toggleable(),
                 
-                Tables\Columns\TextColumn::make('fee')
-                    ->label('Комиссия')
-                    ->money('RUB')
+                Tables\Columns\TextColumn::make('payment_url')
+                    ->label('URL оплаты')
                     ->toggleable(),
                 
                 Tables\Columns\TextColumn::make('paid_at')
@@ -211,7 +212,7 @@ class PaymentResource extends Resource
                     ->label('Статус')
                     ->options([
                         'pending' => 'Ожидает оплаты',
-                        'succeeded' => 'Успешно',
+                        'paid' => 'Оплачен',
                         'failed' => 'Неудачно',
                         'cancelled' => 'Отменен',
                         'refunded' => 'Возвращен',
@@ -280,7 +281,7 @@ class PaymentResource extends Resource
                             'refunded_at' => now(),
                         ]);
                     })
-                    ->visible(fn (Payment $record) => $record->status === 'succeeded'),
+                    ->visible(fn (Payment $record) => $record->status === 'paid'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

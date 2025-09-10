@@ -21,11 +21,15 @@ class Payment extends Model
         'status',
         'type', // subscription, renewal, one_time
         'payload',
+        'metadata',
+        'payment_url',
         'webhook_payload',
         'paid_at',
         'failed_at',
         'refunded_at',
+        'processed_at',
         'refund_amount',
+        'failure_reason',
         'description',
     ];
 
@@ -70,10 +74,12 @@ class Payment extends Model
     {
         return [
             'payload' => 'array',
+            'metadata' => 'array',
             'webhook_payload' => 'array',
             'paid_at' => 'datetime',
             'failed_at' => 'datetime',
             'refunded_at' => 'datetime',
+            'processed_at' => 'datetime',
             'amount' => 'decimal:2',
             'original_amount' => 'decimal:2',
             'discount_amount' => 'decimal:2',

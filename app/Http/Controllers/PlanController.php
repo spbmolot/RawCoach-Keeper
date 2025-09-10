@@ -18,7 +18,7 @@ class PlanController extends Controller
             ->get();
 
         $user = auth()->user();
-        $activeSubscription = $user ? $user->activeSubscription() : null;
+        $activeSubscription = $user ? $user->activeSubscription()->with('plan')->first() : null;
 
         return view('plans.index', compact('plans', 'activeSubscription'));
     }
@@ -33,7 +33,7 @@ class PlanController extends Controller
         }
 
         $user = auth()->user();
-        $activeSubscription = $user ? $user->activeSubscription() : null;
+        $activeSubscription = $user ? $user->activeSubscription()->with('plan')->first() : null;
         
         // Проверяем, есть ли у пользователя уже такой план
         $hasCurrentPlan = $activeSubscription && $activeSubscription->plan_id === $plan->id;
@@ -58,7 +58,7 @@ class PlanController extends Controller
         }
 
         $user = auth()->user();
-        $activeSubscription = $user->activeSubscription();
+        $activeSubscription = $user->activeSubscription()->with('plan')->first();
 
         // Если у пользователя уже есть активная подписка
         if ($activeSubscription) {
@@ -94,7 +94,7 @@ class PlanController extends Controller
     public function upgrade(Request $request)
     {
         $user = auth()->user();
-        $activeSubscription = $user->activeSubscription();
+        $activeSubscription = $user->activeSubscription()->with('plan')->first();
 
         if (!$activeSubscription) {
             return redirect()->route('plans.index')

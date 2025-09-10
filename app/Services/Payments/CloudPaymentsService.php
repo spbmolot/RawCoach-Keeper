@@ -4,6 +4,8 @@ namespace App\Services\Payments;
 
 use App\Models\Payment;
 use App\Models\UserSubscription;
+use App\Events\PaymentProcessed;
+use App\Events\SubscriptionStatusChanged;
 use CloudPayments\Manager as CloudPaymentsManager;
 use RuntimeException;
 use Illuminate\Support\Facades\Log;
@@ -43,7 +45,7 @@ class CloudPaymentsService
                 'currency' => $data['currency'] ?? 'RUB',
                 'status' => $this->mapStatus($response['Status'] ?? 'pending'),
                 'description' => $data['description'] ?? 'Оплата подписки RawPlan',
-                'provider_data' => $response,
+                'payload' => $response,
                 'metadata' => $data['metadata'] ?? [],
             ]);
         } catch (\Exception $e) {
@@ -130,12 +132,12 @@ class CloudPaymentsService
 
         $update = [
             'status' => $newStatus,
-            'provider_data' => array_merge($payment->provider_data ?? [], $paymentData),
+            'payload' => array_merge($payment->payload ?? [], $paymentData),
         ];
 
         // Обновляем даты в зависимости от статуса
         switch ($newStatus) {
-            case 'succeeded':
+            case 'paid':
                 $update['paid_at'] = now();
                 break;
             case 'failed':
@@ -147,7 +149,7 @@ class CloudPaymentsService
         $payment->update($update);
 
         // Обновляем подписку при успешной оплате
-        if ($newStatus === 'succeeded' && $oldStatus !== 'succeeded' && $payment->subscription_id) {
+        if ($newStatus === 'paid' && $oldStatus !== 'paid' && $payment->subscription_id) {
             $this->activateSubscription($payment);
         }
 
@@ -157,6 +159,15 @@ class CloudPaymentsService
             'old_status' => $oldStatus,
             'new_status' => $newStatus,
         ]);
+
+        // Dispatch events
+        event(new PaymentProcessed($payment, $newStatus));
+        if ($newStatus === 'paid' && $payment->subscription_id) {
+            $subscription = UserSubscription::find($payment->subscription_id);
+            if ($subscription) {
+                event(new SubscriptionStatusChanged($subscription, 'active'));
+            }
+        }
     }
 
     /**
@@ -165,7 +176,7 @@ class CloudPaymentsService
     private function mapStatus(string $status): string
     {
         return match ($status) {
-            'Completed' => 'succeeded',
+            'Completed' => 'paid',
             'Declined' => 'failed',
             'Cancelled' => 'cancelled',
             'Authorized' => 'pending',

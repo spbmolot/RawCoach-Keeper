@@ -20,7 +20,7 @@ class MenuController extends Controller
         $query = Menu::where('is_published', true);
         
         // Фильтрация по подписке пользователя
-        if ($user && $user->activeSubscription()) {
+        if ($user && $user->hasActiveSubscription()) {
             $this->filterMenuBySubscription($query, $user);
         } else {
             // Только демо контент для неавторизованных
@@ -274,11 +274,11 @@ class MenuController extends Controller
             return true;
         }
         
-        if (!$user || !$user->activeSubscription()) {
+        if (!$user || !$user->hasActiveSubscription()) {
             return false;
         }
         
-        $subscription = $user->activeSubscription();
+        $subscription = $user->activeSubscription()->with('plan')->first();
         $plan = $subscription->plan;
         
         return match($menu->type) {
@@ -295,7 +295,7 @@ class MenuController extends Controller
      */
     private function filterMenuBySubscription($query, $user)
     {
-        $subscription = $user->activeSubscription();
+        $subscription = $user->activeSubscription()->with('plan')->first();
         
         if (!$subscription) {
             $query->where('type', 'demo');
@@ -325,8 +325,8 @@ class MenuController extends Controller
     {
         $types = ['demo' => 'Демо'];
         
-        if ($user && $user->activeSubscription()) {
-            $plan = $user->activeSubscription()->plan;
+        if ($user && $user->hasActiveSubscription()) {
+            $plan = $user->activeSubscription()->with('plan')->first()->plan;
             
             $types['current'] = 'Текущие';
             

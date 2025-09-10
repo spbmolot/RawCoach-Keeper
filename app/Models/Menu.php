@@ -124,11 +124,11 @@ class Menu extends Model
         }
 
         // Проверяем активную подписку пользователя
-        $activeSubscription = $user->activeSubscription();
-        if (!$activeSubscription) {
+        if (!$user->hasActiveSubscription()) {
             return false;
         }
 
+        $activeSubscription = $user->activeSubscription()->first();
         // Проверяем доступность меню для плана пользователя
         return $this->plans()->where('plan_id', $activeSubscription->plan_id)->exists();
     }

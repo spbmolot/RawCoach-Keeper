@@ -11,24 +11,24 @@ class PaymentStatsOverview extends BaseWidget
     protected function getStats(): array
     {
         $totalPayments = Payment::count();
-        $succeededPayments = Payment::where('status', 'succeeded')->count();
+        $succeededPayments = Payment::where('status', 'paid')->count();
         $pendingPayments = Payment::where('status', 'pending')->count();
         $failedPayments = Payment::where('status', 'failed')->count();
         $refundedPayments = Payment::where('status', 'refunded')->count();
 
         // Общая сумма успешных платежей
-        $totalRevenue = Payment::where('status', 'succeeded')->sum('amount');
+        $totalRevenue = Payment::where('status', 'paid')->sum('amount');
         
         // Платежи за сегодня
         $todayPayments = Payment::whereDate('created_at', today())->count();
         $todayRevenue = Payment::whereDate('created_at', today())
-            ->where('status', 'succeeded')
+            ->where('status', 'paid')
             ->sum('amount');
 
         // Платежи за месяц
         $monthPayments = Payment::where('created_at', '>=', now()->startOfMonth())->count();
         $monthRevenue = Payment::where('created_at', '>=', now()->startOfMonth())
-            ->where('status', 'succeeded')
+            ->where('status', 'paid')
             ->sum('amount');
 
         // Конверсия платежей

@@ -53,7 +53,7 @@ class PersonalPlanController extends Controller
     public function create()
     {
         $user = auth()->user();
-        $subscription = $user->activeSubscription();
+        $subscription = $user->activeSubscription()->with('plan')->first();
 
         // Проверяем, есть ли персональная подписка
         if (!$subscription || $subscription->plan->slug !== 'personal') {
@@ -79,7 +79,7 @@ class PersonalPlanController extends Controller
     public function store(Request $request)
     {
         $user = auth()->user();
-        $subscription = $user->activeSubscription();
+        $subscription = $user->activeSubscription()->with('plan')->first();
 
         if (!$subscription || $subscription->plan->slug !== 'personal') {
             return redirect()->route('plans.index')

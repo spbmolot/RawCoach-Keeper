@@ -29,9 +29,9 @@ class ListPayments extends ListRecords
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'pending'))
                 ->badge($this->getModel()::where('status', 'pending')->count()),
             
-            'succeeded' => Tab::make('Успешные')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'succeeded'))
-                ->badge($this->getModel()::where('status', 'succeeded')->count()),
+            'paid' => Tab::make('Оплаченные')
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'paid'))
+                ->badge($this->getModel()::where('status', 'paid')->count()),
             
             'failed' => Tab::make('Неудачные')
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'failed'))

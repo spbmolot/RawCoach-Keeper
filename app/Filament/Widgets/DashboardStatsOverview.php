@@ -23,10 +23,10 @@ class DashboardStatsOverview extends BaseWidget
         
         // Платежи
         $monthRevenue = Payment::where('created_at', '>=', now()->startOfMonth())
-            ->where('status', 'succeeded')
+            ->where('status', 'paid')
             ->sum('amount');
         $todayRevenue = Payment::whereDate('created_at', today())
-            ->where('status', 'succeeded')
+            ->where('status', 'paid')
             ->sum('amount');
         
         // Планы

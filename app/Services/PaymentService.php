@@ -46,8 +46,8 @@ class PaymentService
         $paymentData = array_merge([
             'user_id' => $user->id,
             'subscription_id' => $subscription->id,
-            'amount' => $subscription->price,
-            'currency' => 'RUB',
+            'amount' => $plan->price,
+            'currency' => $plan->currency ?? 'RUB',
             'description' => "Оплата подписки '{$plan->name}' для {$user->name}",
             'email' => $user->email,
             'metadata' => [
@@ -148,8 +148,8 @@ class PaymentService
         return [
             'total_count' => $payments->count(),
             'total_amount' => $payments->sum('amount'),
-            'succeeded_count' => $payments->where('status', 'succeeded')->count(),
-            'succeeded_amount' => $payments->where('status', 'succeeded')->sum('amount'),
+            'succeeded_count' => $payments->where('status', 'paid')->count(),
+            'succeeded_amount' => $payments->where('status', 'paid')->sum('amount'),
             'failed_count' => $payments->where('status', 'failed')->count(),
             'pending_count' => $payments->where('status', 'pending')->count(),
             'refunded_count' => $payments->where('status', 'refunded')->count(),
@@ -158,11 +158,11 @@ class PaymentService
                 return [
                     'count' => $providerPayments->count(),
                     'amount' => $providerPayments->sum('amount'),
-                    'succeeded_amount' => $providerPayments->where('status', 'succeeded')->sum('amount'),
+                    'succeeded_amount' => $providerPayments->where('status', 'paid')->sum('amount'),
                 ];
             }),
             'conversion_rate' => $payments->count() > 0 
-                ? round(($payments->where('status', 'succeeded')->count() / $payments->count()) * 100, 2)
+                ? round(($payments->where('status', 'paid')->count() / $payments->count()) * 100, 2)
                 : 0,
         ];
     }
@@ -236,56 +236,58 @@ class PaymentService
     /**
      * Автоматическое продление подписок
      */
-    public function processAutoRenewals(): array
+    public function processAutoRenewals(int $days, bool $dryRun = false): array
     {
-        $results = [
+        $result = [
+            'found' => 0,
             'processed' => 0,
-            'succeeded' => 0,
-            'failed' => 0,
-            'errors' => [],
+            'errors' => 0,
+            'skipped' => 0,
+            'details' => [],
         ];
 
-        // Получаем подписки, которые истекают в течение 3 дней и имеют автопродление
-        $expiringSubscriptions = UserSubscription::where('status', 'active')
-            ->where('auto_renewal', true)
-            ->where('ends_at', '<=', now()->addDays(3))
+        $expiring = UserSubscription::where('status', 'active')
+            ->where('auto_renew', true)
+            ->where('ends_at', '<=', now()->addDays($days))
             ->where('ends_at', '>', now())
             ->with(['user', 'plan'])
             ->get();
 
-        foreach ($expiringSubscriptions as $subscription) {
-            $results['processed']++;
+        $result['found'] = $expiring->count();
+
+        foreach ($expiring as $subscription) {
+            if ($dryRun) {
+                $result['skipped']++;
+                $result['details'][] = [
+                    'subscription_id' => $subscription->id,
+                    'success' => true,
+                    'message' => 'Будет создан платеж на сумму ' . $subscription->plan->price,
+                ];
+                continue;
+            }
 
             try {
-                // Создаем новую подписку
-                $newSubscription = UserSubscription::create([
-                    'user_id' => $subscription->user_id,
-                    'plan_id' => $subscription->plan_id,
-                    'status' => 'pending',
-                    'price' => $subscription->plan->price,
-                    'starts_at' => $subscription->ends_at,
-                    'ends_at' => $subscription->ends_at->addMonth(),
-                    'auto_renewal' => true,
-                ]);
-
-                // Создаем платеж для новой подписки
-                $payment = $this->createSubscriptionPayment($newSubscription, [
+                $payment = $this->createSubscriptionPayment($subscription, [
                     'description' => 'Автопродление подписки ' . $subscription->plan->name,
                 ]);
 
-                $results['succeeded']++;
+                $result['processed']++;
+                $result['details'][] = [
+                    'subscription_id' => $subscription->id,
+                    'success' => true,
+                    'message' => 'Платеж создан: #' . $payment->id,
+                ];
 
-                Log::info('Auto-renewal processed', [
-                    'old_subscription_id' => $subscription->id,
-                    'new_subscription_id' => $newSubscription->id,
+                Log::info('Auto-renewal payment created', [
+                    'subscription_id' => $subscription->id,
                     'payment_id' => $payment->id,
                 ]);
-
             } catch (\Exception $e) {
-                $results['failed']++;
-                $results['errors'][] = [
+                $result['errors']++;
+                $result['details'][] = [
                     'subscription_id' => $subscription->id,
-                    'error' => $e->getMessage(),
+                    'success' => false,
+                    'message' => 'Ошибка: ' . $e->getMessage(),
                 ];
 
                 Log::error('Auto-renewal failed', [
@@ -295,6 +297,6 @@ class PaymentService
             }
         }
 
-        return $results;
+        return $result;
     }
 }

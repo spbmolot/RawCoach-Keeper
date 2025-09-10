@@ -4,6 +4,8 @@ namespace App\Services\Payments;
 
 use App\Models\Payment;
 use App\Models\UserSubscription;
+use App\Events\PaymentProcessed;
+use App\Events\SubscriptionStatusChanged;
 use YooKassa\Client as YooKassaClient;
 use YooKassa\Model\Confirmation\ConfirmationRedirect;
 use YooKassa\Model\MonetaryAmount;
@@ -47,9 +49,9 @@ class YooKassaService
                 'external_id' => $response->getId(),
                 'amount' => $response->getAmount()->getValue(),
                 'currency' => $response->getAmount()->getCurrency(),
-                'status' => $response->getStatus(),
+                'status' => $response->getStatus() === 'succeeded' ? 'paid' : ($response->getStatus() === 'canceled' ? 'cancelled' : 'pending'),
                 'description' => $data['description'] ?? 'Оплата подписки RawPlan',
-                'provider_data' => [
+                'payload' => [
                     'confirmation_url' => $response->getConfirmation()->getConfirmationUrl(),
                     'payment_method' => $response->getPaymentMethod()?->getType(),
                 ],
@@ -140,19 +142,24 @@ class YooKassaService
     private function updatePaymentStatus(Payment $payment, array $paymentData): void
     {
         $oldStatus = $payment->status;
-        $newStatus = $paymentData['status'] ?? $payment->status;
+        $ykStatus = $paymentData['status'] ?? $payment->status;
+        $newStatus = match ($ykStatus) {
+            'succeeded' => 'paid',
+            'canceled' => 'cancelled',
+            default => 'pending',
+        };
 
         $update = [
             'status' => $newStatus,
-            'provider_data' => array_merge($payment->provider_data ?? [], $paymentData),
+            'payload' => array_merge($payment->payload ?? [], $paymentData),
         ];
 
         // Обновляем даты в зависимости от статуса
         switch ($newStatus) {
-            case 'succeeded':
+            case 'paid':
                 $update['paid_at'] = now();
                 break;
-            case 'canceled':
+            case 'cancelled':
                 $update['failed_at'] = now();
                 $update['failure_reason'] = $paymentData['cancellation_details']['reason'] ?? 'Платеж отменен';
                 break;
@@ -161,7 +168,7 @@ class YooKassaService
         $payment->update($update);
 
         // Обновляем подписку при успешной оплате
-        if ($newStatus === 'succeeded' && $oldStatus !== 'succeeded' && $payment->subscription_id) {
+        if ($newStatus === 'paid' && $oldStatus !== 'paid' && $payment->subscription_id) {
             $this->activateSubscription($payment);
         }
 
@@ -171,6 +178,15 @@ class YooKassaService
             'old_status' => $oldStatus,
             'new_status' => $newStatus,
         ]);
+
+        // Dispatch events
+        event(new PaymentProcessed($payment, $newStatus));
+        if ($newStatus === 'paid' && $payment->subscription_id) {
+            $subscription = UserSubscription::find($payment->subscription_id);
+            if ($subscription) {
+                event(new SubscriptionStatusChanged($subscription, 'active'));
+            }
+        }
     }
 
     /**

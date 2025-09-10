@@ -22,7 +22,7 @@ class DashboardController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $subscription = $user->activeSubscription();
+        $subscription = $user->activeSubscription()->with('plan')->first();
         
         // Получаем меню на сегодня
         $today = Carbon::today();
@@ -257,7 +257,7 @@ class DashboardController extends Controller
      */
     private function filterMenuBySubscription($query, $user)
     {
-        $subscription = $user->activeSubscription();
+        $subscription = $user->activeSubscription()->with('plan')->first();
         
         if (!$subscription) {
             // Только демо контент для пользователей без подписки
@@ -294,7 +294,7 @@ class DashboardController extends Controller
      */
     private function getUserStats($user)
     {
-        $subscription = $user->activeSubscription();
+        $subscription = $user->activeSubscription()->first();
         
         return [
             'recipes_viewed' => $user->recipeViews()->count(),

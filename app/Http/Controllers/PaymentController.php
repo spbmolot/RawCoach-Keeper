@@ -9,6 +9,8 @@ use App\Models\Coupon;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use App\Events\PaymentProcessed;
+use App\Events\SubscriptionStatusChanged;
 
 class PaymentController extends Controller
 {
@@ -64,7 +66,7 @@ class PaymentController extends Controller
             $payment->update([
                 'external_id' => $result['payment_id'],
                 'payment_url' => $result['payment_url'] ?? null,
-                'payment_data' => $result,
+                'payload' => $result,
             ]);
 
             return response()->json([
@@ -172,13 +174,16 @@ class PaymentController extends Controller
      */
     private function preparePaymentData(Payment $payment): array
     {
+        $provider = $payment->provider ?: config('payments.default_provider', 'yookassa');
+        $webhookUrl = $provider === 'cloudpayments' ? route('webhook.cloudpayments') : route('webhook.yookassa');
+
         return [
             'amount' => $payment->amount,
             'currency' => $payment->currency,
             'description' => $payment->description,
             'return_url' => route('payment.success'),
             'cancel_url' => route('payment.cancel'),
-            'webhook_url' => route('payment.webhook', ['provider' => 'yookassa']),
+            'webhook_url' => $webhookUrl,
         ];
     }
 
@@ -227,8 +232,14 @@ class PaymentController extends Controller
         if (!$payment) {
             throw new \Exception('Payment not found: ' . $paymentId);
         }
+        // Map YooKassa statuses to internal
+        $mapped = match($status) {
+            'succeeded' => 'paid',
+            'canceled' => 'cancelled',
+            default => 'pending'
+        };
 
-        $this->updatePaymentStatus($payment, $status, $data);
+        $this->updatePaymentStatus($payment, $mapped, $data);
     }
 
     /**
@@ -264,12 +275,12 @@ class PaymentController extends Controller
         try {
             $payment->update([
                 'status' => $status,
-                'webhook_data' => $webhookData,
+                'webhook_payload' => $webhookData,
                 'processed_at' => Carbon::now(),
             ]);
 
             // Если платеж успешен, активируем подписку
-            if ($status === 'completed' && $payment->subscription) {
+            if ($status === 'paid' && $payment->subscription) {
                 $payment->subscription->update(['status' => 'active']);
 
                 // Если использовался купон, увеличиваем счетчик использований
@@ -292,6 +303,16 @@ class PaymentController extends Controller
 
             DB::commit();
 
+            // Dispatch events after successful commit
+            event(new PaymentProcessed($payment, $status));
+
+            if ($status === 'paid' && $payment->subscription) {
+                event(new SubscriptionStatusChanged($payment->subscription, 'active'));
+            }
+            if ($status === 'failed' && $payment->subscription) {
+                event(new SubscriptionStatusChanged($payment->subscription, 'cancelled'));
+            }
+
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
@@ -304,7 +325,7 @@ class PaymentController extends Controller
     private function mapCloudPaymentsStatus(string $status): string
     {
         return match($status) {
-            'Completed' => 'completed',
+            'Completed' => 'paid',
             'Authorized' => 'pending',
             'Declined' => 'failed',
             'Cancelled' => 'cancelled',

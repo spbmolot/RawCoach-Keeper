@@ -19,7 +19,7 @@ class RecipeController extends Controller
         $query = Recipe::where('is_published', true);
         
         // Фильтрация по подписке пользователя
-        if ($user && $user->activeSubscription()) {
+        if ($user && $user->hasActiveSubscription()) {
             $this->filterRecipesBySubscription($query, $user);
         } else {
             // Только демо контент для неавторизованных
@@ -305,7 +305,7 @@ class RecipeController extends Controller
             return true;
         }
         
-        if (!$user || !$user->activeSubscription()) {
+        if (!$user || !$user->hasActiveSubscription()) {
             return false;
         }
         
@@ -318,7 +318,7 @@ class RecipeController extends Controller
      */
     private function filterRecipesBySubscription($query, $user)
     {
-        $subscription = $user->activeSubscription();
+        $subscription = $user->activeSubscription()->first();
         
         if (!$subscription) {
             $query->where('is_demo', true);

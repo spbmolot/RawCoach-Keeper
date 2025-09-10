@@ -24,7 +24,7 @@ class CheckSubscription
         }
 
         // Проверяем активную подписку
-        $activeSubscription = $user->activeSubscription();
+        $activeSubscription = $user->activeSubscription()->with('plan')->first();
 
         if (!$activeSubscription) {
             return redirect()->route('plans.index')
@@ -152,7 +152,7 @@ class CheckSubscription
         }
 
         // Пробный доступ доступен всем с любой подпиской, включая trial
-        return $subscription->isActive() || $subscription->isTrialActive();
+        return $subscription->isActive() || $subscription->isInTrial();
     }
 
     /**

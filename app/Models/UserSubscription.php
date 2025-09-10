@@ -167,6 +167,7 @@ class UserSubscription extends Model
         return match($this->status) {
             'active' => 'Активна',
             'cancelled' => 'Отменена',
+            'paused' => 'Приостановлена',
             'expired' => 'Истекла',
             'grace_period' => 'Льготный период',
             'pending' => 'Ожидает оплаты',
