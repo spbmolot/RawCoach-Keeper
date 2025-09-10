@@ -33,8 +33,8 @@ class PaymentServiceProvider extends ServiceProvider
         // Регистрируем CloudPayments клиент
         $this->app->singleton(CloudPaymentsManager::class, function ($app) {
             return new CloudPaymentsManager(
-                config('payments.providers.cloudpayments.public_id', ''),
-                config('payments.providers.cloudpayments.api_secret', '')
+                config('payments.providers.cloudpayments.public_id', '') ?? '',
+                config('payments.providers.cloudpayments.api_secret', '') ?? ''
             );
         });
 
@@ -42,7 +42,7 @@ class PaymentServiceProvider extends ServiceProvider
         $this->app->singleton(YooKassaService::class, function ($app) {
             return new YooKassaService(
                 $app->make(YooKassaClient::class),
-                config('payments.providers.yookassa.webhook_secret', '')
+                config('payments.providers.yookassa.webhook_secret', '') ?? ''
             );
         });
 
@@ -50,7 +50,7 @@ class PaymentServiceProvider extends ServiceProvider
         $this->app->singleton(CloudPaymentsService::class, function ($app) {
             return new CloudPaymentsService(
                 $app->make(CloudPaymentsManager::class),
-                config('payments.providers.cloudpayments.webhook_secret', '')
+                config('payments.providers.cloudpayments.webhook_secret', '') ?? ''
             );
         });
 
