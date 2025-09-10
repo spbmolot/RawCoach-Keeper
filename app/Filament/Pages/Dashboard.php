@@ -22,7 +22,7 @@ class Dashboard extends BaseDashboard
     /**
      * @return array<class-string<Widget>>
      */
-    protected function getWidgets(): array
+    public function getWidgets(): array
     {
         return [
             AccountWidget::class,
@@ -33,7 +33,7 @@ class Dashboard extends BaseDashboard
     /**
      * @return int | string | array<string, int | string | null>
      */
-    protected function getColumns(): int|string|array
+    public function getColumns(): int|string|array
     {
         return 2;
     }
