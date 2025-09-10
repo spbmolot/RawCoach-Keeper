@@ -51,7 +51,7 @@ Route::post('/webhook/yookassa', YooKassaWebhookController::class)->name('webhoo
 Route::post('/webhook/cloudpayments', CloudPaymentsWebhookController::class)->name('webhook.cloudpayments');
 
 // Авторизованные пользователи
-Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
+Route::middleware(['auth', config('jetstream.auth_session'), 'verified'])->group(function () {
     
     // Личный кабинет
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
@@ -141,4 +141,4 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
 // Редирект для совместимости с Jetstream
 Route::get('/dashboard', function () {
     return redirect()->route('dashboard.index');
-})->middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->name('dashboard');
+})->middleware(['auth', config('jetstream.auth_session'), 'verified'])->name('dashboard');
