@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::table('user_subscriptions', function (Blueprint $table) {
             if (!Schema::hasColumn('user_subscriptions', 'auto_renew')) {
-                $table->boolean('auto_renew')->default(true)->after('cancelled_at');
+                $table->boolean('auto_renew')->default(true)->after('ends_at');
             }
         });
 
