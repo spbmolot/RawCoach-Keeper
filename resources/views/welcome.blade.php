@@ -4,10 +4,50 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>RawCoach - Сервис по похудению</title>
+    <meta name="description" content="Планы питания для похудения 1200–1400 ккал. Меню, рецепты и списки покупок. RawPlan." />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <script>
+    // Fallback: если Tailwind из Vite не загрузился, подхватываем CDN-стили
+    window.addEventListener('load', function () {
+        try {
+            var test = document.createElement('div');
+            test.className = 'hidden';
+            document.body.appendChild(test);
+            var isTailwindLoaded = window.getComputedStyle(test).display === 'none';
+            document.body.removeChild(test);
+            if (!isTailwindLoaded) {
+                var l = document.createElement('link');
+                l.rel = 'stylesheet';
+                l.href = 'https://cdn.jsdelivr.net/npm/tailwindcss@3.4.11/dist/tailwind.min.css';
+                document.head.appendChild(l);
+            }
+        } catch (e) {}
+    });
+    </script>
 </head>
 <body class="antialiased text-gray-900">
 <div class="flex flex-col min-h-screen">
+
+    <!-- Sticky header -->
+    <header class="bg-white/80 backdrop-blur sticky top-0 z-40 border-b border-gray-100">
+        <div class="container mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="{{ route('home') }}" class="text-xl font-semibold text-gray-900">RawPlan</a>
+            <nav class="hidden md:flex gap-6 text-gray-700">
+                <a href="#pricing" class="hover:text-green-600 transition">Тарифы</a>
+                <a href="#faq" class="hover:text-green-600 transition">FAQ</a>
+            </nav>
+            <div class="flex items-center gap-3">
+                @auth
+                    <a href="{{ route('dashboard') }}" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition">Кабинет</a>
+                @else
+                    <a href="{{ route('login') }}" class="px-4 py-2 text-green-600 border border-green-600 rounded-md hover:bg-green-50 transition">Войти</a>
+                    <a href="{{ route('register') }}" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition">Регистрация</a>
+                @endauth
+            </div>
+        </div>
+    </header>
 
     <!-- Hero with day preview -->
     <section class="relative bg-cover bg-center bg-no-repeat" style="background-image: url('https://images.unsplash.com/photo-1546484959-f9a77a5c7f1d?auto=format&fit=crop&w=1600&q=80');">
@@ -139,7 +179,7 @@
     </section>
 
     <!-- FAQ -->
-    <section class="py-20 bg-white">
+    <section id="faq" class="py-20 bg-white">
         <div class="container mx-auto px-6">
             <h2 class="text-3xl font-bold text-center mb-12">FAQ</h2>
             <div class="max-w-2xl mx-auto">
