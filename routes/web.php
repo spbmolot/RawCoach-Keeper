@@ -137,8 +137,3 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::post('/{adCampaign}/creatives', [AdCampaignController::class, 'storeCreative'])->name('creatives.store');
     });
 });
-
-// Редирект для совместимости с Jetstream
-Route::get('/dashboard', function () {
-    return redirect()->route('dashboard.index');
-})->middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->name('dashboard');

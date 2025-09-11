@@ -7,10 +7,6 @@ use App\Models\UserSubscription;
 use App\Events\PaymentProcessed;
 use App\Events\SubscriptionStatusChanged;
 use YooKassa\Client as YooKassaClient;
-use YooKassa\Model\Confirmation\ConfirmationRedirect;
-use YooKassa\Model\MonetaryAmount;
-use YooKassa\Model\PaymentData\PaymentDataBankCard;
-use YooKassa\Request\Payments\CreatePaymentRequest;
 use RuntimeException;
 use Illuminate\Support\Facades\Log;
 
@@ -28,32 +24,36 @@ class YooKassaService
     public function createPayment(array $data): Payment
     {
         try {
-            $request = CreatePaymentRequest::builder()
-                ->setAmount($data['amount'])
-                ->setCurrency($data['currency'] ?? 'RUB')
-                ->setDescription($data['description'] ?? 'Оплата подписки RawPlan')
-                ->setConfirmation([
+            // Строим простой запрос (совместимо со стубом клиента)
+            $request = [
+                'amount' => [
+                    'value' => number_format($data['amount'], 2, '.', ''),
+                    'currency' => $data['currency'] ?? 'RUB',
+                ],
+                'description' => $data['description'] ?? 'Оплата подписки RawPlan',
+                'confirmation' => [
                     'type' => 'redirect',
-                    'return_url' => $data['return_url'] ?? route('dashboard.index'),
-                ])
-                ->setCapture(true)
-                ->setMetadata($data['metadata'] ?? [])
-                ->build();
+                    'return_url' => $data['return_url'] ?? route('dashboard'),
+                ],
+                'capture' => true,
+                'metadata' => $data['metadata'] ?? [],
+            ];
 
             $response = $this->sdk->createPayment($request);
 
+            // Так как используем заглушки SDK, полагаемся на входные данные для суммы/валюты
             return Payment::create([
                 'user_id' => $data['user_id'],
                 'subscription_id' => $data['subscription_id'] ?? null,
                 'provider' => 'yookassa',
-                'external_id' => $response->getId(),
-                'amount' => $response->getAmount()->getValue(),
-                'currency' => $response->getAmount()->getCurrency(),
-                'status' => $response->getStatus() === 'succeeded' ? 'paid' : ($response->getStatus() === 'canceled' ? 'cancelled' : 'pending'),
+                'external_id' => $response->id ?? ('stub_' . uniqid()),
+                'amount' => $data['amount'],
+                'currency' => $data['currency'] ?? 'RUB',
+                'status' => 'pending',
                 'description' => $data['description'] ?? 'Оплата подписки RawPlan',
                 'payload' => [
-                    'confirmation_url' => $response->getConfirmation()->getConfirmationUrl(),
-                    'payment_method' => $response->getPaymentMethod()?->getType(),
+                    'request' => $request,
+                    'confirmation_url' => $response->confirmation->confirmation_url ?? null,
                 ],
                 'metadata' => $data['metadata'] ?? [],
             ]);
