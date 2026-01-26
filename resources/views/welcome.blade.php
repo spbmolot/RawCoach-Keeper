@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800&display=swap" rel="stylesheet" />
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         :root {
             --color-primary: #22c55e;
@@ -59,37 +60,8 @@
 <body class="antialiased text-gray-900 bg-white">
 <div class="flex flex-col min-h-screen">
 
-    <!-- Header -->
-    <header class="bg-white/95 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <a href="{{ route('home') }}" class="flex items-center gap-2">
-                    <div class="w-10 h-10 rounded-xl hero-gradient flex items-center justify-center">
-                        <i data-lucide="salad" class="w-6 h-6 text-white"></i>
-                    </div>
-                    <span class="text-xl font-bold text-gray-900">RawPlan</span>
-                </a>
-                <nav class="hidden md:flex items-center gap-8">
-                    <a href="#features" class="text-gray-600 hover:text-green-600 font-medium transition">Возможности</a>
-                    <a href="#how-it-works" class="text-gray-600 hover:text-green-600 font-medium transition">Как это работает</a>
-                    <a href="#pricing" class="text-gray-600 hover:text-green-600 font-medium transition">Тарифы</a>
-                    <a href="#faq" class="text-gray-600 hover:text-green-600 font-medium transition">FAQ</a>
-                </nav>
-                <div class="flex items-center gap-3">
-                    @auth
-                        <a href="{{ route('dashboard') }}" class="px-5 py-2.5 bg-green-500 text-white rounded-xl font-semibold hover:bg-green-600 transition shadow-lg shadow-green-500/25">
-                            Мой кабинет
-                        </a>
-                    @else
-                        <a href="{{ route('login') }}" class="px-4 py-2 text-gray-700 font-medium hover:text-green-600 transition">Войти</a>
-                        <a href="{{ route('register') }}" class="px-5 py-2.5 bg-green-500 text-white rounded-xl font-semibold hover:bg-green-600 transition shadow-lg shadow-green-500/25">
-                            Начать бесплатно
-                        </a>
-                    @endauth
-                </div>
-            </div>
-        </div>
-    </header>
+    {{-- Header Component --}}
+    <x-home-header />
 
     <!-- Hero Section -->
     <section class="hero-gradient relative overflow-hidden">
@@ -259,26 +231,27 @@
                 <span class="text-green-600 font-semibold text-sm uppercase tracking-wider">Как это работает</span>
                 <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mt-3 mb-4">Начните за 3 простых шага</h2>
             </div>
-            <div class="grid md:grid-cols-3 gap-8 lg:gap-12">
-                <div class="text-center relative">
+            <div class="grid md:grid-cols-3 gap-8 lg:gap-12 relative">
+                <!-- Соединительные линии -->
+                <div class="hidden md:block absolute top-10 left-1/3 right-1/3 h-0.5 bg-green-200" style="left: calc(16.67% + 40px); right: calc(16.67% + 40px);"></div>
+                
+                <div class="text-center relative z-10">
                     <div class="w-20 h-20 mx-auto mb-6 rounded-2xl hero-gradient flex items-center justify-center shadow-lg shadow-green-500/30">
                         <i data-lucide="user-plus" class="w-10 h-10 text-white"></i>
                     </div>
-                    <div class="absolute top-10 left-1/2 w-full h-0.5 bg-green-200 hidden md:block" style="transform: translateX(50%);"></div>
                     <span class="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-bold mb-4">Шаг 1</span>
                     <h3 class="text-xl font-bold text-gray-900 mb-2">Зарегистрируйтесь</h3>
                     <p class="text-gray-600">Создайте аккаунт за 30 секунд. Нужен только email.</p>
                 </div>
-                <div class="text-center relative">
+                <div class="text-center relative z-10">
                     <div class="w-20 h-20 mx-auto mb-6 rounded-2xl hero-gradient flex items-center justify-center shadow-lg shadow-green-500/30">
                         <i data-lucide="credit-card" class="w-10 h-10 text-white"></i>
                     </div>
-                    <div class="absolute top-10 left-1/2 w-full h-0.5 bg-green-200 hidden md:block" style="transform: translateX(50%);"></div>
                     <span class="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-bold mb-4">Шаг 2</span>
                     <h3 class="text-xl font-bold text-gray-900 mb-2">Выберите тариф</h3>
                     <p class="text-gray-600">7 дней бесплатно. Потом — от 1990₽ в месяц.</p>
                 </div>
-                <div class="text-center">
+                <div class="text-center relative z-10">
                     <div class="w-20 h-20 mx-auto mb-6 rounded-2xl hero-gradient flex items-center justify-center shadow-lg shadow-green-500/30">
                         <i data-lucide="utensils" class="w-10 h-10 text-white"></i>
                     </div>
@@ -291,7 +264,7 @@
     </section>
 
     <!-- Pricing -->
-    <section id="pricing" class="py-24 bg-gradient-to-b from-gray-50 to-white">
+    <section id="pricing" class="py-24 bg-gradient-to-b from-gray-50 to-white" x-data="{ billingPeriod: 'monthly' }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
                 <span class="text-green-600 font-semibold text-sm uppercase tracking-wider">Тарифы</span>
@@ -301,115 +274,131 @@
             
             <div class="flex justify-center mb-10">
                 <div class="bg-gray-100 p-1 rounded-xl inline-flex">
-                    <button id="monthlyBtn" class="px-6 py-2.5 rounded-lg font-semibold transition bg-white text-gray-900 shadow-sm">Месяц</button>
-                    <button id="yearlyBtn" class="px-6 py-2.5 rounded-lg font-semibold transition text-gray-600 hover:text-gray-900">Год <span class="text-green-600">-25%</span></button>
+                    <button @click="billingPeriod = 'monthly'" 
+                            :class="billingPeriod === 'monthly' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'"
+                            class="px-6 py-2.5 rounded-lg font-semibold transition">
+                        Месяц
+                    </button>
+                    <button @click="billingPeriod = 'yearly'" 
+                            :class="billingPeriod === 'yearly' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'"
+                            class="px-6 py-2.5 rounded-lg font-semibold transition">
+                        Год <span class="text-green-600">-25%</span>
+                    </button>
                 </div>
             </div>
 
+            @php
+                $trialPlan = $plans->where('slug', 'trial')->first();
+                $standardMonthly = $plans->where('slug', 'standard-monthly')->first();
+                $standardYearly = $plans->where('slug', 'standard-yearly')->first();
+                $personalMonthly = $plans->where('slug', 'personal-monthly')->first();
+                $personalYearly = $plans->where('slug', 'personal-yearly')->first();
+            @endphp
+
             <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                {{-- Стандарт --}}
+                @if($standardMonthly)
                 <div class="bg-white rounded-2xl p-8 border border-gray-200 card-hover">
                     <div class="mb-6">
                         <h3 class="text-xl font-bold text-gray-900 mb-2">Стандарт</h3>
                         <p class="text-gray-500 text-sm">Для начинающих</p>
                     </div>
                     <div class="mb-6">
-                        <span class="text-4xl font-extrabold text-gray-900 price" data-month="1990" data-year="1493">1990</span>
-                        <span class="text-gray-500">₽/<span class="period">мес</span></span>
+                        <template x-if="billingPeriod === 'monthly'">
+                            <div>
+                                <span class="text-4xl font-extrabold text-gray-900">{{ number_format($standardMonthly->price, 0, ',', ' ') }}</span>
+                                <span class="text-gray-500">₽/мес</span>
+                            </div>
+                        </template>
+                        <template x-if="billingPeriod === 'yearly'">
+                            <div>
+                                <span class="text-4xl font-extrabold text-gray-900">{{ number_format($standardYearly->price / 12, 0, ',', ' ') }}</span>
+                                <span class="text-gray-500">₽/мес</span>
+                                <div class="text-sm text-green-600 font-medium mt-1">Экономия {{ number_format($standardYearly->original_price - $standardYearly->price, 0, ',', ' ') }}₽ в год</div>
+                            </div>
+                        </template>
                     </div>
+                    @php $features = is_string($standardMonthly->features) ? json_decode($standardMonthly->features, true) : $standardMonthly->features; @endphp
                     <ul class="space-y-4 mb-8">
+                        @foreach(array_slice($features ?? [], 0, 4) as $feature)
                         <li class="flex items-center gap-3 text-gray-600">
                             <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
-                            Меню на текущий месяц
+                            {{ $feature }}
                         </li>
-                        <li class="flex items-center gap-3 text-gray-600">
-                            <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
-                            Рецепты с КБЖУ
-                        </li>
-                        <li class="flex items-center gap-3 text-gray-600">
-                            <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
-                            Списки покупок
-                        </li>
-                        <li class="flex items-center gap-3 text-gray-600">
-                            <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
-                            Экспорт в PDF
-                        </li>
+                        @endforeach
                     </ul>
                     <a href="{{ route('register') }}" class="block w-full py-3 px-6 text-center font-semibold rounded-xl border-2 border-green-500 text-green-600 hover:bg-green-50 transition">
                         Начать бесплатно
                     </a>
                 </div>
+                @endif
 
+                {{-- Стандарт Годовой (Популярный) --}}
+                @if($standardYearly)
                 <div class="bg-white rounded-2xl p-8 border-2 border-green-500 card-hover relative shadow-xl shadow-green-500/10">
                     <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
                         <span class="bg-green-500 text-white text-sm font-bold px-4 py-1 rounded-full">Популярный</span>
                     </div>
                     <div class="mb-6">
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Премиум</h3>
-                        <p class="text-gray-500 text-sm">Максимум возможностей</p>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Стандарт Годовой</h3>
+                        <p class="text-gray-500 text-sm">Максимум выгоды</p>
                     </div>
                     <div class="mb-6">
-                        <span class="text-4xl font-extrabold text-gray-900 price" data-month="17910" data-year="1493">17910</span>
-                        <span class="text-gray-500">₽/<span class="period">год</span></span>
-                        <div class="text-sm text-green-600 font-medium mt-1">Экономия 5970₽</div>
+                        <span class="text-4xl font-extrabold text-gray-900">{{ number_format($standardYearly->price, 0, ',', ' ') }}</span>
+                        <span class="text-gray-500">₽/год</span>
+                        <div class="text-sm text-green-600 font-medium mt-1">Экономия {{ number_format($standardYearly->original_price - $standardYearly->price, 0, ',', ' ') }}₽</div>
                     </div>
+                    @php $features = is_string($standardYearly->features) ? json_decode($standardYearly->features, true) : $standardYearly->features; @endphp
                     <ul class="space-y-4 mb-8">
+                        @foreach(array_slice($features ?? [], 0, 5) as $feature)
                         <li class="flex items-center gap-3 text-gray-600">
                             <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
-                            Всё из Стандарт
+                            {{ $feature }}
                         </li>
-                        <li class="flex items-center gap-3 text-gray-600">
-                            <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
-                            Доступ к архиву меню
-                        </li>
-                        <li class="flex items-center gap-3 text-gray-600">
-                            <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
-                            Ранний доступ к новинкам
-                        </li>
-                        <li class="flex items-center gap-3 text-gray-600">
-                            <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
-                            Приоритетная поддержка
-                        </li>
-                        <li class="flex items-center gap-3 text-gray-600">
-                            <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
-                            Безлимитный экспорт
-                        </li>
+                        @endforeach
                     </ul>
                     <a href="{{ route('register') }}" class="block w-full py-3 px-6 text-center font-semibold rounded-xl bg-green-500 text-white hover:bg-green-600 transition shadow-lg shadow-green-500/25">
                         Начать бесплатно
                     </a>
                 </div>
+                @endif
 
+                {{-- Индивидуальный --}}
+                @if($personalMonthly)
                 <div class="bg-white rounded-2xl p-8 border border-gray-200 card-hover">
                     <div class="mb-6">
                         <h3 class="text-xl font-bold text-gray-900 mb-2">Индивидуальный</h3>
                         <p class="text-gray-500 text-sm">Персональный подход</p>
                     </div>
                     <div class="mb-6">
-                        <span class="text-4xl font-extrabold text-gray-900">4990</span>
-                        <span class="text-gray-500">₽/мес</span>
+                        <template x-if="billingPeriod === 'monthly'">
+                            <div>
+                                <span class="text-4xl font-extrabold text-gray-900">{{ number_format($personalMonthly->price, 0, ',', ' ') }}</span>
+                                <span class="text-gray-500">₽/мес</span>
+                            </div>
+                        </template>
+                        <template x-if="billingPeriod === 'yearly'">
+                            <div>
+                                <span class="text-4xl font-extrabold text-gray-900">{{ number_format($personalYearly->price / 12, 0, ',', ' ') }}</span>
+                                <span class="text-gray-500">₽/мес</span>
+                                <div class="text-sm text-green-600 font-medium mt-1">Экономия {{ number_format($personalYearly->original_price - $personalYearly->price, 0, ',', ' ') }}₽ в год</div>
+                            </div>
+                        </template>
                     </div>
+                    @php $features = is_string($personalMonthly->features) ? json_decode($personalMonthly->features, true) : $personalMonthly->features; @endphp
                     <ul class="space-y-4 mb-8">
+                        @foreach(array_slice($features ?? [], 0, 4) as $feature)
                         <li class="flex items-center gap-3 text-gray-600">
                             <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
-                            Всё из Премиум
+                            {{ $feature }}
                         </li>
-                        <li class="flex items-center gap-3 text-gray-600">
-                            <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
-                            Персональный план питания
-                        </li>
-                        <li class="flex items-center gap-3 text-gray-600">
-                            <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
-                            Учёт аллергий и предпочтений
-                        </li>
-                        <li class="flex items-center gap-3 text-gray-600">
-                            <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
-                            Консультация нутрициолога
-                        </li>
+                        @endforeach
                     </ul>
                     <a href="{{ route('register') }}" class="block w-full py-3 px-6 text-center font-semibold rounded-xl border-2 border-green-500 text-green-600 hover:bg-green-50 transition">
                         Связаться
                     </a>
                 </div>
+                @endif
             </div>
         </div>
     </section>
@@ -553,50 +542,8 @@
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-gray-400 py-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid md:grid-cols-4 gap-12 mb-12">
-                <div class="md:col-span-2">
-                    <a href="{{ route('home') }}" class="flex items-center gap-2 mb-4">
-                        <div class="w-10 h-10 rounded-xl hero-gradient flex items-center justify-center">
-                            <i data-lucide="salad" class="w-6 h-6 text-white"></i>
-                        </div>
-                        <span class="text-xl font-bold text-white">RawPlan</span>
-                    </a>
-                    <p class="text-gray-400 max-w-sm">Готовые планы питания для здорового похудения. Меню, рецепты и списки покупок — всё в одном месте.</p>
-                </div>
-                <div>
-                    <h4 class="text-white font-semibold mb-4">Навигация</h4>
-                    <ul class="space-y-2">
-                        <li><a href="#features" class="hover:text-white transition">Возможности</a></li>
-                        <li><a href="{{ route('plans.index') }}" class="hover:text-white transition">Тарифы</a></li>
-                        <li><a href="{{ route('about') }}" class="hover:text-white transition">О нас</a></li>
-                        <li><a href="{{ route('contact') }}" class="hover:text-white transition">Контакты</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="text-white font-semibold mb-4">Правовая информация</h4>
-                    <ul class="space-y-2">
-                        <li><a href="{{ route('privacy') }}" class="hover:text-white transition">Политика конфиденциальности</a></li>
-                        <li><a href="{{ route('terms') }}" class="hover:text-white transition">Пользовательское соглашение</a></li>
-                        <li><a href="{{ route('offer') }}" class="hover:text-white transition">Оферта</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-                <p class="text-sm">© {{ date('Y') }} RawPlan. Все права защищены.</p>
-                <div class="flex items-center gap-4">
-                    <a href="https://t.me/rawplan" target="_blank" rel="noopener" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition" title="Telegram">
-                        <i data-lucide="send" class="w-5 h-5"></i>
-                    </a>
-                    <a href="mailto:support@rawplan.ru" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition" title="Email">
-                        <i data-lucide="mail" class="w-5 h-5"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </footer>
+    {{-- Footer Component --}}
+    <x-public-footer />
 </div>
 
 <script>

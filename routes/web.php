@@ -17,9 +17,7 @@ use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\TestPaymentController;
 
 // Публичные страницы
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/about', [HomeController::class, 'about'])->name('about');
 Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
 Route::post('/contact', [HomeController::class, 'contactSubmit'])->name('contact.submit');

@@ -19,18 +19,16 @@ class HomeController extends Controller
             ->orderBy('sort_order')
             ->get();
 
-        // Получаем несколько популярных рецептов для демо
+        // Получаем несколько рецептов для демо
         $featuredRecipes = Recipe::where('is_published', true)
-            ->where('is_featured', true)
             ->limit(6)
             ->get();
 
         // Получаем текущее меню для демонстрации
         $currentMenu = Menu::where('is_published', true)
-            ->where('type', 'current')
             ->first();
 
-        return view('home.index', compact('plans', 'featuredRecipes', 'currentMenu'));
+        return view('welcome', compact('plans', 'featuredRecipes', 'currentMenu'));
     }
 
     /**
