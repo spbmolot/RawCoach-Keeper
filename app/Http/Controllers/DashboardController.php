@@ -22,24 +22,26 @@ class DashboardController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $subscription = $user->activeSubscription()->with('plan')->first();
+        $activeSubscription = $user->activeSubscription()->with('plan')->first();
         
-        // Получаем меню на сегодня
-        $today = Carbon::today();
-        $todayMenu = $this->getTodayMenu($user, $today);
+        // Получаем текущее меню
+        $currentMenu = Menu::where('is_published', true)
+            ->where('month', Carbon::now()->month)
+            ->where('year', Carbon::now()->year)
+            ->with(['days.meals.recipe'])
+            ->first();
         
-        // Получаем статистику
-        $stats = $this->getUserStats($user);
-        
-        // Получаем последние активности
-        $recentActivities = $this->getRecentActivities($user);
+        // Получаем недавние рецепты
+        $recentRecipes = Recipe::where('is_published', true)
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
 
         return view('dashboard.index', compact(
             'user', 
-            'subscription', 
-            'todayMenu', 
-            'stats', 
-            'recentActivities'
+            'activeSubscription', 
+            'currentMenu',
+            'recentRecipes'
         ));
     }
 
