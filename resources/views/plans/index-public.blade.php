@@ -74,6 +74,10 @@
                             <span class="text-3xl font-bold text-gray-900">{{ number_format($plan->price, 0, ',', ' ') }} ₽</span>
                             @if($plan->original_price && $plan->original_price > $plan->price)
                                 <span class="text-sm text-gray-400 line-through ml-2">{{ number_format($plan->original_price, 0, ',', ' ') }} ₽</span>
+                                @php
+                                    $discount = round((1 - $plan->price / $plan->original_price) * 100);
+                                @endphp
+                                <div class="text-green-600 text-sm font-semibold">Экономия {{ $discount }}%</div>
                             @endif
                             <div class="text-sm text-gray-500">
                                 @if($plan->type === 'trial')

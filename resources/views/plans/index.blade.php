@@ -31,10 +31,13 @@
                                 <p class="text-gray-600 mb-4">{{ $plan->description }}</p>
                                 
                                 <div class="mb-4">
-                                    <span class="text-4xl font-bold text-gray-900">₽{{ number_format($plan->price, 0, ',', ' ') }}</span>
-                                    @if($plan->type === 'yearly')
-                                        <span class="text-sm text-gray-500 line-through ml-2">₽{{ number_format($plan->price * 1.25, 0, ',', ' ') }}</span>
-                                        <div class="text-green-600 text-sm font-semibold">Экономия 20%</div>
+                                    <span class="text-4xl font-bold text-gray-900">{{ number_format($plan->price, 0, ',', ' ') }} ₽</span>
+                                    @if($plan->original_price && $plan->original_price > $plan->price)
+                                        <span class="text-sm text-gray-500 line-through ml-2">{{ number_format($plan->original_price, 0, ',', ' ') }} ₽</span>
+                                        @php
+                                            $discount = round((1 - $plan->price / $plan->original_price) * 100);
+                                        @endphp
+                                        <div class="text-green-600 text-sm font-semibold">Экономия {{ $discount }}%</div>
                                     @endif
                                     <div class="text-gray-500 text-sm">
                                         @if($plan->type === 'monthly')
