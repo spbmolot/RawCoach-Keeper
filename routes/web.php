@@ -12,6 +12,7 @@ use App\Http\Controllers\PersonalPlanController;
 use App\Http\Controllers\AdCampaignController;
 use App\Http\Controllers\Webhook\YooKassaWebhookController;
 use App\Http\Controllers\Webhook\CloudPaymentsWebhookController;
+use App\Http\Controllers\ShoppingListController;
 
 // Публичные страницы
 Route::get('/', function () {
@@ -104,6 +105,13 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::get('/favorites', [RecipeController::class, 'favorites'])->name('favorites');
         Route::post('/{recipe}/favorite', [RecipeController::class, 'favorite'])->name('favorite');
         Route::get('/{recipe}/export', [RecipeController::class, 'export'])->name('export');
+    });
+    
+    // Список покупок
+    Route::prefix('shopping-list')->name('shopping-list.')->group(function () {
+        Route::get('/', [ShoppingListController::class, 'index'])->name('index');
+        Route::get('/{menu}', [ShoppingListController::class, 'show'])->name('show');
+        Route::get('/{menu}/pdf', [ShoppingListController::class, 'exportPdf'])->name('pdf');
     });
     
     // Персональные планы
