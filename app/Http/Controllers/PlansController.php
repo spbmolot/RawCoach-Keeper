@@ -29,7 +29,7 @@ class PlansController extends Controller
                 ->first();
         }
 
-        return view('plans.index', compact('plans', 'currentSubscription'));
+        return view('plans.index-public', compact('plans', 'currentSubscription'));
     }
 
     /**

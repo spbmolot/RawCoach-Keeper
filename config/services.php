@@ -46,4 +46,12 @@ return [
         'webhook_secret' => env('YOOKASSA_WEBHOOK_SECRET'),
     ],
 
+    'google' => [
+        'analytics_id' => env('GOOGLE_ANALYTICS_ID'),
+    ],
+
+    'yandex' => [
+        'metrika_id' => env('YANDEX_METRIKA_ID'),
+    ],
+
 ];

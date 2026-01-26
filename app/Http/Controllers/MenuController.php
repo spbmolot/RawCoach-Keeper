@@ -7,6 +7,7 @@ use App\Models\Menu;
 use App\Models\Recipe;
 use App\Models\Day;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 class MenuController extends Controller
 {
@@ -15,11 +16,13 @@ class MenuController extends Controller
      */
     public function index(Request $request)
     {
-        $menus = Menu::where('is_published', true)
-            ->with('days')
-            ->orderBy('year', 'desc')
-            ->orderBy('month', 'desc')
-            ->paginate(12);
+        $menus = Cache::remember('menus_published', 600, function () {
+            return Menu::where('is_published', true)
+                ->with('days')
+                ->orderBy('year', 'desc')
+                ->orderBy('month', 'desc')
+                ->paginate(12);
+        });
         
         return view('menus.index', compact('menus'));
     }

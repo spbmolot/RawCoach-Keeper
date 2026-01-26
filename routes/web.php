@@ -13,6 +13,8 @@ use App\Http\Controllers\AdCampaignController;
 use App\Http\Controllers\Webhook\YooKassaWebhookController;
 use App\Http\Controllers\Webhook\CloudPaymentsWebhookController;
 use App\Http\Controllers\ShoppingListController;
+use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\TestPaymentController;
 
 // Публичные страницы
 Route::get('/', function () {
@@ -24,6 +26,16 @@ Route::post('/contact', [HomeController::class, 'contactSubmit'])->name('contact
 Route::get('/privacy', [HomeController::class, 'privacy'])->name('privacy');
 Route::get('/terms', [HomeController::class, 'terms'])->name('terms');
 Route::get('/demo', [HomeController::class, 'demo'])->name('demo');
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+
+// Тестовые маршруты для платежей (только в dev)
+if (app()->environment('local', 'development', 'testing')) {
+    Route::prefix('payment/test')->name('payment.test.')->group(function () {
+        Route::get('/confirm', [TestPaymentController::class, 'confirm'])->name('confirm');
+        Route::get('/success', [TestPaymentController::class, 'success'])->name('success');
+        Route::get('/cancel', [TestPaymentController::class, 'cancel'])->name('cancel');
+    });
+}
 
 // Планы подписки (доступны всем)
 Route::prefix('plans')->name('plans.')->group(function () {
@@ -55,8 +67,10 @@ Route::post('/webhook/cloudpayments', CloudPaymentsWebhookController::class)->na
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
     
     // Личный кабинет
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
-        Route::get('/', [DashboardController::class, 'index'])->name('index');
+        Route::get('/home', [DashboardController::class, 'index'])->name('index');
         Route::get('/today', [DashboardController::class, 'today'])->name('today');
         Route::get('/week', [DashboardController::class, 'week'])->name('week');
         Route::get('/calendar', [DashboardController::class, 'calendar'])->name('calendar');

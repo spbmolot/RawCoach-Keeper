@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Recipe;
 use App\Models\RecipeView;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 class RecipeController extends Controller
 {
@@ -14,26 +15,26 @@ class RecipeController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Recipe::where('is_published', true);
+        $cacheKey = 'recipes_' . md5($request->fullUrl());
         
-        // Фильтр по категории
-        if ($request->filled('category')) {
-            $query->where('category', $request->category);
-        }
+        $recipes = Cache::remember($cacheKey, 300, function () use ($request) {
+            $query = Recipe::where('is_published', true);
+            
+            if ($request->filled('category')) {
+                $query->where('category', $request->category);
+            }
+            
+            if ($request->filled('difficulty')) {
+                $query->where('difficulty', $request->difficulty);
+            }
+            
+            $sortBy = $request->get('sort', 'created_at');
+            $sortOrder = $request->get('order', 'desc');
+            $query->orderBy($sortBy, $sortOrder);
+            
+            return $query->with('ingredients')->paginate(12);
+        });
         
-        // Фильтр по сложности
-        if ($request->filled('difficulty')) {
-            $query->where('difficulty', $request->difficulty);
-        }
-        
-        // Сортировка
-        $sortBy = $request->get('sort', 'created_at');
-        $sortOrder = $request->get('order', 'desc');
-        $query->orderBy($sortBy, $sortOrder);
-        
-        $recipes = $query->with('ingredients')->paginate(12);
-        
-        // Получаем доступные фильтры
         $availableFilters = $this->getAvailableFilters();
         
         return view('recipes.index', compact('recipes', 'availableFilters'));

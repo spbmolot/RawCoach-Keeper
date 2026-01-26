@@ -1,2 +1,18 @@
 User-agent: *
-Disallow:
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /payment/
+Disallow: /api/
+Disallow: /login
+Disallow: /register
+Disallow: /password/
+
+Sitemap: https://rawplan.ru/sitemap.xml
+
+# Yandex
+User-agent: Yandex
+Crawl-delay: 1
+
+# Google
+User-agent: Googlebot
+Allow: /

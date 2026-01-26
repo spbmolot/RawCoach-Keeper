@@ -18,8 +18,8 @@
             <!-- Планы -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 @foreach($plans as $plan)
-                    <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg {{ $plan->is_popular ? 'ring-2 ring-amber-500' : '' }}">
-                        @if($plan->is_popular)
+                    <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg {{ $plan->type === 'yearly' ? 'ring-2 ring-amber-500' : '' }}">
+                        @if($plan->type === 'yearly')
                             <div class="bg-amber-500 text-white text-center py-2 text-sm font-semibold">
                                 ПОПУЛЯРНЫЙ
                             </div>
@@ -112,14 +112,13 @@
 
                             <!-- Кнопка подписки -->
                             @auth
-                                @if(auth()->user()->hasActivePlan($plan->id))
+                                @if($currentSubscription && $currentSubscription->plan_id === $plan->id)
                                     <button class="w-full bg-green-100 text-green-800 py-3 px-6 rounded-lg font-semibold cursor-not-allowed">
                                         Активная подписка
                                     </button>
                                 @else
-                                    <form action="{{ route('subscriptions.create') }}" method="POST">
+                                    <form action="{{ route('subscriptions.create', $plan) }}" method="POST">
                                         @csrf
-                                        <input type="hidden" name="plan_id" value="{{ $plan->id }}">
                                         <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-white py-3 px-6 rounded-lg font-semibold transition duration-200">
                                             Выбрать план
                                         </button>
