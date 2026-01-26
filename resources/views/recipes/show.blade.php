@@ -11,6 +11,10 @@
 </style>
 @endpush
 
+@push('schema')
+<x-schema-recipe :recipe="$recipe" />
+@endpush
+
 @section('content')
     <!-- Breadcrumbs -->
     <div class="bg-white border-b border-gray-100">

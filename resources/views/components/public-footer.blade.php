@@ -28,7 +28,32 @@
                 </ul>
             </div>
         </div>
-        <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        {{-- Payment badges --}}
+        <div class="border-t border-gray-800 pt-8 mb-8">
+            <div class="flex flex-wrap items-center justify-center gap-6">
+                <div class="flex items-center gap-2 text-gray-500">
+                    <i data-lucide="shield-check" class="w-5 h-5 text-green-500"></i>
+                    <span class="text-sm">Безопасная оплата</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="bg-gray-800 px-3 py-1.5 rounded-lg flex items-center gap-2">
+                        <span class="text-xs font-bold text-blue-400">VISA</span>
+                    </div>
+                    <div class="bg-gray-800 px-3 py-1.5 rounded-lg flex items-center gap-2">
+                        <span class="text-xs font-bold text-orange-400">MC</span>
+                    </div>
+                    <div class="bg-gray-800 px-3 py-1.5 rounded-lg flex items-center gap-2">
+                        <span class="text-xs font-bold text-green-400">МИР</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 text-gray-500">
+                    <i data-lucide="lock" class="w-4 h-4"></i>
+                    <span class="text-sm">SSL защита</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
             <p class="text-sm">© {{ date('Y') }} RawPlan. Все права защищены.</p>
             <div class="flex items-center gap-4">
                 <a href="https://t.me/rawplan" target="_blank" rel="noopener" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition" title="Telegram">

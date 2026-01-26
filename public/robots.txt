@@ -6,12 +6,22 @@ Disallow: /api/
 Disallow: /login
 Disallow: /register
 Disallow: /password/
+Disallow: /email/
+Disallow: /webhook/
+Disallow: /_debugbar/
+Disallow: /storage/
+
+# Allow public content
+Allow: /menus/
+Allow: /recipes/
+Allow: /plans/
 
 Sitemap: https://rawplan.ru/sitemap.xml
 
 # Yandex
 User-agent: Yandex
 Crawl-delay: 1
+Host: https://rawplan.ru
 
 # Google
 User-agent: Googlebot

@@ -5,6 +5,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>RawPlan — Планы питания для похудения</title>
     <meta name="description" content="Готовые планы питания 1200–1400 ккал. Меню на месяц, рецепты с КБЖУ и списки покупок. Худейте вкусно!" />
+    <meta name="keywords" content="план питания, похудение, рецепты, КБЖУ, меню на месяц, здоровое питание, диета">
+    <meta name="author" content="RawPlan">
+    <link rel="canonical" href="{{ url()->current() }}">
+    
+    {{-- Favicon --}}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="/favicon.ico" sizes="32x32">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="theme-color" content="#22c55e">
+    
+    {{-- Open Graph --}}
+    <meta property="og:title" content="RawPlan — Планы питания для похудения">
+    <meta property="og:description" content="Готовые планы питания 1200–1400 ккал. Меню на месяц, рецепты с КБЖУ и списки покупок.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:site_name" content="RawPlan">
+    <meta property="og:locale" content="ru_RU">
+    <meta property="og:image" content="{{ asset('images/og-image.jpg') }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    
+    {{-- Twitter Card --}}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="RawPlan — Планы питания для похудения">
+    <meta name="twitter:description" content="Готовые планы питания 1200–1400 ккал. Меню на месяц, рецепты с КБЖУ.">
+    <meta name="twitter:image" content="{{ asset('images/og-image.jpg') }}">
+    
+    {{-- Schema.org --}}
+    <x-schema-organization />
+    <x-schema-website />
+    <x-schema-faq :faqs="[
+        ['question' => 'Есть ли пробный период?', 'answer' => 'Да! Первые 7 дней — бесплатно. Вы получите полный доступ ко всем функциям. Отменить можно в любой момент.'],
+        ['question' => 'Когда я получу меню?', 'answer' => 'Сразу после регистрации! Меню на текущий месяц будет доступно в личном кабинете.'],
+        ['question' => 'Можно ли отменить подписку?', 'answer' => 'Конечно. Вы можете отменить подписку в любой момент в личном кабинете. Без скрытых условий.'],
+        ['question' => 'Подходит ли меню для вегетарианцев?', 'answer' => 'Пока у нас стандартное меню, но в индивидуальном тарифе мы учитываем все ваши предпочтения и ограничения.'],
+        ['question' => 'Какие способы оплаты доступны?', 'answer' => 'Банковские карты Visa, MasterCard, МИР. Также доступна оплата через ЮKassa и CloudPayments.']
+    ]" />
+    
+    {{-- AOS Animation Library --}}
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800&display=swap" rel="stylesheet" />
@@ -172,48 +214,48 @@
     <!-- Features Section -->
     <section id="features" class="py-24 bg-gray-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
+            <div class="text-center mb-16" data-aos="fade-up">
                 <span class="text-green-600 font-semibold text-sm uppercase tracking-wider">Возможности</span>
                 <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mt-3 mb-4">Всё для комфортного похудения</h2>
                 <p class="text-xl text-gray-600 max-w-2xl mx-auto">Мы продумали каждую деталь, чтобы вы могли сосредоточиться на результате</p>
             </div>
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="bg-white rounded-2xl p-8 card-hover shadow-sm border border-gray-100">
+                <div class="bg-white rounded-2xl p-8 card-hover shadow-sm border border-gray-100" data-aos="fade-up" data-aos-delay="100">
                     <div class="feature-icon mb-6">
                         <i data-lucide="calendar-days" class="w-7 h-7 text-green-600"></i>
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 mb-3">Меню на месяц</h3>
                     <p class="text-gray-600">Готовые планы питания на каждый день. Завтрак, обед, ужин и перекусы — всё расписано.</p>
                 </div>
-                <div class="bg-white rounded-2xl p-8 card-hover shadow-sm border border-gray-100">
+                <div class="bg-white rounded-2xl p-8 card-hover shadow-sm border border-gray-100" data-aos="fade-up" data-aos-delay="200">
                     <div class="feature-icon mb-6">
                         <i data-lucide="calculator" class="w-7 h-7 text-green-600"></i>
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 mb-3">КБЖУ посчитаны</h3>
                     <p class="text-gray-600">Калории, белки, жиры и углеводы рассчитаны для каждого блюда. Вам не нужно ничего считать.</p>
                 </div>
-                <div class="bg-white rounded-2xl p-8 card-hover shadow-sm border border-gray-100">
+                <div class="bg-white rounded-2xl p-8 card-hover shadow-sm border border-gray-100" data-aos="fade-up" data-aos-delay="300">
                     <div class="feature-icon mb-6">
                         <i data-lucide="shopping-cart" class="w-7 h-7 text-green-600"></i>
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 mb-3">Списки покупок</h3>
                     <p class="text-gray-600">Автоматические списки продуктов на неделю. Скачивайте в PDF или Excel.</p>
                 </div>
-                <div class="bg-white rounded-2xl p-8 card-hover shadow-sm border border-gray-100">
+                <div class="bg-white rounded-2xl p-8 card-hover shadow-sm border border-gray-100" data-aos="fade-up" data-aos-delay="100">
                     <div class="feature-icon mb-6">
                         <i data-lucide="chef-hat" class="w-7 h-7 text-green-600"></i>
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 mb-3">Простые рецепты</h3>
                     <p class="text-gray-600">Пошаговые инструкции с фото. Даже новичок справится за 30 минут.</p>
                 </div>
-                <div class="bg-white rounded-2xl p-8 card-hover shadow-sm border border-gray-100">
+                <div class="bg-white rounded-2xl p-8 card-hover shadow-sm border border-gray-100" data-aos="fade-up" data-aos-delay="200">
                     <div class="feature-icon mb-6">
                         <i data-lucide="scale" class="w-7 h-7 text-green-600"></i>
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 mb-3">1200–1400 ккал</h3>
                     <p class="text-gray-600">Оптимальный дефицит для здорового похудения. Минус 4-6 кг в месяц.</p>
                 </div>
-                <div class="bg-white rounded-2xl p-8 card-hover shadow-sm border border-gray-100">
+                <div class="bg-white rounded-2xl p-8 card-hover shadow-sm border border-gray-100" data-aos="fade-up" data-aos-delay="300">
                     <div class="feature-icon mb-6">
                         <i data-lucide="smartphone" class="w-7 h-7 text-green-600"></i>
                     </div>
@@ -227,7 +269,7 @@
     <!-- How it works -->
     <section id="how-it-works" class="py-24 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
+            <div class="text-center mb-16" data-aos="fade-up">
                 <span class="text-green-600 font-semibold text-sm uppercase tracking-wider">Как это работает</span>
                 <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mt-3 mb-4">Начните за 3 простых шага</h2>
             </div>
@@ -235,7 +277,7 @@
                 <!-- Соединительные линии -->
                 <div class="hidden md:block absolute top-10 left-1/3 right-1/3 h-0.5 bg-green-200" style="left: calc(16.67% + 40px); right: calc(16.67% + 40px);"></div>
                 
-                <div class="text-center relative z-10">
+                <div class="text-center relative z-10" data-aos="fade-up" data-aos-delay="100">
                     <div class="w-20 h-20 mx-auto mb-6 rounded-2xl hero-gradient flex items-center justify-center shadow-lg shadow-green-500/30">
                         <i data-lucide="user-plus" class="w-10 h-10 text-white"></i>
                     </div>
@@ -243,7 +285,7 @@
                     <h3 class="text-xl font-bold text-gray-900 mb-2">Зарегистрируйтесь</h3>
                     <p class="text-gray-600">Создайте аккаунт за 30 секунд. Нужен только email.</p>
                 </div>
-                <div class="text-center relative z-10">
+                <div class="text-center relative z-10" data-aos="fade-up" data-aos-delay="200">
                     <div class="w-20 h-20 mx-auto mb-6 rounded-2xl hero-gradient flex items-center justify-center shadow-lg shadow-green-500/30">
                         <i data-lucide="credit-card" class="w-10 h-10 text-white"></i>
                     </div>
@@ -251,7 +293,7 @@
                     <h3 class="text-xl font-bold text-gray-900 mb-2">Выберите тариф</h3>
                     <p class="text-gray-600">7 дней бесплатно. Потом — от 1990₽ в месяц.</p>
                 </div>
-                <div class="text-center relative z-10">
+                <div class="text-center relative z-10" data-aos="fade-up" data-aos-delay="300">
                     <div class="w-20 h-20 mx-auto mb-6 rounded-2xl hero-gradient flex items-center justify-center shadow-lg shadow-green-500/30">
                         <i data-lucide="utensils" class="w-10 h-10 text-white"></i>
                     </div>
@@ -296,29 +338,19 @@
             @endphp
 
             <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-                {{-- Стандарт --}}
-                @if($standardMonthly)
+                {{-- Пробный период --}}
+                @if($trialPlan)
                 <div class="bg-white rounded-2xl p-8 border border-gray-200 card-hover">
                     <div class="mb-6">
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Стандарт</h3>
-                        <p class="text-gray-500 text-sm">Для начинающих</p>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Пробный</h3>
+                        <p class="text-gray-500 text-sm">7 дней бесплатно</p>
                     </div>
                     <div class="mb-6">
-                        <template x-if="billingPeriod === 'monthly'">
-                            <div>
-                                <span class="text-4xl font-extrabold text-gray-900">{{ number_format($standardMonthly->price, 0, ',', ' ') }}</span>
-                                <span class="text-gray-500">₽/мес</span>
-                            </div>
-                        </template>
-                        <template x-if="billingPeriod === 'yearly'">
-                            <div>
-                                <span class="text-4xl font-extrabold text-gray-900">{{ number_format($standardYearly->price / 12, 0, ',', ' ') }}</span>
-                                <span class="text-gray-500">₽/мес</span>
-                                <div class="text-sm text-green-600 font-medium mt-1">Экономия {{ number_format($standardYearly->original_price - $standardYearly->price, 0, ',', ' ') }}₽ в год</div>
-                            </div>
-                        </template>
+                        <span class="text-4xl font-extrabold text-gray-900">0</span>
+                        <span class="text-gray-500">₽</span>
+                        <div class="text-sm text-green-600 font-medium mt-1">Без карты</div>
                     </div>
-                    @php $features = is_string($standardMonthly->features) ? json_decode($standardMonthly->features, true) : $standardMonthly->features; @endphp
+                    @php $features = is_string($trialPlan->features) ? json_decode($trialPlan->features, true) : $trialPlan->features; @endphp
                     <ul class="space-y-4 mb-8">
                         @foreach(array_slice($features ?? [], 0, 4) as $feature)
                         <li class="flex items-center gap-3 text-gray-600">
@@ -328,27 +360,33 @@
                         @endforeach
                     </ul>
                     <a href="{{ route('register') }}" class="block w-full py-3 px-6 text-center font-semibold rounded-xl border-2 border-green-500 text-green-600 hover:bg-green-50 transition">
-                        Начать бесплатно
+                        Попробовать
                     </a>
                 </div>
                 @endif
 
-                {{-- Стандарт Годовой (Популярный) --}}
-                @if($standardYearly)
+                {{-- Стандарт (Популярный) --}}
+                @if($standardMonthly && $standardYearly)
                 <div class="bg-white rounded-2xl p-8 border-2 border-green-500 card-hover relative shadow-xl shadow-green-500/10">
                     <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
                         <span class="bg-green-500 text-white text-sm font-bold px-4 py-1 rounded-full">Популярный</span>
                     </div>
                     <div class="mb-6">
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Стандарт Годовой</h3>
-                        <p class="text-gray-500 text-sm">Максимум выгоды</p>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Стандарт</h3>
+                        <p class="text-gray-500 text-sm">Полный доступ</p>
                     </div>
                     <div class="mb-6">
-                        <span class="text-4xl font-extrabold text-gray-900">{{ number_format($standardYearly->price, 0, ',', ' ') }}</span>
-                        <span class="text-gray-500">₽/год</span>
-                        <div class="text-sm text-green-600 font-medium mt-1">Экономия {{ number_format($standardYearly->original_price - $standardYearly->price, 0, ',', ' ') }}₽</div>
+                        <div x-show="billingPeriod === 'monthly'">
+                            <span class="text-4xl font-extrabold text-gray-900">{{ number_format($standardMonthly->price, 0, ',', ' ') }}</span>
+                            <span class="text-gray-500">₽/мес</span>
+                        </div>
+                        <div x-show="billingPeriod === 'yearly'">
+                            <span class="text-4xl font-extrabold text-gray-900">{{ number_format($standardYearly->price / 12, 0, ',', ' ') }}</span>
+                            <span class="text-gray-500">₽/мес</span>
+                            <div class="text-sm text-green-600 font-medium mt-1">Экономия {{ number_format($standardYearly->original_price - $standardYearly->price, 0, ',', ' ') }}₽/год</div>
+                        </div>
                     </div>
-                    @php $features = is_string($standardYearly->features) ? json_decode($standardYearly->features, true) : $standardYearly->features; @endphp
+                    @php $features = is_string($standardMonthly->features) ? json_decode($standardMonthly->features, true) : $standardMonthly->features; @endphp
                     <ul class="space-y-4 mb-8">
                         @foreach(array_slice($features ?? [], 0, 5) as $feature)
                         <li class="flex items-center gap-3 text-gray-600">
@@ -364,26 +402,22 @@
                 @endif
 
                 {{-- Индивидуальный --}}
-                @if($personalMonthly)
+                @if($personalMonthly && $personalYearly)
                 <div class="bg-white rounded-2xl p-8 border border-gray-200 card-hover">
                     <div class="mb-6">
                         <h3 class="text-xl font-bold text-gray-900 mb-2">Индивидуальный</h3>
                         <p class="text-gray-500 text-sm">Персональный подход</p>
                     </div>
                     <div class="mb-6">
-                        <template x-if="billingPeriod === 'monthly'">
-                            <div>
-                                <span class="text-4xl font-extrabold text-gray-900">{{ number_format($personalMonthly->price, 0, ',', ' ') }}</span>
-                                <span class="text-gray-500">₽/мес</span>
-                            </div>
-                        </template>
-                        <template x-if="billingPeriod === 'yearly'">
-                            <div>
-                                <span class="text-4xl font-extrabold text-gray-900">{{ number_format($personalYearly->price / 12, 0, ',', ' ') }}</span>
-                                <span class="text-gray-500">₽/мес</span>
-                                <div class="text-sm text-green-600 font-medium mt-1">Экономия {{ number_format($personalYearly->original_price - $personalYearly->price, 0, ',', ' ') }}₽ в год</div>
-                            </div>
-                        </template>
+                        <div x-show="billingPeriod === 'monthly'">
+                            <span class="text-4xl font-extrabold text-gray-900">{{ number_format($personalMonthly->price, 0, ',', ' ') }}</span>
+                            <span class="text-gray-500">₽/мес</span>
+                        </div>
+                        <div x-show="billingPeriod === 'yearly'">
+                            <span class="text-4xl font-extrabold text-gray-900">{{ number_format($personalYearly->price / 12, 0, ',', ' ') }}</span>
+                            <span class="text-gray-500">₽/мес</span>
+                            <div class="text-sm text-green-600 font-medium mt-1">Экономия {{ number_format($personalYearly->original_price - $personalYearly->price, 0, ',', ' ') }}₽/год</div>
+                        </div>
                     </div>
                     @php $features = is_string($personalMonthly->features) ? json_decode($personalMonthly->features, true) : $personalMonthly->features; @endphp
                     <ul class="space-y-4 mb-8">
@@ -544,10 +578,25 @@
 
     {{-- Footer Component --}}
     <x-public-footer />
+    
+    {{-- Scroll to Top Button --}}
+    <x-scroll-to-top />
+    
+    {{-- Cookie Consent --}}
+    <x-cookie-consent />
 </div>
 
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>
     lucide.createIcons();
+    
+    // Initialize AOS
+    AOS.init({
+        duration: 800,
+        easing: 'ease-out-cubic',
+        once: true,
+        offset: 50
+    });
     
     const monthlyBtn = document.getElementById('monthlyBtn');
     const yearlyBtn = document.getElementById('yearlyBtn');
