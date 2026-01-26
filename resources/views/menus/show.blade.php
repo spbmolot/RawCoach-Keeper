@@ -1,55 +1,19 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $menu->title }} | RawPlan</title>
-    <meta name="description" content="{{ Str::limit($menu->description, 160) }}" />
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800&display=swap" rel="stylesheet" />
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        body { font-family: 'Inter', system-ui, sans-serif; }
-        .hero-gradient { background: linear-gradient(135deg, #065f46 0%, #047857 50%, #10b981 100%); }
-        .day-card { transition: all 0.2s ease; }
-        .day-card:hover { transform: scale(1.02); }
-        .day-card.active { ring: 2px; ring-color: #22c55e; }
-    </style>
-</head>
-<body class="antialiased text-gray-900 bg-gray-50">
+@extends('layouts.public')
 
-    <!-- Header -->
-    <header class="bg-white/95 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <a href="{{ route('home') }}" class="flex items-center gap-2">
-                    <div class="w-10 h-10 rounded-xl hero-gradient flex items-center justify-center">
-                        <i data-lucide="salad" class="w-6 h-6 text-white"></i>
-                    </div>
-                    <span class="text-xl font-bold text-gray-900">RawPlan</span>
-                </a>
-                <nav class="hidden md:flex items-center gap-8">
-                    <a href="{{ route('recipes.index') }}" class="text-gray-600 hover:text-green-600 font-medium transition">Рецепты</a>
-                    <a href="{{ route('menus.index') }}" class="text-green-600 font-medium">Меню</a>
-                    <a href="{{ route('home') }}#pricing" class="text-gray-600 hover:text-green-600 font-medium transition">Тарифы</a>
-                </nav>
-                <div class="flex items-center gap-3">
-                    @auth
-                        <a href="{{ route('dashboard') }}" class="px-5 py-2.5 bg-green-500 text-white rounded-xl font-semibold hover:bg-green-600 transition shadow-lg shadow-green-500/25">
-                            Мой кабинет
-                        </a>
-                    @else
-                        <a href="{{ route('login') }}" class="px-4 py-2 text-gray-700 font-medium hover:text-green-600 transition">Войти</a>
-                        <a href="{{ route('register') }}" class="px-5 py-2.5 bg-green-500 text-white rounded-xl font-semibold hover:bg-green-600 transition shadow-lg shadow-green-500/25">
-                            Начать бесплатно
-                        </a>
-                    @endauth
-                </div>
-            </div>
-        </div>
-    </header>
+@section('title', $menu->title . ' — RawPlan')
+@section('description', Str::limit($menu->description, 160))
 
+@php $activeNav = 'menus'; @endphp
+
+@push('styles')
+<style>
+    .day-card { transition: all 0.2s ease; }
+    .day-card:hover { transform: scale(1.02); }
+    .day-card.active { ring: 2px; ring-color: #22c55e; }
+</style>
+@endpush
+
+@section('content')
     <!-- Breadcrumbs -->
     <div class="bg-white border-b border-gray-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
@@ -240,63 +204,33 @@
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-gray-400 py-12 mt-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <p class="text-sm">© {{ date('Y') }} RawPlan. Все права защищены.</p>
-        </div>
-    </footer>
+@endsection
 
-    <script>
+@push('scripts')
+<script>
+    let currentDay = 1;
+    const totalDays = {{ $menu->days->count() }};
+    
+    function showDay(dayNumber) {
+        document.querySelectorAll('.day-content').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.day-card').forEach(el => {
+            el.classList.remove('ring-2', 'ring-green-500');
+        });
+        
+        const content = document.getElementById('day-content-' + dayNumber);
+        if (content) content.classList.remove('hidden');
+        
+        const btn = document.getElementById('day-btn-' + dayNumber);
+        if (btn) btn.classList.add('ring-2', 'ring-green-500');
+        
+        document.getElementById('selected-day-title').textContent = 'День ' + dayNumber;
+        currentDay = dayNumber;
         lucide.createIcons();
-        
-        let currentDay = 1;
-        const totalDays = {{ $menu->days->count() }};
-        
-        function showDay(dayNumber) {
-            // Hide all day contents
-            document.querySelectorAll('.day-content').forEach(el => el.classList.add('hidden'));
-            
-            // Remove active state from all buttons
-            document.querySelectorAll('.day-card').forEach(el => {
-                el.classList.remove('ring-2', 'ring-green-500');
-            });
-            
-            // Show selected day
-            const content = document.getElementById('day-content-' + dayNumber);
-            if (content) {
-                content.classList.remove('hidden');
-            }
-            
-            // Add active state to button
-            const btn = document.getElementById('day-btn-' + dayNumber);
-            if (btn) {
-                btn.classList.add('ring-2', 'ring-green-500');
-            }
-            
-            // Update title
-            document.getElementById('selected-day-title').textContent = 'День ' + dayNumber;
-            
-            currentDay = dayNumber;
-            
-            // Reinitialize icons for the new content
-            lucide.createIcons();
-        }
-        
-        function prevDay() {
-            if (currentDay > 1) {
-                showDay(currentDay - 1);
-            }
-        }
-        
-        function nextDay() {
-            if (currentDay < totalDays) {
-                showDay(currentDay + 1);
-            }
-        }
-        
-        // Show first day on load
-        showDay(1);
-    </script>
-</body>
-</html>
+    }
+    
+    function prevDay() { if (currentDay > 1) showDay(currentDay - 1); }
+    function nextDay() { if (currentDay < totalDays) showDay(currentDay + 1); }
+    
+    showDay(1);
+</script>
+@endpush

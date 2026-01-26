@@ -56,78 +56,203 @@
     </section>
 
     <!-- Plans Grid -->
-    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            @foreach($plans as $plan)
-                <div class="bg-white rounded-2xl shadow-sm overflow-hidden {{ $plan->type === 'yearly' ? 'ring-2 ring-green-500' : '' }}">
-                    @if($plan->type === 'yearly')
-                        <div class="bg-green-500 text-white text-center py-2 text-sm font-semibold">
-                            ПОПУЛЯРНЫЙ
-                        </div>
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12" x-data="{ billingPeriod: 'monthly' }">
+        
+        <!-- Переключатель месяц/год -->
+        <div class="flex justify-center mb-10">
+            <div class="bg-white rounded-xl p-1 shadow-sm inline-flex">
+                <button @click="billingPeriod = 'monthly'" 
+                        :class="billingPeriod === 'monthly' ? 'bg-green-500 text-white' : 'text-gray-600 hover:text-gray-900'"
+                        class="px-6 py-2 rounded-lg font-semibold transition">
+                    Ежемесячно
+                </button>
+                <button @click="billingPeriod = 'yearly'" 
+                        :class="billingPeriod === 'yearly' ? 'bg-green-500 text-white' : 'text-gray-600 hover:text-gray-900'"
+                        class="px-6 py-2 rounded-lg font-semibold transition flex items-center gap-2">
+                    Ежегодно
+                    <span class="bg-amber-400 text-amber-900 text-xs px-2 py-0.5 rounded-full font-bold">-25%</span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            
+            <!-- Пробный период -->
+            @php $trialPlan = $plans->where('slug', 'trial')->first(); @endphp
+            @if($trialPlan)
+            <div class="bg-white rounded-2xl shadow-sm overflow-hidden border-2 border-gray-100">
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">{{ $trialPlan->name }}</h3>
+                    <p class="text-gray-500 text-sm mb-4">{{ $trialPlan->description }}</p>
+                    
+                    <div class="mb-6">
+                        <span class="text-3xl font-bold text-gray-900">Бесплатно</span>
+                        <div class="text-sm text-gray-500">7 дней</div>
+                    </div>
+                    
+                    @php
+                        $features = is_string($trialPlan->features) ? json_decode($trialPlan->features, true) : $trialPlan->features;
+                    @endphp
+                    
+                    @if($features && is_array($features))
+                        <ul class="space-y-2 mb-6 text-sm">
+                            @foreach($features as $feature)
+                                <li class="flex items-start gap-2">
+                                    <i data-lucide="check" class="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0"></i>
+                                    <span class="text-gray-600">{{ $feature }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
                     @endif
                     
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ $plan->name }}</h3>
-                        <p class="text-gray-500 text-sm mb-4">{{ $plan->description }}</p>
-                        
-                        <div class="mb-6">
-                            <span class="text-3xl font-bold text-gray-900">{{ number_format($plan->price, 0, ',', ' ') }} ₽</span>
-                            @if($plan->original_price && $plan->original_price > $plan->price)
-                                <span class="text-sm text-gray-400 line-through ml-2">{{ number_format($plan->original_price, 0, ',', ' ') }} ₽</span>
-                                @php
-                                    $discount = round((1 - $plan->price / $plan->original_price) * 100);
-                                @endphp
-                                <div class="text-green-600 text-sm font-semibold">Экономия {{ $discount }}%</div>
-                            @endif
-                            <div class="text-sm text-gray-500">
-                                @if($plan->type === 'trial')
-                                    7 дней бесплатно
-                                @elseif($plan->type === 'monthly')
-                                    за {{ $plan->duration_days }} дней
-                                @elseif($plan->type === 'yearly')
-                                    за год
-                                @else
-                                    индивидуально
-                                @endif
-                            </div>
-                        </div>
-                        
-                        @php
-                            $features = is_string($plan->features) ? json_decode($plan->features, true) : $plan->features;
-                        @endphp
-                        
-                        @if($features && is_array($features))
-                            <ul class="space-y-2 mb-6 text-sm">
-                                @foreach(array_slice($features, 0, 4) as $feature)
-                                    <li class="flex items-start gap-2">
-                                        <i data-lucide="check" class="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0"></i>
-                                        <span class="text-gray-600">{{ $feature }}</span>
-                                    </li>
-                                @endforeach
-                            </ul>
-                        @endif
-                        
-                        @auth
-                            @if($currentSubscription && $currentSubscription->plan_id === $plan->id)
-                                <button class="w-full py-3 px-4 bg-green-100 text-green-700 rounded-xl font-semibold cursor-not-allowed">
-                                    Активная подписка
-                                </button>
-                            @else
-                                <form action="{{ route('subscriptions.create', $plan) }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="w-full py-3 px-4 bg-green-500 text-white rounded-xl font-semibold hover:bg-green-600 transition">
-                                        Выбрать план
-                                    </button>
-                                </form>
-                            @endif
-                        @else
-                            <a href="{{ route('register') }}" class="block w-full py-3 px-4 bg-green-500 text-white rounded-xl font-semibold text-center hover:bg-green-600 transition">
-                                Начать сейчас
-                            </a>
-                        @endauth
-                    </div>
+                    <a href="{{ route('register') }}" class="block w-full py-3 px-4 bg-gray-100 text-gray-700 rounded-xl font-semibold text-center hover:bg-gray-200 transition">
+                        Попробовать бесплатно
+                    </a>
                 </div>
-            @endforeach
+            </div>
+            @endif
+            
+            <!-- Стандарт -->
+            @php 
+                $standardMonthly = $plans->where('slug', 'standard-monthly')->first();
+                $standardYearly = $plans->where('slug', 'standard-yearly')->first();
+            @endphp
+            @if($standardMonthly)
+            <div class="bg-white rounded-2xl shadow-sm overflow-hidden border-2 border-gray-100">
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Стандарт</h3>
+                    <p class="text-gray-500 text-sm mb-4">Доступ к планам питания</p>
+                    
+                    <div class="mb-6">
+                        <template x-if="billingPeriod === 'monthly'">
+                            <div>
+                                <span class="text-3xl font-bold text-gray-900">{{ number_format($standardMonthly->price, 0, ',', ' ') }} ₽</span>
+                                <div class="text-sm text-gray-500">в месяц</div>
+                            </div>
+                        </template>
+                        <template x-if="billingPeriod === 'yearly'">
+                            <div>
+                                <span class="text-3xl font-bold text-gray-900">{{ number_format($standardYearly->price / 12, 0, ',', ' ') }} ₽</span>
+                                <span class="text-sm text-gray-400 line-through ml-2">{{ number_format($standardMonthly->price, 0, ',', ' ') }} ₽</span>
+                                <div class="text-sm text-gray-500">в месяц, оплата за год</div>
+                                <div class="text-green-600 text-sm font-semibold">Экономия 25% ({{ number_format($standardYearly->original_price - $standardYearly->price, 0, ',', ' ') }} ₽)</div>
+                            </div>
+                        </template>
+                    </div>
+                    
+                    @php
+                        $features = is_string($standardMonthly->features) ? json_decode($standardMonthly->features, true) : $standardMonthly->features;
+                    @endphp
+                    
+                    @if($features && is_array($features))
+                        <ul class="space-y-2 mb-6 text-sm">
+                            @foreach(array_slice($features, 0, 5) as $feature)
+                                <li class="flex items-start gap-2">
+                                    <i data-lucide="check" class="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0"></i>
+                                    <span class="text-gray-600">{{ $feature }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
+                    
+                    @auth
+                        <template x-if="billingPeriod === 'monthly'">
+                            <form action="{{ route('subscriptions.create', $standardMonthly) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="w-full py-3 px-4 bg-green-500 text-white rounded-xl font-semibold hover:bg-green-600 transition">
+                                    Выбрать план
+                                </button>
+                            </form>
+                        </template>
+                        <template x-if="billingPeriod === 'yearly'">
+                            <form action="{{ route('subscriptions.create', $standardYearly) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="w-full py-3 px-4 bg-green-500 text-white rounded-xl font-semibold hover:bg-green-600 transition">
+                                    Выбрать план
+                                </button>
+                            </form>
+                        </template>
+                    @else
+                        <a href="{{ route('register') }}" class="block w-full py-3 px-4 bg-green-500 text-white rounded-xl font-semibold text-center hover:bg-green-600 transition">
+                            Начать сейчас
+                        </a>
+                    @endauth
+                </div>
+            </div>
+            @endif
+            
+            <!-- Индивидуальный -->
+            @php 
+                $personalMonthly = $plans->where('slug', 'personal-monthly')->first();
+                $personalYearly = $plans->where('slug', 'personal-yearly')->first();
+            @endphp
+            @if($personalMonthly)
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden ring-2 ring-green-500">
+                <div class="bg-green-500 text-white text-center py-2 text-sm font-semibold">
+                    РЕКОМЕНДУЕМ
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Индивидуальный</h3>
+                    <p class="text-gray-500 text-sm mb-4">Персональный план питания</p>
+                    
+                    <div class="mb-6">
+                        <template x-if="billingPeriod === 'monthly'">
+                            <div>
+                                <span class="text-3xl font-bold text-gray-900">{{ number_format($personalMonthly->price, 0, ',', ' ') }} ₽</span>
+                                <div class="text-sm text-gray-500">в месяц</div>
+                            </div>
+                        </template>
+                        <template x-if="billingPeriod === 'yearly'">
+                            <div>
+                                <span class="text-3xl font-bold text-gray-900">{{ number_format($personalYearly->price / 12, 0, ',', ' ') }} ₽</span>
+                                <span class="text-sm text-gray-400 line-through ml-2">{{ number_format($personalMonthly->price, 0, ',', ' ') }} ₽</span>
+                                <div class="text-sm text-gray-500">в месяц, оплата за год</div>
+                                <div class="text-green-600 text-sm font-semibold">Экономия 25% ({{ number_format($personalYearly->original_price - $personalYearly->price, 0, ',', ' ') }} ₽)</div>
+                            </div>
+                        </template>
+                    </div>
+                    
+                    @php
+                        $features = is_string($personalMonthly->features) ? json_decode($personalMonthly->features, true) : $personalMonthly->features;
+                    @endphp
+                    
+                    @if($features && is_array($features))
+                        <ul class="space-y-2 mb-6 text-sm">
+                            @foreach(array_slice($features, 0, 5) as $feature)
+                                <li class="flex items-start gap-2">
+                                    <i data-lucide="check" class="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0"></i>
+                                    <span class="text-gray-600">{{ $feature }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
+                    
+                    @auth
+                        <template x-if="billingPeriod === 'monthly'">
+                            <form action="{{ route('subscriptions.create', $personalMonthly) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="w-full py-3 px-4 bg-green-500 text-white rounded-xl font-semibold hover:bg-green-600 transition">
+                                    Выбрать план
+                                </button>
+                            </form>
+                        </template>
+                        <template x-if="billingPeriod === 'yearly'">
+                            <form action="{{ route('subscriptions.create', $personalYearly) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="w-full py-3 px-4 bg-green-500 text-white rounded-xl font-semibold hover:bg-green-600 transition">
+                                    Выбрать план
+                                </button>
+                            </form>
+                        </template>
+                    @else
+                        <a href="{{ route('register') }}" class="block w-full py-3 px-4 bg-green-500 text-white rounded-xl font-semibold text-center hover:bg-green-600 transition">
+                            Начать сейчас
+                        </a>
+                    @endauth
+                </div>
+            </div>
+            @endif
+            
         </div>
         
         <!-- FAQ -->

@@ -25,7 +25,7 @@ Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
 Route::post('/contact', [HomeController::class, 'contactSubmit'])->name('contact.submit');
 Route::get('/privacy', [HomeController::class, 'privacy'])->name('privacy');
 Route::get('/terms', [HomeController::class, 'terms'])->name('terms');
-Route::get('/demo', [HomeController::class, 'demo'])->name('demo');
+Route::get('/offer', [HomeController::class, 'offer'])->name('offer');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 // Тестовые маршруты для платежей (только в dev)
@@ -42,21 +42,6 @@ Route::prefix('plans')->name('plans.')->group(function () {
     Route::get('/', [PlansController::class, 'index'])->name('index');
     Route::get('/compare', [PlansController::class, 'compare'])->name('compare');
     Route::get('/{plan}', [PlansController::class, 'show'])->name('show');
-});
-
-// Меню и рецепты (частично доступны без авторизации)
-Route::prefix('menus')->name('menus.')->group(function () {
-    Route::get('/', [MenuController::class, 'index'])->name('index');
-    Route::get('/search', [MenuController::class, 'search'])->name('search');
-    Route::get('/{menu}', [MenuController::class, 'show'])->name('show');
-});
-
-Route::prefix('recipes')->name('recipes.')->group(function () {
-    Route::get('/', [RecipeController::class, 'index'])->name('index');
-    Route::get('/search', [RecipeController::class, 'search'])->name('search');
-    Route::get('/popular', [RecipeController::class, 'popular'])->name('popular');
-    Route::get('/meal/{mealType}', [RecipeController::class, 'byMealType'])->name('by-meal-type');
-    Route::get('/{recipe}', [RecipeController::class, 'show'])->name('show');
 });
 
 // Вебхуки платежных систем (без middleware)
@@ -105,21 +90,32 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::get('/{payment}', [PaymentController::class, 'show'])->name('show');
     });
     
-    // Меню (дополнительные маршруты для авторизованных)
+    // Меню (только для авторизованных)
     Route::prefix('menus')->name('menus.')->group(function () {
+        Route::get('/', [MenuController::class, 'index'])->name('index');
+        Route::get('/search', [MenuController::class, 'search'])->name('search');
         Route::get('/archive', [MenuController::class, 'archive'])->name('archive');
         Route::get('/early', [MenuController::class, 'early'])->name('early');
         Route::get('/favorites', [MenuController::class, 'favorites'])->name('favorites');
+        Route::get('/{menu}', [MenuController::class, 'show'])->name('show');
         Route::post('/{menu}/favorite', [MenuController::class, 'favorite'])->name('favorite');
         Route::get('/{menu}/export', [MenuController::class, 'export'])->name('export');
     });
     
-    // Рецепты (дополнительные маршруты для авторизованных)
+    // Рецепты (только для авторизованных)
     Route::prefix('recipes')->name('recipes.')->group(function () {
+        Route::get('/', [RecipeController::class, 'index'])->name('index');
+        Route::get('/search', [RecipeController::class, 'search'])->name('search');
+        Route::get('/popular', [RecipeController::class, 'popular'])->name('popular');
         Route::get('/favorites', [RecipeController::class, 'favorites'])->name('favorites');
+        Route::get('/meal/{mealType}', [RecipeController::class, 'byMealType'])->name('by-meal-type');
+        Route::get('/{recipe}', [RecipeController::class, 'show'])->name('show');
         Route::post('/{recipe}/favorite', [RecipeController::class, 'favorite'])->name('favorite');
         Route::get('/{recipe}/export', [RecipeController::class, 'export'])->name('export');
     });
+    
+    // Демо-страница (только для авторизованных)
+    Route::get('/demo', [HomeController::class, 'demo'])->name('demo');
     
     // Список покупок
     Route::prefix('shopping-list')->name('shopping-list.')->group(function () {

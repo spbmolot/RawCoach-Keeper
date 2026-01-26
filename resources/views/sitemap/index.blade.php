@@ -30,6 +30,42 @@
         <priority>0.8</priority>
     </url>
 
+    {{-- Статические страницы --}}
+    <url>
+        <loc>{{ route('about') }}</loc>
+        <lastmod>{{ now()->toW3cString() }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+    </url>
+
+    <url>
+        <loc>{{ route('contact') }}</loc>
+        <lastmod>{{ now()->toW3cString() }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+    </url>
+
+    <url>
+        <loc>{{ route('privacy') }}</loc>
+        <lastmod>{{ now()->toW3cString() }}</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.3</priority>
+    </url>
+
+    <url>
+        <loc>{{ route('terms') }}</loc>
+        <lastmod>{{ now()->toW3cString() }}</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.3</priority>
+    </url>
+
+    <url>
+        <loc>{{ route('offer') }}</loc>
+        <lastmod>{{ now()->toW3cString() }}</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.3</priority>
+    </url>
+
     {{-- Меню --}}
     @foreach($menus as $menu)
     <url>

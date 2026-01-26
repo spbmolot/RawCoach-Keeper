@@ -96,4 +96,12 @@ class HomeController extends Controller
 
         return view('home.demo', compact('demoRecipes'));
     }
+
+    /**
+     * Страница публичной оферты
+     */
+    public function offer()
+    {
+        return view('home.offer');
+    }
 }
