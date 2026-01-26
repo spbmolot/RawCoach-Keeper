@@ -17,6 +17,8 @@ class DatabaseSeeder extends Seeder
             CouponSeeder::class,
             RoleSeeder::class,
             UserSeeder::class,
+            RecipeSeeder::class,
+            MenuSeeder::class,
         ]);
     }
 }

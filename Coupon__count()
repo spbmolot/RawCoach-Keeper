@@ -1,0 +1,25 @@
+[90m= [39m[34;4mIlluminate\Database\Eloquent\Collection[39;24m {#7175
+    [34mall[39m: [
+      [34;4mApp\Models\Plan[39;24m {#7186
+        [34mid[39m: [35m3[39m,
+        [34mname[39m: "[32mСтандарт[39m",
+        [34mslug[39m: "[32mstandard[39m",
+      },
+      [34;4mApp\Models\Plan[39;24m {#7184
+        [34mid[39m: [35m4[39m,
+        [34mname[39m: "[32mПремиум[39m",
+        [34mslug[39m: "[32mpremium[39m",
+      },
+      [34;4mApp\Models\Plan[39;24m {#7170
+        [34mid[39m: [35m5[39m,
+        [34mname[39m: "[32mИндивидуальный[39m",
+        [34mslug[39m: "[32mpersonal[39m",
+      },
+      [34;4mApp\Models\Plan[39;24m {#7183
+        [34mid[39m: [35m6[39m,
+        [34mname[39m: "[32mПробный период[39m",
+        [34mslug[39m: "[32mtrial[39m",
+      },
+    ],
+  }
+

@@ -14,65 +14,24 @@ class RecipeController extends Controller
      */
     public function index(Request $request)
     {
-        $user = auth()->user();
-        
         $query = Recipe::where('is_published', true);
         
-        // Фильтрация по подписке пользователя
-        if ($user && $user->hasActiveSubscription()) {
-            $this->filterRecipesBySubscription($query, $user);
-        } else {
-            // Только демо контент для неавторизованных
-            $query->where('is_demo', true);
+        // Фильтр по категории
+        if ($request->filled('category')) {
+            $query->where('category', $request->category);
         }
         
-        // Фильтры
-        if ($request->filled('meal_type')) {
-            $query->where('meal_type', $request->meal_type);
-        }
-        
+        // Фильтр по сложности
         if ($request->filled('difficulty')) {
             $query->where('difficulty', $request->difficulty);
-        }
-        
-        if ($request->filled('cooking_time')) {
-            $cookingTime = $request->cooking_time;
-            if ($cookingTime === 'quick') {
-                $query->where('cooking_time', '<=', 30);
-            } elseif ($cookingTime === 'medium') {
-                $query->whereBetween('cooking_time', [31, 60]);
-            } elseif ($cookingTime === 'long') {
-                $query->where('cooking_time', '>', 60);
-            }
-        }
-        
-        if ($request->filled('dietary_tags')) {
-            $dietaryTags = $request->dietary_tags;
-            $query->where(function($q) use ($dietaryTags) {
-                foreach ($dietaryTags as $tag) {
-                    $q->whereJsonContains('dietary_tags', $tag);
-                }
-            });
         }
         
         // Сортировка
         $sortBy = $request->get('sort', 'created_at');
         $sortOrder = $request->get('order', 'desc');
+        $query->orderBy($sortBy, $sortOrder);
         
-        if ($sortBy === 'popularity') {
-            $query->withCount('views')->orderBy('views_count', $sortOrder);
-        } elseif ($sortBy === 'cooking_time') {
-            $query->orderBy('cooking_time', $sortOrder);
-        } elseif ($sortBy === 'calories') {
-            $query->join('recipe_nutrition', 'recipes.id', '=', 'recipe_nutrition.recipe_id')
-                  ->orderBy('recipe_nutrition.calories', $sortOrder)
-                  ->select('recipes.*');
-        } else {
-            $query->orderBy($sortBy, $sortOrder);
-        }
-        
-        $recipes = $query->with(['nutrition', 'author'])
-            ->paginate(12);
+        $recipes = $query->with('ingredients')->paginate(12);
         
         // Получаем доступные фильтры
         $availableFilters = $this->getAvailableFilters();
@@ -91,32 +50,16 @@ class RecipeController extends Controller
         
         $user = auth()->user();
         
-        // Проверяем доступ к рецепту
-        if (!$this->canAccessRecipe($user, $recipe)) {
-            if (!$user) {
-                return redirect()->route('login')
-                    ->with('message', 'Войдите в систему для доступа к этому рецепту');
-            }
-            
-            return redirect()->route('plans.index')
-                ->with('error', 'Для доступа к этому рецепту необходима соответствующая подписка');
-        }
-        
         // Загружаем связанные данные
-        $recipe->load([
-            'nutrition',
-            'ingredients.ingredient',
-            'author',
-            'tags'
-        ]);
-        
-        // Записываем просмотр
-        if ($user) {
-            $this->recordView($user, $recipe);
-        }
+        $recipe->load('ingredients');
         
         // Получаем похожие рецепты
-        $similarRecipes = $this->getSimilarRecipes($recipe, $user);
+        $similarRecipes = Recipe::where('is_published', true)
+            ->where('id', '!=', $recipe->id)
+            ->where('category', $recipe->category)
+            ->inRandomOrder()
+            ->limit(4)
+            ->get();
         
         // Проверяем, добавлен ли в избранное
         $isFavorite = $user ? $user->favoriteRecipes()->where('recipe_id', $recipe->id)->exists() : false;

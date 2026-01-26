@@ -15,46 +15,13 @@ class MenuController extends Controller
      */
     public function index(Request $request)
     {
-        $user = auth()->user();
-        
-        $query = Menu::where('is_published', true);
-        
-        // Фильтрация по подписке пользователя
-        if ($user && $user->hasActiveSubscription()) {
-            $this->filterMenuBySubscription($query, $user);
-        } else {
-            // Только демо контент для неавторизованных
-            $query->where('type', 'demo');
-        }
-        
-        // Фильтры
-        if ($request->filled('type')) {
-            $query->where('type', $request->type);
-        }
-        
-        if ($request->filled('month')) {
-            $query->whereMonth('period_start', $request->month);
-        }
-        
-        if ($request->filled('year')) {
-            $query->whereYear('period_start', $request->year);
-        }
-        
-        $menus = $query->with(['days', 'recipes'])
-            ->orderBy('period_start', 'desc')
+        $menus = Menu::where('is_published', true)
+            ->with('days')
+            ->orderBy('year', 'desc')
+            ->orderBy('month', 'desc')
             ->paginate(12);
         
-        // Получаем доступные фильтры
-        $availableTypes = $this->getAvailableMenuTypes($user);
-        $availableMonths = $this->getAvailableMonths();
-        $availableYears = $this->getAvailableYears();
-        
-        return view('menus.index', compact(
-            'menus', 
-            'availableTypes', 
-            'availableMonths', 
-            'availableYears'
-        ));
+        return view('menus.index', compact('menus'));
     }
 
     /**
@@ -66,33 +33,9 @@ class MenuController extends Controller
             abort(404, 'Меню не найдено');
         }
         
-        $user = auth()->user();
+        $menu->load(['days.meals.recipe']);
         
-        // Проверяем доступ к меню
-        if (!$this->canAccessMenu($user, $menu)) {
-            if (!$user) {
-                return redirect()->route('login')
-                    ->with('message', 'Войдите в систему для доступа к этому меню');
-            }
-            
-            return redirect()->route('plans.index')
-                ->with('error', 'Для доступа к этому меню необходима соответствующая подписка');
-        }
-        
-        $days = $menu->days()
-            ->with(['recipes.nutrition', 'recipes.ingredients.ingredient'])
-            ->orderBy('date')
-            ->get();
-        
-        // Группируем рецепты по дням и типам приема пищи
-        $menuStructure = $days->map(function($day) {
-            return [
-                'date' => $day->date,
-                'recipes' => $day->recipes->groupBy('meal_type')
-            ];
-        });
-        
-        return view('menus.show', compact('menu', 'menuStructure'));
+        return view('menus.show', compact('menu'));
     }
 
     /**
