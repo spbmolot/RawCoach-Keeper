@@ -124,7 +124,7 @@ class PersonalPlanController extends Controller
             ], 403);
         }
 
-        $personalPlan->load(['nutritionist', 'questionnaire', 'days.recipes.nutrition']);
+        $personalPlan->load(['nutritionist', 'questionnaire', 'days.recipes']);
 
         return response()->json([
             'success' => true,

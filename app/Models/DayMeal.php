@@ -11,7 +11,7 @@ class DayMeal extends Model
         'day_id',
         'recipe_id',
         'meal_type', // breakfast, lunch, dinner, snack
-        'meal_type_order', // порядок в рамках типа приема пищи
+        'order', // порядок в рамках типа приема пищи
         'portion_size', // размер порции (если отличается от стандартного)
         'notes',
     ];

@@ -94,10 +94,10 @@ class RecipeController extends Controller
         if ($user && $user->activeSubscription()) {
             $this->filterRecipesBySubscription($recipeQuery, $user);
         } else {
-            $recipeQuery->where('is_demo', true);
+            $recipeQuery->where('is_published', true);
         }
         
-        $recipes = $recipeQuery->with(['nutrition', 'author'])
+        $recipes = $recipeQuery->with(['author'])
             ->orderBy('created_at', 'desc')
             ->paginate(12);
         
@@ -143,7 +143,7 @@ class RecipeController extends Controller
         
         $favoriteRecipes = $user->favoriteRecipes()
             ->where('is_published', true)
-            ->with(['nutrition', 'author'])
+            ->with(['author'])
             ->orderBy('recipe_user.created_at', 'desc')
             ->paginate(12);
         
@@ -169,10 +169,10 @@ class RecipeController extends Controller
         if ($user && $user->activeSubscription()) {
             $this->filterRecipesBySubscription($query, $user);
         } else {
-            $query->where('is_demo', true);
+            $query->where('is_published', true);
         }
         
-        $recipes = $query->with(['nutrition', 'author'])
+        $recipes = $query->with(['author'])
             ->orderBy('created_at', 'desc')
             ->paginate(12);
         
@@ -201,10 +201,10 @@ class RecipeController extends Controller
         if ($user && $user->activeSubscription()) {
             $this->filterRecipesBySubscription($query, $user);
         } else {
-            $query->where('is_demo', true);
+            $query->where('is_published', true);
         }
         
-        $recipes = $query->with(['nutrition', 'author'])
+        $recipes = $query->with(['author'])
             ->orderBy('views_count', 'desc')
             ->paginate(12);
         
@@ -229,7 +229,7 @@ class RecipeController extends Controller
         $format = $request->get('format', 'pdf');
         $filename = "recipe-{$recipe->slug}.{$format}";
         
-        $recipe->load(['nutrition', 'ingredients.ingredient']);
+        $recipe->load(['ingredients.ingredient']);
         
         if ($format === 'pdf') {
             // return PDF::loadView('exports.recipe-pdf', compact('recipe'))->download($filename);
@@ -245,15 +245,16 @@ class RecipeController extends Controller
      */
     private function canAccessRecipe($user, $recipe): bool
     {
-        if ($recipe->is_demo) {
+        // Опубликованные рецепты доступны всем авторизованным пользователям
+        if ($recipe->is_published && $user) {
             return true;
         }
         
+        // Для неопубликованных рецептов нужна активная подписка
         if (!$user || !$user->hasActiveSubscription()) {
             return false;
         }
         
-        // Все подписчики имеют доступ к опубликованным рецептам
         return true;
     }
 
@@ -262,15 +263,8 @@ class RecipeController extends Controller
      */
     private function filterRecipesBySubscription($query, $user)
     {
-        $subscription = $user->activeSubscription()->first();
-        
-        if (!$subscription) {
-            $query->where('is_demo', true);
-            return;
-        }
-
-        // Все подписчики имеют доступ ко всем опубликованным рецептам
-        // Дополнительные ограничения можно добавить при необходимости
+        // Все авторизованные пользователи видят опубликованные рецепты
+        $query->where('is_published', true);
     }
 
     /**
@@ -306,10 +300,10 @@ class RecipeController extends Controller
         if ($user && $user->activeSubscription()) {
             $this->filterRecipesBySubscription($query, $user);
         } else {
-            $query->where('is_demo', true);
+            $query->where('is_published', true);
         }
         
-        return $query->with(['nutrition', 'author'])
+        return $query->with(['author'])
             ->inRandomOrder()
             ->limit($limit)
             ->get();

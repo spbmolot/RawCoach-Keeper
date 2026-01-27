@@ -13,7 +13,7 @@ class RecipeIngredient extends Model
         'amount',
         'unit',
         'category',
-        'notes',
+        'preparation_notes',
         'is_optional',
         'order',
     ];
@@ -80,8 +80,8 @@ class RecipeIngredient extends Model
     {
         $description = $this->getFormattedAmount() . ' ' . $this->ingredient_name;
         
-        if ($this->notes) {
-            $description .= ' (' . $this->notes . ')';
+        if ($this->preparation_notes) {
+            $description .= ' (' . $this->preparation_notes . ')';
         }
         
         if ($this->is_optional) {

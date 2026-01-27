@@ -59,7 +59,7 @@ class DashboardController extends Controller
         }
 
         $recipes = $todayMenu->recipes()
-            ->with(['nutrition', 'ingredients'])
+            ->with(['ingredients'])
             ->get()
             ->groupBy('meal_type');
 

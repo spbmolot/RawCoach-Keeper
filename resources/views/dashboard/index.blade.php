@@ -1,204 +1,294 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Личный кабинет') }}
-        </h2>
-    </x-slot>
+    <div class="max-w-7xl mx-auto">
+        {{-- Приветствие --}}
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">
+                Привет, {{ auth()->user()->name }}! 👋
+            </h1>
+            <p class="text-gray-600 mt-1">Добро пожаловать в личный кабинет RawPlan</p>
+        </div>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <!-- Статус подписки -->
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg mb-8">
-                <div class="p-6 lg:p-8">
-                    @if($activeSubscription)
-                        <div class="flex items-center justify-between mb-6">
-                            <div>
-                                <h3 class="text-2xl font-bold text-gray-900">{{ $activeSubscription->plan->name }}</h3>
-                                <p class="text-gray-600">Активна до {{ $activeSubscription->ends_at->format('d.m.Y') }}</p>
-                            </div>
-                            <div class="text-right">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                                    Активна
+        {{-- Карточка подписки --}}
+        @if($activeSubscription)
+            <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-6 mb-8 text-white shadow-xl shadow-green-500/20">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <i data-lucide="crown" class="w-5 h-5"></i>
+                            <span class="text-green-100 text-sm font-medium">Активная подписка</span>
+                        </div>
+                        <h2 class="text-2xl font-bold mb-1">{{ $activeSubscription->plan->name }}</h2>
+                        <p class="text-green-100">
+                            Действует до {{ $activeSubscription->ends_at->format('d.m.Y') }}
+                            @if($activeSubscription->ends_at->diffInDays(now()) <= 7)
+                                <span class="ml-2 px-2 py-0.5 bg-yellow-400 text-yellow-900 rounded-full text-xs font-semibold">
+                                    Осталось {{ $activeSubscription->ends_at->diffInDays(now()) }} дн.
                                 </span>
-                                @if($activeSubscription->ends_at->diffInDays(now()) <= 7)
-                                    <div class="text-orange-600 text-sm mt-1">
-                                        Истекает через {{ $activeSubscription->ends_at->diffInDays(now()) }} дн.
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-
-                        <!-- Прогресс подписки -->
-                        <div class="mb-6">
-                            @php
-                                $totalDays = $activeSubscription->starts_at->diffInDays($activeSubscription->ends_at);
-                                $passedDays = $activeSubscription->starts_at->diffInDays(now());
-                                $progress = $totalDays > 0 ? min(100, ($passedDays / $totalDays) * 100) : 0;
-                            @endphp
-                            <div class="flex justify-between text-sm text-gray-600 mb-2">
-                                <span>Прогресс подписки</span>
-                                <span>{{ round($progress) }}%</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2">
-                                <div class="bg-amber-500 h-2 rounded-full" style="width: {{ $progress }}%"></div>
-                            </div>
-                        </div>
-
-                        <!-- Действия с подпиской -->
-                        <div class="flex space-x-4">
-                            @if(!$activeSubscription->auto_renewal)
-                                <form action="{{ route('subscriptions.toggle-renewal', $activeSubscription) }}" method="POST">
-                                    @csrf
-                                    @method('PATCH')
-                                    <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium">
-                                        Включить автопродление
-                                    </button>
-                                </form>
-                            @else
-                                <form action="{{ route('subscriptions.toggle-renewal', $activeSubscription) }}" method="POST">
-                                    @csrf
-                                    @method('PATCH')
-                                    <button type="submit" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium">
-                                        Отключить автопродление
-                                    </button>
-                                </form>
                             @endif
-                            
-                            <a href="{{ route('plans.index') }}" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium">
-                                Изменить план
-                            </a>
-                        </div>
-                    @else
-                        <div class="text-center py-8">
-                            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                                </svg>
-                            </div>
-                            <h3 class="text-lg font-medium text-gray-900 mb-2">У вас нет активной подписки</h3>
-                            <p class="text-gray-600 mb-4">Выберите план питания, чтобы начать свой путь к здоровому образу жизни</p>
-                            <a href="{{ route('plans.index') }}" class="bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-lg font-medium">
-                                Выбрать план
-                            </a>
-                        </div>
-                    @endif
+                        </p>
+                    </div>
+                    <div class="flex flex-wrap gap-3">
+                        @if($activeSubscription->auto_renew)
+                            <form action="{{ route('subscriptions.toggle-renewal', $activeSubscription) }}" method="POST">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-xl text-sm font-medium transition backdrop-blur-sm">
+                                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                                    Автопродление вкл.
+                                </button>
+                            </form>
+                        @else
+                            <form action="{{ route('subscriptions.toggle-renewal', $activeSubscription) }}" method="POST">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-xl text-sm font-medium transition backdrop-blur-sm">
+                                    <i data-lucide="refresh-cw-off" class="w-4 h-4"></i>
+                                    Включить автопродление
+                                </button>
+                            </form>
+                        @endif
+                        <a href="{{ route('plans.index') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-green-600 hover:bg-green-50 rounded-xl text-sm font-semibold transition">
+                            <i data-lucide="arrow-up-circle" class="w-4 h-4"></i>
+                            Улучшить план
+                        </a>
+                    </div>
+                </div>
+                {{-- Прогресс-бар --}}
+                @php
+                    $totalDays = $activeSubscription->starts_at->diffInDays($activeSubscription->ends_at);
+                    $passedDays = $activeSubscription->starts_at->diffInDays(now());
+                    $progress = $totalDays > 0 ? min(100, ($passedDays / $totalDays) * 100) : 0;
+                    $remainingDays = max(0, $activeSubscription->ends_at->diffInDays(now()));
+                @endphp
+                <div class="mt-6">
+                    <div class="flex justify-between text-sm text-green-100 mb-2">
+                        <span>Использовано {{ $passedDays }} из {{ $totalDays }} дней</span>
+                        <span>{{ round($progress) }}%</span>
+                    </div>
+                    <div class="w-full bg-white/20 rounded-full h-2">
+                        <div class="bg-white h-2 rounded-full transition-all duration-500" style="width: {{ $progress }}%"></div>
+                    </div>
                 </div>
             </div>
+        @else
+            <div class="bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl p-8 mb-8 text-center">
+                <div class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <i data-lucide="sparkles" class="w-10 h-10 text-green-500"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Начните свой путь к здоровью</h2>
+                <p class="text-gray-600 mb-6 max-w-md mx-auto">
+                    Выберите план питания и получите доступ к сотням рецептов, меню и спискам покупок
+                </p>
+                <a href="{{ route('plans.index') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-xl font-semibold transition shadow-lg shadow-green-500/25">
+                    <i data-lucide="rocket" class="w-5 h-5"></i>
+                    Выбрать план
+                </a>
+            </div>
+        @endif
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Быстрые действия -->
-                <div class="lg:col-span-2">
-                    <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg mb-8">
-                        <div class="p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Быстрые действия</h3>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <a href="{{ route('menus.today') }}" class="flex flex-col items-center p-4 bg-amber-50 rounded-lg hover:bg-amber-100 transition">
-                                    <svg class="w-8 h-8 text-amber-500 mb-2" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
-                                    </svg>
-                                    <span class="text-sm font-medium text-gray-700">Сегодня</span>
-                                </a>
-                                
-                                <a href="{{ route('menus.week') }}" class="flex flex-col items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition">
-                                    <svg class="w-8 h-8 text-blue-500 mb-2" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
-                                    </svg>
-                                    <span class="text-sm font-medium text-gray-700">Неделя</span>
-                                </a>
-                                
-                                <a href="{{ route('shopping-lists.index') }}" class="flex flex-col items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition">
-                                    <svg class="w-8 h-8 text-green-500 mb-2" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd"></path>
-                                    </svg>
-                                    <span class="text-sm font-medium text-gray-700">Покупки</span>
-                                </a>
-                                
-                                <a href="{{ route('recipes.favorites') }}" class="flex flex-col items-center p-4 bg-red-50 rounded-lg hover:bg-red-100 transition">
-                                    <svg class="w-8 h-8 text-red-500 mb-2" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
-                                    </svg>
-                                    <span class="text-sm font-medium text-gray-700">Избранное</span>
-                                </a>
-                            </div>
+        {{-- Быстрые действия --}}
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <a href="{{ route('dashboard.today') }}" class="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-amber-200">
+                <div class="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <i data-lucide="sun" class="w-7 h-7 text-amber-600"></i>
+                </div>
+                <h3 class="font-semibold text-gray-900 mb-1">Сегодня</h3>
+                <p class="text-sm text-gray-500">Меню на сегодня</p>
+            </a>
+            
+            <a href="{{ route('dashboard.week') }}" class="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-blue-200">
+                <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <i data-lucide="calendar-days" class="w-7 h-7 text-blue-600"></i>
+                </div>
+                <h3 class="font-semibold text-gray-900 mb-1">Неделя</h3>
+                <p class="text-sm text-gray-500">План на 7 дней</p>
+            </a>
+            
+            <a href="{{ route('shopping-list.index') }}" class="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-green-200">
+                <div class="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <i data-lucide="shopping-cart" class="w-7 h-7 text-green-600"></i>
+                </div>
+                <h3 class="font-semibold text-gray-900 mb-1">Покупки</h3>
+                <p class="text-sm text-gray-500">Список продуктов</p>
+            </a>
+            
+            <a href="{{ route('recipes.favorites') }}" class="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-red-200">
+                <div class="w-14 h-14 bg-red-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <i data-lucide="heart" class="w-7 h-7 text-red-500"></i>
+                </div>
+                <h3 class="font-semibold text-gray-900 mb-1">Избранное</h3>
+                <p class="text-sm text-gray-500">Любимые рецепты</p>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {{-- Основной контент --}}
+            <div class="lg:col-span-2 space-y-6">
+                {{-- Меню и рецепты --}}
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="p-6 border-b border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                <i data-lucide="utensils" class="w-5 h-5 text-green-500"></i>
+                                Меню и рецепты
+                            </h3>
+                            <a href="{{ route('menus.index') }}" class="text-sm text-green-600 hover:text-green-700 font-medium">
+                                Все меню →
+                            </a>
                         </div>
                     </div>
-
-                    <!-- Последние рецепты -->
-                    @if($recentRecipes && $recentRecipes->count() > 0)
-                        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
-                            <div class="p-6">
-                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Недавние рецепты</h3>
-                                <div class="space-y-4">
-                                    @foreach($recentRecipes as $recipe)
-                                        <div class="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
-                                            @if($recipe->image)
-                                                <img src="{{ $recipe->image }}" alt="{{ $recipe->name }}" class="w-12 h-12 rounded-lg object-cover">
-                                            @else
-                                                <div class="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                                                    <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
-                                                    </svg>
-                                                </div>
-                                            @endif
-                                            <div class="flex-1">
-                                                <h4 class="font-medium text-gray-900">{{ $recipe->name }}</h4>
-                                                <p class="text-sm text-gray-600">{{ $recipe->calories }} ккал • {{ $recipe->cooking_time }} мин</p>
-                                            </div>
-                                            <a href="{{ route('recipes.show', $recipe) }}" class="text-amber-500 hover:text-amber-600">
-                                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                                                </svg>
-                                            </a>
-                                        </div>
-                                    @endforeach
-                                </div>
+                    <div class="divide-y divide-gray-100">
+                        <a href="{{ route('menus.index') }}" class="flex items-center gap-4 p-4 hover:bg-gray-50 transition">
+                            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                                <i data-lucide="book-open" class="w-6 h-6 text-green-600"></i>
                             </div>
-                        </div>
-                    @endif
+                            <div class="flex-1">
+                                <h4 class="font-medium text-gray-900">Текущее меню</h4>
+                                <p class="text-sm text-gray-500">{{ now()->translatedFormat('F Y') }}</p>
+                            </div>
+                            <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>
+                        </a>
+                        <a href="{{ route('recipes.index') }}" class="flex items-center gap-4 p-4 hover:bg-gray-50 transition">
+                            <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+                                <i data-lucide="chef-hat" class="w-6 h-6 text-amber-600"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-medium text-gray-900">Все рецепты</h4>
+                                <p class="text-sm text-gray-500">Каталог рецептов с КБЖУ</p>
+                            </div>
+                            <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>
+                        </a>
+                        <a href="{{ route('dashboard.calendar') }}" class="flex items-center gap-4 p-4 hover:bg-gray-50 transition">
+                            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <i data-lucide="calendar" class="w-6 h-6 text-purple-600"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-medium text-gray-900">Календарь</h4>
+                                <p class="text-sm text-gray-500">Планирование питания</p>
+                            </div>
+                            <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>
+                        </a>
+                    </div>
                 </div>
 
-                <!-- Боковая панель -->
-                <div class="space-y-6">
-                    <!-- Статистика -->
-                    <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
-                        <div class="p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Ваша статистика</h3>
-                            <div class="space-y-4">
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">Дней с нами:</span>
-                                    <span class="font-semibold">{{ auth()->user()->created_at->diffInDays(now()) }}</span>
-                                </div>
-                                @if($activeSubscription)
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">Дней подписки:</span>
-                                        <span class="font-semibold">{{ $activeSubscription->starts_at->diffInDays(now()) }}</span>
+                {{-- Последние рецепты --}}
+                @if($recentRecipes && $recentRecipes->count() > 0)
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="p-6 border-b border-gray-100">
+                            <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                <i data-lucide="clock" class="w-5 h-5 text-blue-500"></i>
+                                Новые рецепты
+                            </h3>
+                        </div>
+                        <div class="divide-y divide-gray-100">
+                            @foreach($recentRecipes->take(4) as $recipe)
+                                <a href="{{ route('recipes.show', $recipe) }}" class="flex items-center gap-4 p-4 hover:bg-gray-50 transition">
+                                    @if($recipe->image)
+                                        <img src="{{ $recipe->image }}" alt="{{ $recipe->name }}" class="w-14 h-14 rounded-xl object-cover">
+                                    @else
+                                        <div class="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center">
+                                            <i data-lucide="image" class="w-6 h-6 text-gray-400"></i>
+                                        </div>
+                                    @endif
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="font-medium text-gray-900 truncate">{{ $recipe->name }}</h4>
+                                        <div class="flex items-center gap-3 text-sm text-gray-500">
+                                            <span class="flex items-center gap-1">
+                                                <i data-lucide="flame" class="w-4 h-4 text-orange-400"></i>
+                                                {{ $recipe->calories ?? 0 }} ккал
+                                            </span>
+                                            <span class="flex items-center gap-1">
+                                                <i data-lucide="timer" class="w-4 h-4 text-blue-400"></i>
+                                                {{ $recipe->cooking_time ?? 0 }} мин
+                                            </span>
+                                        </div>
                                     </div>
-                                @endif
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">Избранных рецептов:</span>
-                                    <span class="font-semibold">{{ auth()->user()->favoriteRecipes()->count() }}</span>
-                                </div>
-                            </div>
+                                    <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400 flex-shrink-0"></i>
+                                </a>
+                            @endforeach
                         </div>
                     </div>
+                @endif
+            </div>
 
-                    <!-- Поддержка -->
-                    <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
-                        <div class="p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Нужна помощь?</h3>
-                            <div class="space-y-3">
-                                <a href="{{ route('support.faq') }}" class="block text-amber-600 hover:text-amber-700">
-                                    Часто задаваемые вопросы
-                                </a>
-                                <a href="{{ route('support.contact') }}" class="block text-amber-600 hover:text-amber-700">
-                                    Связаться с поддержкой
-                                </a>
-                                <a href="{{ route('support.guides') }}" class="block text-amber-600 hover:text-amber-700">
-                                    Руководства пользователя
-                                </a>
+            {{-- Боковая панель --}}
+            <div class="space-y-6">
+                {{-- Статистика --}}
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <i data-lucide="bar-chart-3" class="w-5 h-5 text-indigo-500"></i>
+                        Статистика
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="calendar-check" class="w-5 h-5 text-blue-600"></i>
+                                </div>
+                                <span class="text-gray-600">Дней с нами</span>
                             </div>
+                            <span class="text-xl font-bold text-gray-900">{{ auth()->user()->created_at->diffInDays(now()) }}</span>
+                        </div>
+                        @if($activeSubscription)
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                        <i data-lucide="zap" class="w-5 h-5 text-green-600"></i>
+                                    </div>
+                                    <span class="text-gray-600">Дней подписки</span>
+                                </div>
+                                <span class="text-xl font-bold text-gray-900">{{ $activeSubscription->starts_at->diffInDays(now()) }}</span>
+                            </div>
+                        @endif
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="heart" class="w-5 h-5 text-red-500"></i>
+                                </div>
+                                <span class="text-gray-600">Избранное</span>
+                            </div>
+                            <span class="text-xl font-bold text-gray-900">{{ auth()->user()->favoriteRecipes()->count() }}</span>
                         </div>
                     </div>
+                </div>
+
+                {{-- Быстрые ссылки --}}
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <i data-lucide="link" class="w-5 h-5 text-gray-500"></i>
+                        Быстрые ссылки
+                    </h3>
+                    <div class="space-y-2">
+                        <a href="{{ route('profile.show') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition text-gray-700 hover:text-gray-900">
+                            <i data-lucide="user" class="w-5 h-5 text-gray-400"></i>
+                            <span>Мой профиль</span>
+                        </a>
+                        <a href="{{ route('payment.history') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition text-gray-700 hover:text-gray-900">
+                            <i data-lucide="receipt" class="w-5 h-5 text-gray-400"></i>
+                            <span>История платежей</span>
+                        </a>
+                        <a href="{{ route('dashboard.personal-plans') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition text-gray-700 hover:text-gray-900">
+                            <i data-lucide="clipboard-list" class="w-5 h-5 text-gray-400"></i>
+                            <span>Персональные планы</span>
+                        </a>
+                    </div>
+                </div>
+
+                {{-- Поддержка --}}
+                <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center">
+                            <i data-lucide="headphones" class="w-5 h-5 text-white"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900">Нужна помощь?</h3>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-4">
+                        Наша команда поддержки готова помочь вам с любыми вопросами
+                    </p>
+                    <a href="{{ route('contact') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl text-sm font-medium transition">
+                        <i data-lucide="message-circle" class="w-4 h-4"></i>
+                        Написать нам
+                    </a>
                 </div>
             </div>
         </div>

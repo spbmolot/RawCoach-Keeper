@@ -46,22 +46,16 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationGroups([
                 NavigationGroup::make('Пользователи')
-                    ->icon('heroicon-o-users')
                     ->collapsed(),
                 NavigationGroup::make('Подписки и планы')
-                    ->icon('heroicon-o-document-text')
                     ->collapsed(),
                 NavigationGroup::make('Платежи')
-                    ->icon('heroicon-o-credit-card')
                     ->collapsed(),
                 NavigationGroup::make('Контент')
-                    ->icon('heroicon-o-book-open')
                     ->collapsed(),
                 NavigationGroup::make('Маркетинг')
-                    ->icon('heroicon-o-megaphone')
                     ->collapsed(),
                 NavigationGroup::make('Система')
-                    ->icon('heroicon-o-cog-6-tooth')
                     ->collapsed(),
             ])
             ->middleware([

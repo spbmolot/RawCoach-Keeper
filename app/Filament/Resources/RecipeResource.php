@@ -40,15 +40,15 @@ class RecipeResource extends Resource
                             ->rows(3)
                             ->maxLength(1000),
                         
-                        Forms\Components\Select::make('meal_type')
-                            ->label('Тип приема пищи')
+                        Forms\Components\Select::make('category')
+                            ->label('Категория')
                             ->options([
                                 'breakfast' => 'Завтрак',
                                 'lunch' => 'Обед',
                                 'dinner' => 'Ужин',
                                 'snack' => 'Перекус',
-                            ])
-                            ->required(),
+                                'dessert' => 'Десерт',
+                            ]),
                         
                         Forms\Components\Select::make('difficulty')
                             ->label('Сложность')
@@ -80,8 +80,8 @@ class RecipeResource extends Resource
                 
                 Forms\Components\Section::make('Изображение')
                     ->schema([
-                        Forms\Components\FileUpload::make('image')
-                            ->label('Изображение рецепта')
+                        Forms\Components\FileUpload::make('main_image')
+                            ->label('Главное изображение')
                             ->image()
                             ->directory('recipes')
                             ->maxSize(2048),
@@ -95,24 +95,42 @@ class RecipeResource extends Resource
                             ->columnSpanFull(),
                     ]),
                 
+                Forms\Components\Section::make('Питательная ценность')
+                    ->schema([
+                        Forms\Components\TextInput::make('calories')
+                            ->label('Калории')
+                            ->numeric()
+                            ->suffix('ккал'),
+                        
+                        Forms\Components\TextInput::make('proteins')
+                            ->label('Белки')
+                            ->numeric()
+                            ->suffix('г'),
+                        
+                        Forms\Components\TextInput::make('fats')
+                            ->label('Жиры')
+                            ->numeric()
+                            ->suffix('г'),
+                        
+                        Forms\Components\TextInput::make('carbs')
+                            ->label('Углеводы')
+                            ->numeric()
+                            ->suffix('г'),
+                    ])->columns(4),
+                
                 Forms\Components\Section::make('Дополнительная информация')
                     ->schema([
-                        Forms\Components\Textarea::make('tips')
-                            ->label('Советы по приготовлению')
+                        Forms\Components\Textarea::make('notes')
+                            ->label('Заметки')
                             ->rows(3),
                         
-                        Forms\Components\TagsInput::make('tags')
-                            ->label('Теги')
+                        Forms\Components\TagsInput::make('dietary_tags')
+                            ->label('Диетические теги')
                             ->placeholder('Добавить тег'),
                         
-                        Forms\Components\Toggle::make('is_vegetarian')
-                            ->label('Вегетарианское'),
-                        
-                        Forms\Components\Toggle::make('is_vegan')
-                            ->label('Веганское'),
-                        
-                        Forms\Components\Toggle::make('is_gluten_free')
-                            ->label('Без глютена'),
+                        Forms\Components\TagsInput::make('allergens')
+                            ->label('Аллергены')
+                            ->placeholder('Добавить аллерген'),
                         
                         Forms\Components\Toggle::make('is_published')
                             ->label('Опубликовано')
@@ -125,7 +143,7 @@ class RecipeResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\ImageColumn::make('image')
+                Tables\Columns\ImageColumn::make('main_image')
                     ->label('Изображение')
                     ->circular(),
                 
@@ -134,20 +152,22 @@ class RecipeResource extends Resource
                     ->searchable()
                     ->sortable(),
                 
-                Tables\Columns\BadgeColumn::make('meal_type')
-                    ->label('Тип')
+                Tables\Columns\BadgeColumn::make('category')
+                    ->label('Категория')
                     ->colors([
                         'success' => 'breakfast',
                         'primary' => 'lunch',
                         'warning' => 'dinner',
                         'secondary' => 'snack',
+                        'info' => 'dessert',
                     ])
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
                         'breakfast' => 'Завтрак',
                         'lunch' => 'Обед',
                         'dinner' => 'Ужин',
                         'snack' => 'Перекус',
-                        default => $state,
+                        'dessert' => 'Десерт',
+                        default => $state ?? '-',
                     }),
                 
                 Tables\Columns\BadgeColumn::make('difficulty')
@@ -157,11 +177,11 @@ class RecipeResource extends Resource
                         'warning' => 'medium',
                         'danger' => 'hard',
                     ])
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
                         'easy' => 'Легко',
                         'medium' => 'Средне',
                         'hard' => 'Сложно',
-                        default => $state,
+                        default => $state ?? '-',
                     }),
                 
                 Tables\Columns\TextColumn::make('prep_time')
@@ -178,20 +198,10 @@ class RecipeResource extends Resource
                     ->label('Порций')
                     ->sortable(),
                 
-                Tables\Columns\IconColumn::make('is_vegetarian')
-                    ->label('🥬')
-                    ->boolean()
-                    ->tooltip('Вегетарианское'),
-                
-                Tables\Columns\IconColumn::make('is_vegan')
-                    ->label('🌱')
-                    ->boolean()
-                    ->tooltip('Веганское'),
-                
-                Tables\Columns\IconColumn::make('is_gluten_free')
-                    ->label('🌾')
-                    ->boolean()
-                    ->tooltip('Без глютена'),
+                Tables\Columns\TextColumn::make('calories')
+                    ->label('Ккал')
+                    ->suffix(' ккал')
+                    ->sortable(),
                 
                 Tables\Columns\IconColumn::make('is_published')
                     ->label('Опубликовано')
@@ -204,13 +214,14 @@ class RecipeResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('meal_type')
-                    ->label('Тип приема пищи')
+                Tables\Filters\SelectFilter::make('category')
+                    ->label('Категория')
                     ->options([
                         'breakfast' => 'Завтрак',
                         'lunch' => 'Обед',
                         'dinner' => 'Ужин',
                         'snack' => 'Перекус',
+                        'dessert' => 'Десерт',
                     ]),
                 
                 Tables\Filters\SelectFilter::make('difficulty')
@@ -220,15 +231,6 @@ class RecipeResource extends Resource
                         'medium' => 'Средне',
                         'hard' => 'Сложно',
                     ]),
-                
-                Tables\Filters\TernaryFilter::make('is_vegetarian')
-                    ->label('Вегетарианское'),
-                
-                Tables\Filters\TernaryFilter::make('is_vegan')
-                    ->label('Веганское'),
-                
-                Tables\Filters\TernaryFilter::make('is_gluten_free')
-                    ->label('Без глютена'),
                 
                 Tables\Filters\TernaryFilter::make('is_published')
                     ->label('Опубликовано'),
@@ -250,7 +252,6 @@ class RecipeResource extends Resource
     {
         return [
             RelationManagers\IngredientsRelationManager::class,
-            RelationManagers\NutritionRelationManager::class,
         ];
     }
 

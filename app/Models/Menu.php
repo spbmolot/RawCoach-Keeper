@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -14,25 +15,34 @@ class Menu extends Model
         'description',
         'month',
         'year',
-        'calories_per_day',
-        'is_published',
-        'is_featured',
-        'published_at',
+        'total_calories',
+        'total_proteins',
+        'total_fats',
+        'total_carbs',
         'cover_image',
         'pdf_file',
         'excel_file',
-        'sort_order',
-        'meta_title',
-        'meta_description',
+        'is_published',
+        'is_personal',
+        'published_at',
+        'visible_from',
+        'user_id',
+        'features',
+        'notes',
     ];
 
     protected function casts(): array
     {
         return [
             'is_published' => 'boolean',
-            'is_featured' => 'boolean',
+            'is_personal' => 'boolean',
             'published_at' => 'datetime',
-            'calories_per_day' => 'integer',
+            'visible_from' => 'date',
+            'features' => 'array',
+            'total_calories' => 'decimal:1',
+            'total_proteins' => 'decimal:1',
+            'total_fats' => 'decimal:1',
+            'total_carbs' => 'decimal:1',
         ];
     }
 
@@ -53,6 +63,14 @@ class Menu extends Model
     }
 
     /**
+     * Владелец персонального меню
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
      * Пользователи, добавившие в избранное
      */
     public function favoritedByUsers(): BelongsToMany
@@ -61,20 +79,36 @@ class Menu extends Model
     }
 
     /**
-     * Опубликованные меню
+     * Опубликованные меню (не персональные)
      */
     public function scopePublished($query)
     {
         return $query->where('is_published', true)
+                    ->where('is_personal', false)
                     ->where('published_at', '<=', now());
     }
 
     /**
-     * Рекомендуемые меню
+     * Видимые меню (с учетом visible_from)
      */
-    public function scopeFeatured($query)
+    public function scopeVisible($query)
     {
-        return $query->where('is_featured', true);
+        return $query->where('is_published', true)
+                    ->where('is_personal', false)
+                    ->where(function ($q) {
+                        $q->whereNull('visible_from')
+                          ->orWhere('visible_from', '<=', now());
+                    });
+    }
+
+    /**
+     * Персональные меню для пользователя
+     */
+    public function scopePersonalFor($query, User $user)
+    {
+        return $query->where('is_personal', true)
+                    ->where('user_id', $user->id)
+                    ->where('is_published', true);
     }
 
     /**
@@ -115,11 +149,33 @@ class Menu extends Model
     }
 
     /**
+     * Проверка видимости (с учетом visible_from)
+     */
+    public function isVisible(): bool
+    {
+        if (!$this->isPublished()) {
+            return false;
+        }
+        
+        // Если visible_from не установлена, меню видимо сразу
+        if (!$this->visible_from) {
+            return true;
+        }
+        
+        return $this->visible_from <= now();
+    }
+
+    /**
      * Проверка доступности для пользователя
      */
     public function isAvailableForUser(User $user): bool
     {
-        if (!$this->isPublished()) {
+        // Персональное меню - только для владельца
+        if ($this->is_personal) {
+            return $this->user_id === $user->id && $this->isPublished();
+        }
+        
+        if (!$this->isVisible()) {
             return false;
         }
 

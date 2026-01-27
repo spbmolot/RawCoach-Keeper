@@ -44,7 +44,7 @@ class Day extends Model
      */
     public function meals(): HasMany
     {
-        return $this->hasMany(DayMeal::class)->orderBy('meal_type_order');
+        return $this->hasMany(DayMeal::class)->orderBy('order');
     }
 
     /**
@@ -184,13 +184,13 @@ class Day extends Model
     public function addMeal(Recipe $recipe, string $mealType, int $order = 0): DayMeal
     {
         if ($order === 0) {
-            $order = $this->meals()->where('meal_type', $mealType)->max('meal_type_order') + 1;
+            $order = $this->meals()->where('meal_type', $mealType)->max('order') + 1;
         }
 
         return $this->meals()->create([
             'recipe_id' => $recipe->id,
             'meal_type' => $mealType,
-            'meal_type_order' => $order,
+            'order' => $order,
         ]);
     }
 

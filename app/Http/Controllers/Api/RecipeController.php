@@ -15,7 +15,7 @@ class RecipeController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Recipe::with(['nutrition', 'ingredients'])
+        $query = Recipe::with(['ingredients'])
             ->where('status', 'published');
 
         // Фильтрация по типу приема пищи
@@ -25,15 +25,11 @@ class RecipeController extends Controller
 
         // Фильтрация по калорийности
         if ($request->has('calories_min')) {
-            $query->whereHas('nutrition', function ($q) use ($request) {
-                $q->where('calories', '>=', $request->get('calories_min'));
-            });
+            $query->where('calories', '>=', $request->get('calories_min'));
         }
 
         if ($request->has('calories_max')) {
-            $query->whereHas('nutrition', function ($q) use ($request) {
-                $q->where('calories', '<=', $request->get('calories_max'));
-            });
+            $query->where('calories', '<=', $request->get('calories_max'));
         }
 
         // Сортировка
@@ -54,7 +50,7 @@ class RecipeController extends Controller
      */
     public function show(Recipe $recipe): JsonResponse
     {
-        $recipe->load(['nutrition', 'ingredients']);
+        $recipe->load(['ingredients']);
 
         return response()->json([
             'success' => true,
@@ -76,7 +72,7 @@ class RecipeController extends Controller
             ], 400);
         }
 
-        $recipes = Recipe::with(['nutrition', 'ingredients'])
+        $recipes = Recipe::with(['ingredients'])
             ->where('status', 'published')
             ->where(function ($q) use ($query) {
                 $q->where('title', 'like', "%{$query}%")
@@ -105,7 +101,7 @@ class RecipeController extends Controller
             ->where('favorable_type', Recipe::class)
             ->pluck('favorable_id');
 
-        $recipes = Recipe::with(['nutrition', 'ingredients'])
+        $recipes = Recipe::with(['ingredients'])
             ->whereIn('id', $favoriteRecipeIds)
             ->orderBy('title')
             ->paginate($request->get('per_page', 15));

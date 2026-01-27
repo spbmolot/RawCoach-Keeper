@@ -51,7 +51,7 @@ class MenuController extends Controller
             ], 403);
         }
 
-        $menu->load(['days.recipes.nutrition', 'days.recipes.ingredients']);
+        $menu->load(['days.recipes', 'days.recipes.ingredients']);
 
         return response()->json([
             'success' => true,

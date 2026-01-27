@@ -86,9 +86,8 @@ class HomeController extends Controller
      */
     public function demo()
     {
-        // Показываем ограниченный набор рецептов
+        // Показываем ограниченный набор опубликованных рецептов
         $demoRecipes = Recipe::where('is_published', true)
-            ->where('is_demo', true)
             ->limit(3)
             ->get();
 

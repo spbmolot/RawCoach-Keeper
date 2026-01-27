@@ -44,6 +44,9 @@
         ['question' => 'Какие способы оплаты доступны?', 'answer' => 'Банковские карты Visa, MasterCard, МИР. Также доступна оплата через ЮKassa и CloudPayments.']
     ]" />
     
+    {{-- Analytics --}}
+    @include('components.analytics')
+    
     {{-- AOS Animation Library --}}
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
@@ -97,13 +100,42 @@
             background: rgba(255,255,255,0.1);
             border: 1px solid rgba(255,255,255,0.2);
         }
+        
+        /* Очень маленькие экраны (до 360px) */
+        @media (max-width: 360px) {
+            .hero-title { font-size: 1.75rem !important; line-height: 1.2; }
+            .hero-subtitle { font-size: 0.95rem !important; }
+            .hero-badge { font-size: 0.7rem !important; padding: 0.375rem 0.75rem !important; }
+            .hero-btn { padding: 0.75rem 1.25rem !important; font-size: 0.875rem !important; }
+            .hero-stats { gap: 0.5rem !important; }
+            .hero-stats > div { padding: 0.5rem 0.625rem !important; }
+            .hero-stats .stat-value { font-size: 1.25rem !important; }
+            .hero-stats .stat-label { font-size: 0.65rem !important; }
+            .section-title { font-size: 1.375rem !important; }
+            .section-subtitle { font-size: 0.875rem !important; }
+            .price-card { padding: 1rem !important; }
+            .price-value { font-size: 1.75rem !important; }
+            .price-btn { padding: 0.625rem 1rem !important; font-size: 0.8rem !important; }
+            .feature-list li { font-size: 0.8rem !important; }
+            .faq-question { font-size: 0.9rem !important; }
+            .faq-answer { font-size: 0.8rem !important; }
+        }
+        
+        /* Экстремально маленькие экраны (до 320px) */
+        @media (max-width: 320px) {
+            .hero-title { font-size: 1.5rem !important; }
+            .hero-stats { flex-wrap: wrap; justify-content: center; }
+            .hero-stats > div { flex: 0 0 auto; }
+            .price-card { padding: 0.875rem !important; }
+            .price-value { font-size: 1.5rem !important; }
+        }
     </style>
 </head>
 <body class="antialiased text-gray-900 bg-white">
 <div class="flex flex-col min-h-screen">
 
-    {{-- Header Component --}}
-    <x-home-header />
+    {{-- Header Component (единый) --}}
+    <x-header variant="landing" />
 
     <!-- Hero Section -->
     <section class="hero-gradient relative overflow-hidden">
@@ -114,46 +146,46 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 relative">
             <div class="grid lg:grid-cols-2 gap-12 items-center">
                 <div class="text-white">
-                    <div class="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-sm font-medium mb-6 backdrop-blur-sm border border-white/20">
+                    <div class="hero-badge inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-white/10 rounded-full text-xs sm:text-sm font-medium mb-4 sm:mb-6 backdrop-blur-sm border border-white/20">
                         <span class="w-2 h-2 bg-green-400 rounded-full pulse-dot"></span>
                         7 дней бесплатно
                     </div>
-                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
+                    <h1 class="hero-title text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-4 sm:mb-6">
                         Худейте вкусно<br>
                         <span class="text-green-300">без подсчёта калорий</span>
                     </h1>
-                    <p class="text-xl text-green-100 mb-8 max-w-lg">
-                        Готовые планы питания 1200–1400 ккал с рецептами и списками покупок. Всё уже посчитано за вас.
+                    <p class="hero-subtitle text-base sm:text-lg md:text-xl text-green-100 mb-6 sm:mb-8 max-w-lg">
+                        Готовые планы питания 1200–1400 ккал с рецептами и списками покупок.
                     </p>
-                    <div class="flex flex-col sm:flex-row gap-4 mb-10">
+                    <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-8 sm:mb-10">
                         @auth
-                            <a href="{{ route('dashboard') }}" class="px-8 py-4 bg-white text-green-700 rounded-xl font-bold text-lg hover:bg-green-50 transition shadow-xl inline-flex items-center justify-center gap-2">
+                            <a href="{{ route('dashboard') }}" class="hero-btn px-6 py-3 sm:px-8 sm:py-4 bg-white text-green-700 rounded-xl font-bold text-base sm:text-lg hover:bg-green-50 transition shadow-xl inline-flex items-center justify-center gap-2">
                                 <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
-                                Перейти в кабинет
+                                Мой кабинет
                             </a>
                         @else
-                            <a href="{{ route('register') }}" class="px-8 py-4 bg-white text-green-700 rounded-xl font-bold text-lg hover:bg-green-50 transition shadow-xl inline-flex items-center justify-center gap-2">
+                            <a href="{{ route('register') }}" class="hero-btn px-6 py-3 sm:px-8 sm:py-4 bg-white text-green-700 rounded-xl font-bold text-base sm:text-lg hover:bg-green-50 transition shadow-xl inline-flex items-center justify-center gap-2">
                                 <i data-lucide="rocket" class="w-5 h-5"></i>
                                 Попробовать бесплатно
                             </a>
-                            <a href="#how-it-works" class="px-8 py-4 bg-white/10 text-white rounded-xl font-semibold text-lg hover:bg-white/20 transition border border-white/20 inline-flex items-center justify-center gap-2">
+                            <a href="#how-it-works" class="hero-btn px-6 py-3 sm:px-8 sm:py-4 bg-white/10 text-white rounded-xl font-semibold text-base sm:text-lg hover:bg-white/20 transition border border-white/20 inline-flex items-center justify-center gap-2">
                                 <i data-lucide="play-circle" class="w-5 h-5"></i>
                                 Как это работает
                             </a>
                         @endauth
                     </div>
-                    <div class="flex items-center gap-6">
-                        <div class="stats-card px-4 py-3 rounded-xl">
-                            <div class="text-2xl font-bold">1200+</div>
-                            <div class="text-green-200 text-sm">рецептов</div>
+                    <div class="hero-stats flex items-center gap-3 sm:gap-6">
+                        <div class="stats-card px-3 py-2 sm:px-4 sm:py-3 rounded-xl">
+                            <div class="stat-value text-xl sm:text-2xl font-bold">1200+</div>
+                            <div class="stat-label text-green-200 text-xs sm:text-sm">рецептов</div>
                         </div>
-                        <div class="stats-card px-4 py-3 rounded-xl">
-                            <div class="text-2xl font-bold">50+</div>
-                            <div class="text-green-200 text-sm">меню</div>
+                        <div class="stats-card px-3 py-2 sm:px-4 sm:py-3 rounded-xl">
+                            <div class="stat-value text-xl sm:text-2xl font-bold">50+</div>
+                            <div class="stat-label text-green-200 text-xs sm:text-sm">меню</div>
                         </div>
-                        <div class="stats-card px-4 py-3 rounded-xl">
-                            <div class="text-2xl font-bold">10k+</div>
-                            <div class="text-green-200 text-sm">пользователей</div>
+                        <div class="stats-card px-3 py-2 sm:px-4 sm:py-3 rounded-xl">
+                            <div class="stat-value text-xl sm:text-2xl font-bold">10k+</div>
+                            <div class="stat-label text-green-200 text-xs sm:text-sm">пользователей</div>
                         </div>
                     </div>
                 </div>
@@ -308,22 +340,22 @@
     <!-- Pricing -->
     <section id="pricing" class="py-24 bg-gradient-to-b from-gray-50 to-white" x-data="{ billingPeriod: 'monthly' }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <span class="text-green-600 font-semibold text-sm uppercase tracking-wider">Тарифы</span>
-                <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mt-3 mb-4">Выберите свой план</h2>
-                <p class="text-xl text-gray-600">Начните с 7 дней бесплатно. Отмена в любой момент.</p>
+            <div class="text-center mb-8 sm:mb-12">
+                <span class="text-green-600 font-semibold text-xs sm:text-sm uppercase tracking-wider">Тарифы</span>
+                <h2 class="section-title text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mt-2 sm:mt-3 mb-3 sm:mb-4">Выберите план</h2>
+                <p class="section-subtitle text-base sm:text-lg lg:text-xl text-gray-600">7 дней бесплатно. Отмена в любой момент.</p>
             </div>
             
-            <div class="flex justify-center mb-10">
-                <div class="bg-gray-100 p-1 rounded-xl inline-flex">
+            <div class="flex justify-center mb-6 sm:mb-10">
+                <div class="bg-gray-100 p-1 rounded-xl inline-flex text-sm sm:text-base">
                     <button @click="billingPeriod = 'monthly'" 
                             :class="billingPeriod === 'monthly' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'"
-                            class="px-6 py-2.5 rounded-lg font-semibold transition">
+                            class="px-4 py-2 sm:px-6 sm:py-2.5 rounded-lg font-semibold transition">
                         Месяц
                     </button>
                     <button @click="billingPeriod = 'yearly'" 
                             :class="billingPeriod === 'yearly' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'"
-                            class="px-6 py-2.5 rounded-lg font-semibold transition">
+                            class="px-4 py-2 sm:px-6 sm:py-2.5 rounded-lg font-semibold transition">
                         Год <span class="text-green-600">-25%</span>
                     </button>
                 </div>
@@ -337,29 +369,29 @@
                 $personalYearly = $plans->where('slug', 'personal-yearly')->first();
             @endphp
 
-            <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <div class="grid md:grid-cols-3 gap-6 lg:gap-8 max-w-5xl mx-auto">
                 {{-- Пробный период --}}
                 @if($trialPlan)
-                <div class="bg-white rounded-2xl p-8 border border-gray-200 card-hover">
-                    <div class="mb-6">
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Пробный</h3>
-                        <p class="text-gray-500 text-sm">7 дней бесплатно</p>
+                <div class="price-card bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-gray-200 card-hover">
+                    <div class="mb-3 sm:mb-4 lg:mb-6">
+                        <h3 class="text-base sm:text-lg lg:text-xl font-bold text-gray-900 mb-1">Пробный</h3>
+                        <p class="text-gray-500 text-xs sm:text-sm">7 дней бесплатно</p>
                     </div>
-                    <div class="mb-6">
-                        <span class="text-4xl font-extrabold text-gray-900">0</span>
+                    <div class="mb-3 sm:mb-4 lg:mb-6">
+                        <span class="price-value text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900">0</span>
                         <span class="text-gray-500">₽</span>
-                        <div class="text-sm text-green-600 font-medium mt-1">Без карты</div>
+                        <div class="text-[10px] sm:text-xs text-green-600 font-medium mt-1">Без карты</div>
                     </div>
                     @php $features = is_string($trialPlan->features) ? json_decode($trialPlan->features, true) : $trialPlan->features; @endphp
-                    <ul class="space-y-4 mb-8">
+                    <ul class="feature-list space-y-1.5 sm:space-y-2 lg:space-y-3 mb-4 sm:mb-6 lg:mb-8">
                         @foreach(array_slice($features ?? [], 0, 4) as $feature)
-                        <li class="flex items-center gap-3 text-gray-600">
-                            <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
-                            {{ $feature }}
+                        <li class="flex items-start gap-2 text-gray-600 text-xs sm:text-sm">
+                            <i data-lucide="check" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500 flex-shrink-0 mt-0.5"></i>
+                            <span>{{ $feature }}</span>
                         </li>
                         @endforeach
                     </ul>
-                    <a href="{{ route('register') }}" class="block w-full py-3 px-6 text-center font-semibold rounded-xl border-2 border-green-500 text-green-600 hover:bg-green-50 transition">
+                    <a href="{{ route('register') }}" class="price-btn block w-full py-2 sm:py-2.5 lg:py-3 px-3 sm:px-4 lg:px-6 text-center font-semibold text-xs sm:text-sm lg:text-base rounded-xl border-2 border-green-500 text-green-600 hover:bg-green-50 transition">
                         Попробовать
                     </a>
                 </div>
@@ -367,35 +399,35 @@
 
                 {{-- Стандарт (Популярный) --}}
                 @if($standardMonthly && $standardYearly)
-                <div class="bg-white rounded-2xl p-8 border-2 border-green-500 card-hover relative shadow-xl shadow-green-500/10">
-                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                        <span class="bg-green-500 text-white text-sm font-bold px-4 py-1 rounded-full">Популярный</span>
+                <div class="price-card bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border-2 border-green-500 card-hover relative shadow-xl shadow-green-500/10">
+                    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                        <span class="bg-green-500 text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">Популярный</span>
                     </div>
-                    <div class="mb-6">
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Стандарт</h3>
-                        <p class="text-gray-500 text-sm">Полный доступ</p>
+                    <div class="mb-3 sm:mb-4 lg:mb-6 mt-1 sm:mt-0">
+                        <h3 class="text-base sm:text-lg lg:text-xl font-bold text-gray-900 mb-1">Стандарт</h3>
+                        <p class="text-gray-500 text-xs sm:text-sm">Полный доступ</p>
                     </div>
-                    <div class="mb-6">
+                    <div class="mb-3 sm:mb-4 lg:mb-6">
                         <div x-show="billingPeriod === 'monthly'">
-                            <span class="text-4xl font-extrabold text-gray-900">{{ number_format($standardMonthly->price, 0, ',', ' ') }}</span>
-                            <span class="text-gray-500">₽/мес</span>
+                            <span class="price-value text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900">{{ number_format($standardMonthly->price, 0, ',', ' ') }}</span>
+                            <span class="text-gray-500 text-sm">₽/мес</span>
                         </div>
                         <div x-show="billingPeriod === 'yearly'">
-                            <span class="text-4xl font-extrabold text-gray-900">{{ number_format($standardYearly->price / 12, 0, ',', ' ') }}</span>
-                            <span class="text-gray-500">₽/мес</span>
-                            <div class="text-sm text-green-600 font-medium mt-1">Экономия {{ number_format($standardYearly->original_price - $standardYearly->price, 0, ',', ' ') }}₽/год</div>
+                            <span class="price-value text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900">{{ number_format($standardYearly->price / 12, 0, ',', ' ') }}</span>
+                            <span class="text-gray-500 text-xs sm:text-sm">₽/мес</span>
+                            <div class="text-[10px] sm:text-xs text-green-600 font-medium mt-1">Экономия {{ number_format($standardYearly->original_price - $standardYearly->price, 0, ',', ' ') }}₽</div>
                         </div>
                     </div>
                     @php $features = is_string($standardMonthly->features) ? json_decode($standardMonthly->features, true) : $standardMonthly->features; @endphp
-                    <ul class="space-y-4 mb-8">
+                    <ul class="feature-list space-y-1.5 sm:space-y-2 lg:space-y-3 mb-4 sm:mb-6 lg:mb-8">
                         @foreach(array_slice($features ?? [], 0, 5) as $feature)
-                        <li class="flex items-center gap-3 text-gray-600">
-                            <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
-                            {{ $feature }}
+                        <li class="flex items-start gap-2 text-gray-600 text-xs sm:text-sm">
+                            <i data-lucide="check" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500 flex-shrink-0 mt-0.5"></i>
+                            <span>{{ $feature }}</span>
                         </li>
                         @endforeach
                     </ul>
-                    <a href="{{ route('register') }}" class="block w-full py-3 px-6 text-center font-semibold rounded-xl bg-green-500 text-white hover:bg-green-600 transition shadow-lg shadow-green-500/25">
+                    <a href="{{ route('register') }}" class="price-btn block w-full py-2 sm:py-2.5 lg:py-3 px-3 sm:px-4 lg:px-6 text-center font-semibold text-xs sm:text-sm lg:text-base rounded-xl bg-green-500 text-white hover:bg-green-600 transition shadow-lg shadow-green-500/25">
                         Начать бесплатно
                     </a>
                 </div>
@@ -403,32 +435,32 @@
 
                 {{-- Индивидуальный --}}
                 @if($personalMonthly && $personalYearly)
-                <div class="bg-white rounded-2xl p-8 border border-gray-200 card-hover">
-                    <div class="mb-6">
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Индивидуальный</h3>
-                        <p class="text-gray-500 text-sm">Персональный подход</p>
+                <div class="price-card bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-gray-200 card-hover">
+                    <div class="mb-3 sm:mb-4 lg:mb-6">
+                        <h3 class="text-base sm:text-lg lg:text-xl font-bold text-gray-900 mb-1">Индивидуальный</h3>
+                        <p class="text-gray-500 text-xs sm:text-sm">Персональный подход</p>
                     </div>
-                    <div class="mb-6">
+                    <div class="mb-3 sm:mb-4 lg:mb-6">
                         <div x-show="billingPeriod === 'monthly'">
-                            <span class="text-4xl font-extrabold text-gray-900">{{ number_format($personalMonthly->price, 0, ',', ' ') }}</span>
-                            <span class="text-gray-500">₽/мес</span>
+                            <span class="price-value text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900">{{ number_format($personalMonthly->price, 0, ',', ' ') }}</span>
+                            <span class="text-gray-500 text-xs sm:text-sm">₽/мес</span>
                         </div>
                         <div x-show="billingPeriod === 'yearly'">
-                            <span class="text-4xl font-extrabold text-gray-900">{{ number_format($personalYearly->price / 12, 0, ',', ' ') }}</span>
-                            <span class="text-gray-500">₽/мес</span>
-                            <div class="text-sm text-green-600 font-medium mt-1">Экономия {{ number_format($personalYearly->original_price - $personalYearly->price, 0, ',', ' ') }}₽/год</div>
+                            <span class="price-value text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900">{{ number_format($personalYearly->price / 12, 0, ',', ' ') }}</span>
+                            <span class="text-gray-500 text-xs sm:text-sm">₽/мес</span>
+                            <div class="text-[10px] sm:text-xs text-green-600 font-medium mt-1">Экономия {{ number_format($personalYearly->original_price - $personalYearly->price, 0, ',', ' ') }}₽</div>
                         </div>
                     </div>
                     @php $features = is_string($personalMonthly->features) ? json_decode($personalMonthly->features, true) : $personalMonthly->features; @endphp
-                    <ul class="space-y-4 mb-8">
+                    <ul class="feature-list space-y-1.5 sm:space-y-2 lg:space-y-3 mb-4 sm:mb-6 lg:mb-8">
                         @foreach(array_slice($features ?? [], 0, 4) as $feature)
-                        <li class="flex items-center gap-3 text-gray-600">
-                            <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
-                            {{ $feature }}
+                        <li class="flex items-start gap-2 text-gray-600 text-xs sm:text-sm">
+                            <i data-lucide="check" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500 flex-shrink-0 mt-0.5"></i>
+                            <span>{{ $feature }}</span>
                         </li>
                         @endforeach
                     </ul>
-                    <a href="{{ route('register') }}" class="block w-full py-3 px-6 text-center font-semibold rounded-xl border-2 border-green-500 text-green-600 hover:bg-green-50 transition">
+                    <a href="{{ route('register') }}" class="price-btn block w-full py-2 sm:py-2.5 lg:py-3 px-3 sm:px-4 lg:px-6 text-center font-semibold text-xs sm:text-sm lg:text-base rounded-xl border-2 border-green-500 text-green-600 hover:bg-green-50 transition">
                         Связаться
                     </a>
                 </div>
@@ -438,14 +470,14 @@
     </section>
 
     <!-- Testimonials -->
-    <section class="py-24 bg-white">
+    <section class="py-16 sm:py-24 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <span class="text-green-600 font-semibold text-sm uppercase tracking-wider">Отзывы</span>
-                <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mt-3 mb-4">Что говорят наши пользователи</h2>
+            <div class="text-center mb-10 sm:mb-16">
+                <span class="text-green-600 font-semibold text-xs sm:text-sm uppercase tracking-wider">Отзывы</span>
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mt-2 sm:mt-3 mb-4">Что говорят пользователи</h2>
             </div>
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="bg-gray-50 rounded-2xl p-8 card-hover">
+            <div class="grid md:grid-cols-3 gap-6 lg:gap-8">
+                <div class="bg-gray-50 rounded-2xl p-5 sm:p-8 card-hover">
                     <div class="flex items-center gap-1 mb-4">
                         <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-yellow-400"></i>
                         <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-yellow-400"></i>
@@ -453,7 +485,7 @@
                         <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-yellow-400"></i>
                         <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-yellow-400"></i>
                     </div>
-                    <p class="text-gray-700 mb-6 text-lg">"За 3 месяца похудела на 12 кг! Рецепты простые и вкусные, муж тоже ест с удовольствием."</p>
+                    <p class="text-gray-700 mb-4 sm:mb-6 text-base sm:text-lg">"За 3 месяца похудела на 12 кг! Рецепты простые и вкусные."</p>
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
                             <span class="text-green-600 font-bold">АК</span>
@@ -464,15 +496,15 @@
                         </div>
                     </div>
                 </div>
-                <div class="bg-gray-50 rounded-2xl p-8 card-hover">
-                    <div class="flex items-center gap-1 mb-4">
-                        <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-yellow-400"></i>
-                        <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-yellow-400"></i>
-                        <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-yellow-400"></i>
-                        <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-yellow-400"></i>
-                        <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-yellow-400"></i>
+                <div class="bg-gray-50 rounded-2xl p-5 sm:p-8 card-hover">
+                    <div class="flex items-center gap-1 mb-3 sm:mb-4">
+                        <i data-lucide="star" class="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-yellow-400"></i>
+                        <i data-lucide="star" class="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-yellow-400"></i>
+                        <i data-lucide="star" class="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-yellow-400"></i>
+                        <i data-lucide="star" class="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-yellow-400"></i>
+                        <i data-lucide="star" class="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-yellow-400"></i>
                     </div>
-                    <p class="text-gray-700 mb-6 text-lg">"Наконец-то не нужно думать, что готовить. Списки покупок — это гениально!"</p>
+                    <p class="text-gray-700 mb-4 sm:mb-6 text-base sm:text-lg">"Списки покупок — это гениально! Не нужно думать, что готовить."</p>
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
                             <span class="text-blue-600 font-bold">ИП</span>
@@ -483,15 +515,15 @@
                         </div>
                     </div>
                 </div>
-                <div class="bg-gray-50 rounded-2xl p-8 card-hover">
-                    <div class="flex items-center gap-1 mb-4">
-                        <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-yellow-400"></i>
-                        <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-yellow-400"></i>
-                        <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-yellow-400"></i>
-                        <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-yellow-400"></i>
-                        <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-yellow-400"></i>
+                <div class="bg-gray-50 rounded-2xl p-5 sm:p-8 card-hover">
+                    <div class="flex items-center gap-1 mb-3 sm:mb-4">
+                        <i data-lucide="star" class="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-yellow-400"></i>
+                        <i data-lucide="star" class="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-yellow-400"></i>
+                        <i data-lucide="star" class="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-yellow-400"></i>
+                        <i data-lucide="star" class="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-yellow-400"></i>
+                        <i data-lucide="star" class="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-yellow-400"></i>
                     </div>
-                    <p class="text-gray-700 mb-6 text-lg">"Пользуюсь уже полгода. Минус 8 кг и отличное самочувствие. Рекомендую всем!"</p>
+                    <p class="text-gray-700 mb-4 sm:mb-6 text-base sm:text-lg">"Минус 8 кг и отличное самочувствие. Рекомендую!"</p>
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
                             <span class="text-purple-600 font-bold">МС</span>
@@ -507,77 +539,79 @@
     </section>
 
     <!-- FAQ -->
-    <section id="faq" class="py-24 bg-gray-50">
+    <section id="faq" class="py-16 sm:py-24 bg-gray-50">
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <span class="text-green-600 font-semibold text-sm uppercase tracking-wider">FAQ</span>
-                <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mt-3 mb-4">Частые вопросы</h2>
+            <div class="text-center mb-8 sm:mb-10 lg:mb-16">
+                <span class="text-green-600 font-semibold text-xs sm:text-sm uppercase tracking-wider">FAQ</span>
+                <h2 class="section-title text-xl sm:text-2xl lg:text-4xl font-bold text-gray-900 mt-2 sm:mt-3 mb-4">Частые вопросы</h2>
             </div>
-            <div class="space-y-4">
-                <details class="bg-white rounded-2xl p-6 group" open>
-                    <summary class="flex items-center justify-between cursor-pointer list-none">
-                        <span class="font-semibold text-gray-900 text-lg">Есть ли пробный период?</span>
+            <div class="space-y-2 sm:space-y-3 lg:space-y-4">
+                <details class="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 group" open>
+                    <summary class="flex items-center justify-between cursor-pointer list-none gap-2">
+                        <span class="faq-question font-semibold text-gray-900 text-sm sm:text-base lg:text-lg">Есть ли пробный период?</span>
                         <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform"></i>
                     </summary>
-                    <p class="mt-4 text-gray-600">Да! Первые 7 дней — бесплатно. Вы получите полный доступ ко всем функциям. Отменить можно в любой момент.</p>
+                    <p class="faq-answer mt-2 sm:mt-3 lg:mt-4 text-gray-600 text-xs sm:text-sm lg:text-base">Да! 7 дней бесплатно. Полный доступ.</p>
                 </details>
-                <details class="bg-white rounded-2xl p-6 group">
-                    <summary class="flex items-center justify-between cursor-pointer list-none">
-                        <span class="font-semibold text-gray-900 text-lg">Когда я получу меню?</span>
+                <details class="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 group">
+                    <summary class="flex items-center justify-between cursor-pointer list-none gap-2">
+                        <span class="faq-question font-semibold text-gray-900 text-sm sm:text-base lg:text-lg">Когда я получу меню?</span>
                         <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform"></i>
                     </summary>
-                    <p class="mt-4 text-gray-600">Сразу после регистрации! Меню на текущий месяц будет доступно в личном кабинете.</p>
+                    <p class="faq-answer mt-2 sm:mt-3 lg:mt-4 text-gray-600 text-xs sm:text-sm lg:text-base">Сразу после регистрации! Меню доступно в личном кабинете.</p>
                 </details>
-                <details class="bg-white rounded-2xl p-6 group">
-                    <summary class="flex items-center justify-between cursor-pointer list-none">
-                        <span class="font-semibold text-gray-900 text-lg">Можно ли отменить подписку?</span>
-                        <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform"></i>
+                <details class="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 group">
+                    <summary class="flex items-center justify-between cursor-pointer list-none gap-2">
+                        <span class="faq-question font-semibold text-gray-900 text-sm sm:text-base lg:text-lg">Можно отменить?</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-open:rotate-180 transition-transform flex-shrink-0"></i>
                     </summary>
-                    <p class="mt-4 text-gray-600">Конечно. Вы можете отменить подписку в любой момент в личном кабинете. Без скрытых условий.</p>
+                    <p class="faq-answer mt-2 sm:mt-3 lg:mt-4 text-gray-600 text-xs sm:text-sm lg:text-base">Да, в любой момент. Без скрытых условий.</p>
                 </details>
-                <details class="bg-white rounded-2xl p-6 group">
-                    <summary class="flex items-center justify-between cursor-pointer list-none">
-                        <span class="font-semibold text-gray-900 text-lg">Подходит ли меню для вегетарианцев?</span>
-                        <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform"></i>
+                <details class="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 group">
+                    <summary class="flex items-center justify-between cursor-pointer list-none gap-2">
+                        <span class="faq-question font-semibold text-gray-900 text-sm sm:text-base lg:text-lg">Вегетарианцам?</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-open:rotate-180 transition-transform flex-shrink-0"></i>
                     </summary>
-                    <p class="mt-4 text-gray-600">Пока у нас стандартное меню, но в индивидуальном тарифе мы учитываем все ваши предпочтения и ограничения.</p>
+                    <p class="faq-answer mt-2 sm:mt-3 lg:mt-4 text-gray-600 text-xs sm:text-sm lg:text-base">В индивидуальном тарифе учтём все.</p>
                 </details>
-                <details class="bg-white rounded-2xl p-6 group">
-                    <summary class="flex items-center justify-between cursor-pointer list-none">
-                        <span class="font-semibold text-gray-900 text-lg">Какие способы оплаты доступны?</span>
-                        <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform"></i>
+                <details class="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 group">
+                    <summary class="flex items-center justify-between cursor-pointer list-none gap-2">
+                        <span class="faq-question font-semibold text-gray-900 text-sm sm:text-base lg:text-lg">Способы оплаты?</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-open:rotate-180 transition-transform flex-shrink-0"></i>
                     </summary>
-                    <p class="mt-4 text-gray-600">Банковские карты Visa, MasterCard, МИР. Также доступна оплата через ЮKassa и CloudPayments.</p>
+                    <p class="faq-answer mt-2 sm:mt-3 lg:mt-4 text-gray-600 text-xs sm:text-sm lg:text-base">Visa, MC, МИР, ЮKassa, CloudPayments.</p>
                 </details>
             </div>
         </div>
     </section>
 
     <!-- CTA -->
-    <section class="py-24 hero-gradient relative overflow-hidden">
+    <section class="py-16 sm:py-24 hero-gradient relative overflow-hidden">
         <div class="absolute inset-0 opacity-10">
-            <div class="absolute top-10 right-20 w-64 h-64 bg-white rounded-full blur-3xl"></div>
-            <div class="absolute bottom-10 left-20 w-80 h-80 bg-white rounded-full blur-3xl"></div>
+            <div class="absolute top-10 right-10 sm:right-20 w-40 sm:w-64 h-40 sm:h-64 bg-white rounded-full blur-3xl"></div>
+            <div class="absolute bottom-10 left-10 sm:left-20 w-48 sm:w-80 h-48 sm:h-80 bg-white rounded-full blur-3xl"></div>
         </div>
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
-            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">Готовы изменить свою жизнь?</h2>
-            <p class="text-xl text-green-100 mb-10 max-w-2xl mx-auto">Присоединяйтесь к тысячам людей, которые уже достигли своих целей с RawPlan</p>
+            <h2 class="text-2xl sm:text-3xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">Готовы изменить жизнь?</h2>
+            <p class="text-base sm:text-xl text-green-100 mb-8 sm:mb-10 max-w-2xl mx-auto">Присоединяйтесь к 10 000+ пользователей RawPlan</p>
             @auth
-                <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 px-10 py-4 bg-white text-green-700 rounded-xl font-bold text-lg hover:bg-green-50 transition shadow-xl">
+                <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 px-6 sm:px-10 py-3 sm:py-4 bg-white text-green-700 rounded-xl font-bold text-base sm:text-lg hover:bg-green-50 transition shadow-xl">
                     <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
-                    Перейти в кабинет
+                    <span class="hidden sm:inline">Перейти в кабинет</span>
+                    <span class="sm:hidden">Мой кабинет</span>
                 </a>
             @else
-                <a href="{{ route('register') }}" class="inline-flex items-center gap-2 px-10 py-4 bg-white text-green-700 rounded-xl font-bold text-lg hover:bg-green-50 transition shadow-xl">
+                <a href="{{ route('register') }}" class="inline-flex items-center gap-2 px-6 sm:px-10 py-3 sm:py-4 bg-white text-green-700 rounded-xl font-bold text-base sm:text-lg hover:bg-green-50 transition shadow-xl">
                     <i data-lucide="rocket" class="w-5 h-5"></i>
-                    Начать бесплатно — 7 дней
+                    <span class="hidden sm:inline">Начать бесплатно — 7 дней</span>
+                    <span class="sm:hidden">Начать бесплатно</span>
                 </a>
             @endauth
         </div>
     </section>
 
-    {{-- Footer Component --}}
-    <x-public-footer />
+    {{-- Footer Component (единый) --}}
+    <x-footer />
     
     {{-- Scroll to Top Button --}}
     <x-scroll-to-top />

@@ -40,17 +40,18 @@ class MenuResource extends Resource
                             ->rows(3)
                             ->maxLength(1000),
                         
-                        Forms\Components\DatePicker::make('month')
+                        Forms\Components\TextInput::make('month')
                             ->label('Месяц')
-                            ->required()
-                            ->displayFormat('m/Y')
-                            ->format('Y-m-01'),
-                        
-                        Forms\Components\TextInput::make('calories_per_day')
-                            ->label('Калорий в день')
                             ->numeric()
-                            ->suffix('ккал')
-                            ->default(1200),
+                            ->minValue(1)
+                            ->maxValue(12)
+                            ->required(),
+                        
+                        Forms\Components\TextInput::make('year')
+                            ->label('Год')
+                            ->numeric()
+                            ->minValue(2020)
+                            ->required(),
                     ])->columns(2),
                 
                 Forms\Components\Section::make('Настройки доступа')
@@ -59,38 +60,52 @@ class MenuResource extends Resource
                             ->label('Опубликовано')
                             ->default(false),
                         
-                        Forms\Components\Toggle::make('is_early_access')
-                            ->label('Ранний доступ')
-                            ->default(false),
-                        
                         Forms\Components\DateTimePicker::make('published_at')
                             ->label('Дата публикации')
                             ->default(now()),
                         
-                        Forms\Components\DateTimePicker::make('early_access_at')
-                            ->label('Дата раннего доступа'),
+                        Forms\Components\DatePicker::make('visible_from')
+                            ->label('Видимо с даты')
+                            ->helperText('Меню станет доступно пользователям начиная с этой даты. Оставьте пустым для немедленной видимости.'),
+                        
+                        Forms\Components\Toggle::make('is_personal')
+                            ->label('Персональное меню')
+                            ->helperText('Персональное меню видно только выбранному пользователю')
+                            ->reactive(),
+                        
+                        Forms\Components\Select::make('user_id')
+                            ->label('Пользователь')
+                            ->relationship('user', 'email')
+                            ->searchable()
+                            ->preload()
+                            ->visible(fn (callable $get) => $get('is_personal'))
+                            ->required(fn (callable $get) => $get('is_personal'))
+                            ->helperText('Выберите пользователя для персонального меню'),
                     ])->columns(2),
                 
-                Forms\Components\Section::make('Изображение')
+                Forms\Components\Section::make('Изображение и файлы')
                     ->schema([
-                        Forms\Components\FileUpload::make('image')
-                            ->label('Изображение меню')
+                        Forms\Components\FileUpload::make('cover_image')
+                            ->label('Обложка меню')
                             ->image()
                             ->directory('menus')
                             ->maxSize(2048),
-                    ]),
+                        
+                        Forms\Components\FileUpload::make('pdf_file')
+                            ->label('PDF файл')
+                            ->directory('menus/pdf')
+                            ->acceptedFileTypes(['application/pdf']),
+                        
+                        Forms\Components\FileUpload::make('excel_file')
+                            ->label('Excel файл')
+                            ->directory('menus/excel'),
+                    ])->columns(3),
                 
                 Forms\Components\Section::make('Дополнительно')
                     ->schema([
-                        Forms\Components\TextInput::make('sort_order')
-                            ->label('Порядок сортировки')
-                            ->numeric()
-                            ->default(0),
-                        
-                        Forms\Components\KeyValue::make('nutrition_summary')
-                            ->label('Сводка по питательности')
-                            ->keyLabel('Показатель')
-                            ->valueLabel('Значение'),
+                        Forms\Components\Textarea::make('notes')
+                            ->label('Заметки')
+                            ->rows(3),
                     ]),
             ]);
     }
@@ -99,8 +114,8 @@ class MenuResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\ImageColumn::make('image')
-                    ->label('Изображение')
+                Tables\Columns\ImageColumn::make('cover_image')
+                    ->label('Обложка')
                     ->circular(),
                 
                 Tables\Columns\TextColumn::make('title')
@@ -110,12 +125,10 @@ class MenuResource extends Resource
                 
                 Tables\Columns\TextColumn::make('month')
                     ->label('Месяц')
-                    ->date('m/Y')
                     ->sortable(),
                 
-                Tables\Columns\TextColumn::make('calories_per_day')
-                    ->label('Калорий/день')
-                    ->suffix(' ккал')
+                Tables\Columns\TextColumn::make('year')
+                    ->label('Год')
                     ->sortable(),
                 
                 Tables\Columns\TextColumn::make('days_count')
@@ -126,13 +139,20 @@ class MenuResource extends Resource
                     ->label('Опубликовано')
                     ->boolean(),
                 
-                Tables\Columns\IconColumn::make('is_early_access')
-                    ->label('Ранний доступ')
-                    ->boolean(),
+                Tables\Columns\IconColumn::make('is_personal')
+                    ->label('Персональное')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-user')
+                    ->falseIcon('heroicon-o-users'),
                 
-                Tables\Columns\TextColumn::make('published_at')
-                    ->label('Дата публикации')
-                    ->dateTime()
+                Tables\Columns\TextColumn::make('user.email')
+                    ->label('Пользователь')
+                    ->placeholder('-')
+                    ->toggleable(),
+                
+                Tables\Columns\TextColumn::make('visible_from')
+                    ->label('Видимо с')
+                    ->date()
                     ->sortable()
                     ->toggleable(),
                 
@@ -146,27 +166,12 @@ class MenuResource extends Resource
                 Tables\Filters\TernaryFilter::make('is_published')
                     ->label('Опубликовано'),
                 
-                Tables\Filters\TernaryFilter::make('is_early_access')
-                    ->label('Ранний доступ'),
+                Tables\Filters\TernaryFilter::make('is_personal')
+                    ->label('Персональное'),
                 
-                Tables\Filters\Filter::make('month')
-                    ->form([
-                        Forms\Components\DatePicker::make('month_from')
-                            ->label('Месяц с'),
-                        Forms\Components\DatePicker::make('month_until')
-                            ->label('Месяц по'),
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query
-                            ->when(
-                                $data['month_from'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('month', '>=', $date),
-                            )
-                            ->when(
-                                $data['month_until'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('month', '<=', $date),
-                            );
-                    }),
+                Tables\Filters\SelectFilter::make('year')
+                    ->label('Год')
+                    ->options(fn () => Menu::query()->distinct()->pluck('year', 'year')->toArray()),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

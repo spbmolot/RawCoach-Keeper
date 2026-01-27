@@ -167,6 +167,24 @@ class SubscriptionController extends Controller
     }
 
     /**
+     * Переключение автопродления подписки
+     */
+    public function toggleRenewal(UserSubscription $subscription)
+    {
+        $this->authorize('manage', $subscription);
+
+        $subscription->update([
+            'auto_renew' => !$subscription->auto_renew,
+        ]);
+
+        $message = $subscription->auto_renew 
+            ? 'Автопродление включено' 
+            : 'Автопродление отключено';
+
+        return back()->with('success', $message);
+    }
+
+    /**
      * Обновление подписки до другого плана
      */
     public function upgrade(Request $request, Plan $newPlan)

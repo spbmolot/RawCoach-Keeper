@@ -40,7 +40,7 @@ class PersonalPlanController extends Controller
         $personalPlan->load([
             'questionnaire',
             'nutritionist',
-            'menus.days.recipes.nutrition',
+            'menus.days.recipes',
             'recommendations'
         ]);
 
@@ -278,7 +278,7 @@ class PersonalPlanController extends Controller
         $personalPlan->load([
             'questionnaire',
             'nutritionist',
-            'menus.days.recipes.nutrition',
+            'menus.days.recipes',
             'recommendations'
         ]);
 

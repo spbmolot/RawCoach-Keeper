@@ -70,6 +70,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::patch('/{subscription}/cancel', [SubscriptionController::class, 'cancel'])->name('cancel');
         Route::patch('/{subscription}/pause', [SubscriptionController::class, 'pause'])->name('pause');
         Route::patch('/{subscription}/resume', [SubscriptionController::class, 'resume'])->name('resume');
+        Route::patch('/{subscription}/toggle-renewal', [SubscriptionController::class, 'toggleRenewal'])->name('toggle-renewal');
         Route::post('/upgrade/{plan}', [SubscriptionController::class, 'upgrade'])->name('upgrade');
     });
     

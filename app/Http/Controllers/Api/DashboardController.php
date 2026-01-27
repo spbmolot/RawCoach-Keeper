@@ -87,7 +87,7 @@ class DashboardController extends Controller
         $startOfWeek = Carbon::now()->startOfWeek();
         $endOfWeek = Carbon::now()->endOfWeek();
 
-        $weekDays = Day::with(['recipes.nutrition', 'menu'])
+        $weekDays = Day::with(['recipes', 'menu'])
             ->whereBetween('date', [$startOfWeek, $endOfWeek])
             ->orderBy('date')
             ->get()
@@ -238,7 +238,7 @@ class DashboardController extends Controller
     {
         $today = Carbon::now()->format('Y-m-d');
         
-        return Day::with(['recipes.nutrition', 'recipes.ingredients', 'menu'])
+        return Day::with(['recipes', 'recipes.ingredients', 'menu'])
             ->where('date', $today)
             ->first();
     }

@@ -20,7 +20,7 @@ class IngredientsRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
+                Forms\Components\TextInput::make('ingredient_name')
                     ->label('Название ингредиента')
                     ->required()
                     ->maxLength(255),
@@ -36,12 +36,7 @@ class IngredientsRelationManager extends RelationManager
                     ->maxLength(50)
                     ->placeholder('г, мл, шт, ст.л.'),
                 
-                Forms\Components\TextInput::make('calories_per_100g')
-                    ->label('Калорий на 100г')
-                    ->numeric()
-                    ->suffix('ккал'),
-                
-                Forms\Components\TextInput::make('sort_order')
+                Forms\Components\TextInput::make('order')
                     ->label('Порядок')
                     ->numeric()
                     ->default(0),
@@ -51,9 +46,9 @@ class IngredientsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('name')
+            ->recordTitleAttribute('ingredient_name')
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                Tables\Columns\TextColumn::make('ingredient_name')
                     ->label('Ингредиент')
                     ->searchable()
                     ->sortable(),
@@ -66,9 +61,8 @@ class IngredientsRelationManager extends RelationManager
                     ->label('Единица')
                     ->sortable(),
                 
-                Tables\Columns\TextColumn::make('calories_per_100g')
-                    ->label('Калории/100г')
-                    ->suffix(' ккал')
+                Tables\Columns\TextColumn::make('order')
+                    ->label('Порядок')
                     ->sortable(),
             ])
             ->filters([
@@ -87,6 +81,6 @@ class IngredientsRelationManager extends RelationManager
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
-            ->defaultSort('sort_order');
+            ->defaultSort('order');
     }
 }

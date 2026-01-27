@@ -13,44 +13,45 @@ class Recipe extends Model
         'slug',
         'description',
         'instructions',
-        'prep_time', // время подготовки в минутах
-        'cook_time', // время приготовления в минутах
-        'servings', // количество порций
-        'difficulty', // easy, medium, hard
+        'prep_time',
+        'cook_time',
+        'servings',
+        'difficulty',
         'calories',
         'proteins',
         'fats',
         'carbs',
         'fiber',
-        'sugar',
-        'sodium',
-        'image',
-        'video_url',
+        'category',
+        'cuisine',
+        'dietary_tags',
+        'allergens',
+        'main_image',
+        'gallery_images',
         'is_published',
-        'is_featured',
-        'category', // breakfast, lunch, dinner, snack, dessert
-        'cuisine_type', // russian, italian, asian, etc.
-        'dietary_tags', // JSON array: vegetarian, vegan, gluten_free, etc.
-        'allergens', // JSON array: nuts, dairy, eggs, etc.
-        'created_by',
-        'meta_title',
-        'meta_description',
+        'published_at',
+        'views_count',
+        'rating',
+        'ratings_count',
+        'notes',
     ];
 
     protected function casts(): array
     {
         return [
             'is_published' => 'boolean',
-            'is_featured' => 'boolean',
+            'published_at' => 'datetime',
             'dietary_tags' => 'array',
             'allergens' => 'array',
+            'gallery_images' => 'array',
             'calories' => 'decimal:1',
             'proteins' => 'decimal:1',
             'fats' => 'decimal:1',
             'carbs' => 'decimal:1',
             'fiber' => 'decimal:1',
-            'sugar' => 'decimal:1',
-            'sodium' => 'decimal:1',
+            'views_count' => 'integer',
+            'rating' => 'decimal:2',
+            'ratings_count' => 'integer',
         ];
     }
 

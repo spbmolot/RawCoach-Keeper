@@ -16,15 +16,20 @@ class MenuController extends Controller
      */
     public function index(Request $request)
     {
-        $menus = Cache::remember('menus_published', 600, function () {
-            return Menu::where('is_published', true)
-                ->with('days')
-                ->orderBy('year', 'desc')
-                ->orderBy('month', 'desc')
-                ->paginate(12);
-        });
+        $user = auth()->user();
         
-        return view('menus.index', compact('menus'));
+        // Общие видимые меню (не персональные)
+        $menusQuery = Menu::visible()
+            ->with('days')
+            ->orderBy('year', 'desc')
+            ->orderBy('month', 'desc');
+        
+        $menus = $menusQuery->paginate(12);
+        
+        // Персональные меню для текущего пользователя
+        $personalMenus = $user ? Menu::personalFor($user)->with('days')->get() : collect();
+        
+        return view('menus.index', compact('menus', 'personalMenus'));
     }
 
     /**
@@ -32,8 +37,19 @@ class MenuController extends Controller
      */
     public function show(Menu $menu)
     {
-        if (!$menu->is_published) {
-            abort(404, 'Меню не найдено');
+        $user = auth()->user();
+        
+        // Проверка доступа
+        if ($menu->is_personal) {
+            // Персональное меню - только для владельца
+            if (!$user || $menu->user_id !== $user->id) {
+                abort(404, 'Меню не найдено');
+            }
+        } else {
+            // Общее меню - проверяем видимость
+            if (!$menu->isVisible()) {
+                abort(404, 'Меню не найдено');
+            }
         }
         
         $menu->load(['days.meals.recipe']);
@@ -60,7 +76,7 @@ class MenuController extends Controller
         $format = $request->get('format', 'pdf');
         
         $days = $menu->days()
-            ->with(['recipes.nutrition', 'recipes.ingredients.ingredient'])
+            ->with(['recipes', 'recipes.ingredients.ingredient'])
             ->orderBy('date')
             ->get();
         
@@ -76,7 +92,7 @@ class MenuController extends Controller
     }
 
     /**
-     * Архив меню
+     * Архив меню (прошлые месяцы)
      */
     public function archive(Request $request)
     {
@@ -87,25 +103,36 @@ class MenuController extends Controller
                 ->with('error', 'Для доступа к архиву необходима подписка');
         }
         
-        $subscription = $user->activeSubscription();
+        $subscription = $user->activeSubscription()->first();
         
-        // Проверяем, есть ли доступ к архиву
-        if (!in_array($subscription->plan->slug, ['yearly', 'personal'])) {
-            return redirect()->route('plans.upgrade')
+        // Проверяем, есть ли доступ к архиву (годовая или персональная подписка)
+        if (!$subscription || !in_array($subscription->plan->slug, ['yearly', 'personal'])) {
+            return redirect()->route('plans.index')
                 ->with('error', 'Доступ к архиву доступен только для годовой и персональной подписки');
         }
         
-        $menus = Menu::where('is_published', true)
-            ->where('type', 'archive')
-            ->with(['days', 'recipes'])
-            ->orderBy('period_start', 'desc')
+        $currentMonth = now()->month;
+        $currentYear = now()->year;
+        
+        // Архивные меню - прошлые месяцы
+        $menus = Menu::visible()
+            ->where(function($q) use ($currentMonth, $currentYear) {
+                $q->where('year', '<', $currentYear)
+                  ->orWhere(function($q2) use ($currentMonth, $currentYear) {
+                      $q2->where('year', '=', $currentYear)
+                         ->where('month', '<', $currentMonth);
+                  });
+            })
+            ->with('days')
+            ->orderBy('year', 'desc')
+            ->orderBy('month', 'desc')
             ->paginate(12);
         
         return view('menus.archive', compact('menus'));
     }
 
     /**
-     * Раннее меню (для годовых подписчиков)
+     * Раннее меню (для годовых подписчиков - будущие месяцы)
      */
     public function early()
     {
@@ -116,18 +143,23 @@ class MenuController extends Controller
                 ->with('error', 'Для раннего доступа необходима подписка');
         }
         
-        $subscription = $user->activeSubscription();
+        $subscription = $user->activeSubscription()->first();
         
-        if (!in_array($subscription->plan->slug, ['yearly', 'personal'])) {
-            return redirect()->route('plans.upgrade')
+        if (!$subscription || !in_array($subscription->plan->slug, ['yearly', 'personal'])) {
+            return redirect()->route('plans.index')
                 ->with('error', 'Ранний доступ доступен только для годовой и персональной подписки');
         }
         
+        $currentMonth = now()->month;
+        $currentYear = now()->year;
+        
+        // Ранний доступ - меню будущих месяцев (еще не видимые обычным пользователям)
         $earlyMenus = Menu::where('is_published', true)
-            ->where('type', 'early')
-            ->where('period_start', '>', Carbon::now())
-            ->with(['days', 'recipes'])
-            ->orderBy('period_start', 'asc')
+            ->where('is_personal', false)
+            ->where('visible_from', '>', now())
+            ->with('days')
+            ->orderBy('year', 'asc')
+            ->orderBy('month', 'asc')
             ->get();
         
         return view('menus.early', compact('earlyMenus'));
@@ -145,21 +177,15 @@ class MenuController extends Controller
         $query = $request->get('q');
         $user = auth()->user();
         
-        $menuQuery = Menu::where('is_published', true)
+        $menuQuery = Menu::visible()
             ->where(function($q) use ($query) {
-                $q->where('name', 'like', "%{$query}%")
+                $q->where('title', 'like', "%{$query}%")
                   ->orWhere('description', 'like', "%{$query}%");
             });
         
-        // Фильтрация по подписке
-        if ($user && $user->activeSubscription()) {
-            $this->filterMenuBySubscription($menuQuery, $user);
-        } else {
-            $menuQuery->where('type', 'demo');
-        }
-        
-        $menus = $menuQuery->with(['days', 'recipes'])
-            ->orderBy('period_start', 'desc')
+        $menus = $menuQuery->with('days')
+            ->orderBy('year', 'desc')
+            ->orderBy('month', 'desc')
             ->paginate(12);
         
         return view('menus.search', compact('menus', 'query'));
