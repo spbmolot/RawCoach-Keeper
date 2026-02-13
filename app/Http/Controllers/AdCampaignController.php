@@ -273,16 +273,29 @@ class AdCampaignController extends Controller
             abort(403);
         }
 
-        // Получаем статистику по дням (заглушка - в реальности из аналитики)
-        $dailyStats = collect(range(0, 29))->map(function ($day) use ($adCampaign) {
-            $date = Carbon::now()->subDays($day);
+        // Получаем реальную статистику по дням за последние 30 дней
+        $startDate = Carbon::now()->subDays(29)->startOfDay();
+        $endDate = Carbon::now()->endOfDay();
+
+        $statsFromDb = $adCampaign->dailyStats()
+            ->whereBetween('date', [$startDate, $endDate])
+            ->orderBy('date', 'asc')
+            ->get()
+            ->keyBy(fn($stat) => $stat->date->format('Y-m-d'));
+
+        // Заполняем все 30 дней (нулями если данных нет)
+        $dailyStats = collect(range(0, 29))->map(function ($day) use ($statsFromDb) {
+            $date = Carbon::now()->subDays(29 - $day);
+            $dateKey = $date->format('Y-m-d');
+            $stat = $statsFromDb->get($dateKey);
+
             return [
-                'date' => $date->format('Y-m-d'),
-                'impressions' => rand(100, 1000),
-                'clicks' => rand(5, 50),
-                'spent' => rand(50, 500),
+                'date' => $dateKey,
+                'impressions' => $stat->impressions ?? 0,
+                'clicks' => $stat->clicks ?? 0,
+                'spent' => $stat->spent ?? 0,
             ];
-        })->reverse()->values();
+        });
 
         return view('ad-campaigns.stats', compact('adCampaign', 'dailyStats'));
     }

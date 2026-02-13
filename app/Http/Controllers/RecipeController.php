@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Recipe;
 use App\Models\RecipeView;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 
@@ -232,12 +233,12 @@ class RecipeController extends Controller
         $recipe->load(['ingredients.ingredient']);
         
         if ($format === 'pdf') {
-            // return PDF::loadView('exports.recipe-pdf', compact('recipe'))->download($filename);
-        } else {
-            // return Excel::download(new RecipeExport($recipe), $filename);
+            $pdf = Pdf::loadView('exports.recipe-pdf', compact('recipe'));
+            return $pdf->download($filename);
         }
         
-        return back()->with('success', 'Рецепт экспортирован');
+        // Excel экспорт пока не реализован
+        return back()->with('error', 'Формат экспорта не поддерживается');
     }
 
     /**
