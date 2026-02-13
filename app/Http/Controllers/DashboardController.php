@@ -7,6 +7,7 @@ use App\Models\Menu;
 use App\Models\Recipe;
 use App\Models\Day;
 use App\Models\PersonalPlan;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -217,10 +218,9 @@ class DashboardController extends Controller
         
         $filename = "shopping-list-{$startDate->format('Y-m-d')}-{$endDate->format('Y-m-d')}.pdf";
         
-        // Здесь будет генерация PDF
-        // return PDF::loadView('exports.shopping-list', compact('shoppingList'))->download($filename);
+        $pdf = Pdf::loadView('exports.shopping-list', compact('shoppingList', 'startDate', 'endDate'));
         
-        return back()->with('success', 'Список покупок экспортирован');
+        return $pdf->download($filename);
     }
 
     /**
