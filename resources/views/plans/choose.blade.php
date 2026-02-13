@@ -66,8 +66,8 @@
 
                     <p class="text-xs text-gray-500 text-center mt-4">
                         Нажимая «Оплатить», вы соглашаетесь с
-                        <a href="{{ route('home.offer') }}" class="text-green-600 hover:underline">офертой</a> и
-                        <a href="{{ route('home.privacy') }}" class="text-green-600 hover:underline">политикой конфиденциальности</a>
+                        <a href="{{ route('offer') }}" class="text-green-600 hover:underline">офертой</a> и
+                        <a href="{{ route('privacy') }}" class="text-green-600 hover:underline">политикой конфиденциальности</a>
                     </p>
                 </div>
             </div>

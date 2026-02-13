@@ -7,9 +7,11 @@ use App\Models\Payment;
 use App\Models\UserSubscription;
 use App\Models\Coupon;
 use App\Services\SubscriptionService;
+use App\Services\Payments\YooKassaService;
+use App\Services\Payments\CloudPaymentsService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 use App\Events\PaymentProcessed;
 use App\Events\SubscriptionStatusChanged;
 
@@ -193,12 +195,25 @@ class PaymentController extends Controller
      */
     private function createYooKassaPayment(Payment $payment): array
     {
-        // Здесь будет интеграция с YooKassa API
-        // Пока заглушка
+        $yooKassaService = app(YooKassaService::class);
+
+        $response = $yooKassaService->createPayment([
+            'user_id' => $payment->user_id,
+            'subscription_id' => $payment->subscription_id,
+            'amount' => $payment->amount,
+            'currency' => $payment->currency ?? 'RUB',
+            'description' => $payment->description,
+            'return_url' => route('payment.success', ['payment_id' => $payment->external_id]),
+            'metadata' => [
+                'payment_id' => $payment->id,
+                'user_id' => $payment->user_id,
+            ],
+        ]);
+
         return [
-            'payment_id' => 'yk_' . Str::uuid(),
-            'payment_url' => 'https://yoomoney.ru/checkout/payments/v2/contract',
-            'status' => 'pending'
+            'payment_id' => $response->external_id,
+            'payment_url' => $response->payload['confirmation_url'] ?? route('payment.success'),
+            'status' => $response->status,
         ];
     }
 
@@ -207,12 +222,25 @@ class PaymentController extends Controller
      */
     private function createCloudPaymentsPayment(Payment $payment): array
     {
-        // Здесь будет интеграция с CloudPayments API
-        // Пока заглушка
+        $cloudPaymentsService = app(CloudPaymentsService::class);
+
+        $response = $cloudPaymentsService->createPayment([
+            'user_id' => $payment->user_id,
+            'subscription_id' => $payment->subscription_id,
+            'amount' => $payment->amount,
+            'currency' => $payment->currency ?? 'RUB',
+            'description' => $payment->description,
+            'email' => $payment->user->email ?? null,
+            'metadata' => [
+                'payment_id' => $payment->id,
+                'user_id' => $payment->user_id,
+            ],
+        ]);
+
         return [
-            'payment_id' => 'cp_' . Str::uuid(),
-            'payment_url' => 'https://widget.cloudpayments.ru/widgets/payment',
-            'status' => 'pending'
+            'payment_id' => $response->external_id,
+            'payment_url' => $response->payload['PaymentUrl'] ?? route('payment.success'),
+            'status' => $response->status,
         ];
     }
 

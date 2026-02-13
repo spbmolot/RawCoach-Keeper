@@ -81,6 +81,14 @@ class Recipe extends Model
     }
 
     /**
+     * Просмотры рецепта
+     */
+    public function views(): HasMany
+    {
+        return $this->hasMany(RecipeView::class);
+    }
+
+    /**
      * Автор рецепта
      */
     public function author()

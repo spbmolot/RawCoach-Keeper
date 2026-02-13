@@ -20,7 +20,7 @@ return [
             'webhook_secret' => env('YOOKASSA_WEBHOOK_SECRET'),
             'test_mode' => env('YOOKASSA_TEST_MODE', true),
             'currency' => 'RUB',
-            'webhook_url' => env('APP_URL') . '/webhooks/yookassa',
+            'webhook_url' => env('APP_URL') . '/webhook/yookassa',
         ],
 
         'cloudpayments' => [
@@ -30,7 +30,7 @@ return [
             'webhook_secret' => env('CLOUDPAYMENTS_WEBHOOK_SECRET'),
             'test_mode' => env('CLOUDPAYMENTS_TEST_MODE', true),
             'currency' => 'RUB',
-            'webhook_url' => env('APP_URL') . '/webhooks/cloudpayments',
+            'webhook_url' => env('APP_URL') . '/webhook/cloudpayments',
         ],
     ],
 

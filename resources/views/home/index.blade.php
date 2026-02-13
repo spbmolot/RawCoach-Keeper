@@ -19,7 +19,7 @@
                     <a href="{{ route('plans.index') }}" class="bg-yellow-400 text-gray-900 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-yellow-300 transition">
                         Выбрать план
                     </a>
-                    <a href="{{ route('home.demo') }}" class="border-2 border-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-gray-900 transition">
+                    <a href="{{ route('demo') }}" class="border-2 border-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-gray-900 transition">
                         Демо доступ
                     </a>
                 </div>
