@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Menu;
 use App\Models\Recipe;
 use App\Models\Day;
+use App\Services\SpreadsheetExporter;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 
@@ -76,19 +78,23 @@ class MenuController extends Controller
         $format = $request->get('format', 'pdf');
         
         $days = $menu->days()
-            ->with(['recipes', 'recipes.ingredients'])
-            ->orderBy('date')
+            ->with(['meals.recipe.ingredients'])
+            ->orderBy('day_number')
             ->get();
         
         $filename = "menu-{$menu->slug}-{$menu->period_start->format('Y-m')}.{$format}";
         
         if ($format === 'pdf') {
-            // return PDF::loadView('exports.menu-pdf', compact('menu', 'days'))->download($filename);
-        } else {
-            // return Excel::download(new MenuExport($menu, $days), $filename);
+            $pdf = Pdf::loadView('exports.menu-pdf', compact('menu', 'days'));
+            return $pdf->download($filename);
         }
         
-        return back()->with('success', 'Меню экспортировано');
+        if ($format === 'xlsx') {
+            $xlsxFilename = str_replace('.xlsx', '', $filename) . '.xlsx';
+            return SpreadsheetExporter::exportMenu($menu, $days, $xlsxFilename);
+        }
+        
+        return back()->with('error', 'Формат экспорта не поддерживается');
     }
 
     /**

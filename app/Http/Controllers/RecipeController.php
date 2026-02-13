@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Recipe;
 use App\Models\RecipeView;
+use App\Services\SpreadsheetExporter;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -237,7 +238,10 @@ class RecipeController extends Controller
             return $pdf->download($filename);
         }
         
-        // Excel экспорт пока не реализован
+        if ($format === 'xlsx') {
+            return SpreadsheetExporter::exportRecipe($recipe, $filename);
+        }
+        
         return back()->with('error', 'Формат экспорта не поддерживается');
     }
 
