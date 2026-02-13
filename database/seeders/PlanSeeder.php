@@ -18,25 +18,26 @@ class PlanSeeder extends Seeder
             [
                 'name' => 'Пробный период',
                 'type' => 'trial',
+                'role' => 'subscriber_trial',
                 'price' => 0.00,
                 'currency' => 'RUB',
                 'duration_days' => 7,
                 'is_active' => true,
                 'sort_order' => 0,
                 'description' => '7 дней бесплатного доступа для новых пользователей',
-                'features' => json_encode([
+                'features' => [
                     'Доступ к текущей неделе планов',
                     'Ограниченные рецепты',
                     'Базовые списки покупок',
                     'Один экспорт в PDF'
-                ]),
-                'limits' => json_encode([
+                ],
+                'limits' => [
                     'archive_access' => false,
                     'early_access' => false,
                     'personal_plans' => false,
                     'max_exports_per_month' => 1,
                     'max_recipes_per_day' => 3
-                ])
+                ]
             ]
         );
 
@@ -46,26 +47,27 @@ class PlanSeeder extends Seeder
             [
                 'name' => 'Стандарт',
                 'type' => 'monthly',
+                'role' => 'subscriber_standard',
                 'price' => 1990.00,
                 'currency' => 'RUB',
                 'duration_days' => 30,
                 'is_active' => true,
                 'sort_order' => 1,
                 'description' => 'Доступ к текущему месяцу планов питания',
-                'features' => json_encode([
+                'features' => [
                     'Актуальные планы питания на месяц',
                     'Подробные рецепты с граммовкой',
                     'Калорийность 1200-1400 ккал/день',
                     'Списки покупок',
                     'Экспорт в PDF и Excel',
                     'Поддержка в чате'
-                ]),
-                'limits' => json_encode([
+                ],
+                'limits' => [
                     'archive_access' => false,
                     'early_access' => false,
                     'personal_plans' => false,
                     'max_exports_per_month' => 10
-                ])
+                ]
             ]
         );
 
@@ -75,6 +77,7 @@ class PlanSeeder extends Seeder
             [
                 'name' => 'Стандарт',
                 'type' => 'yearly',
+                'role' => 'subscriber_premium',
                 'price' => 17910.00, // 1990 * 12 * 0.75
                 'original_price' => 23880.00, // 1990 * 12
                 'currency' => 'RUB',
@@ -82,7 +85,7 @@ class PlanSeeder extends Seeder
                 'is_active' => true,
                 'sort_order' => 2,
                 'description' => 'Годовая подписка со скидкой 25%',
-                'features' => json_encode([
+                'features' => [
                     'Актуальные планы питания на месяц',
                     'Подробные рецепты с граммовкой',
                     'Калорийность 1200-1400 ккал/день',
@@ -91,13 +94,13 @@ class PlanSeeder extends Seeder
                     'Поддержка в чате',
                     'Доступ к архиву всех планов',
                     'Скидка 25%'
-                ]),
-                'limits' => json_encode([
+                ],
+                'limits' => [
                     'archive_access' => true,
                     'early_access' => false,
                     'personal_plans' => false,
                     'max_exports_per_month' => null
-                ])
+                ]
             ]
         );
 
@@ -107,27 +110,28 @@ class PlanSeeder extends Seeder
             [
                 'name' => 'Индивидуальный',
                 'type' => 'monthly',
+                'role' => 'subscriber_personal',
                 'price' => 4990.00,
                 'currency' => 'RUB',
                 'duration_days' => 30,
                 'is_active' => true,
                 'sort_order' => 3,
                 'description' => 'Персонализированные планы питания',
-                'features' => json_encode([
+                'features' => [
                     'Все возможности плана Стандарт',
                     'Персональный план питания',
                     'Учет аллергий и предпочтений',
                     'Индивидуальная калорийность',
                     'Консультация нутрициолога',
                     'Корректировка плана в течение месяца'
-                ]),
-                'limits' => json_encode([
+                ],
+                'limits' => [
                     'archive_access' => true,
                     'early_access' => true,
                     'personal_plans' => true,
                     'max_exports_per_month' => null,
                     'nutritionist_consultations' => 2
-                ])
+                ]
             ]
         );
 
@@ -137,6 +141,7 @@ class PlanSeeder extends Seeder
             [
                 'name' => 'Индивидуальный',
                 'type' => 'yearly',
+                'role' => 'subscriber_personal',
                 'price' => 44910.00, // 4990 * 12 * 0.75
                 'original_price' => 59880.00, // 4990 * 12
                 'currency' => 'RUB',
@@ -144,7 +149,7 @@ class PlanSeeder extends Seeder
                 'is_active' => true,
                 'sort_order' => 4,
                 'description' => 'Годовая персональная подписка со скидкой 25%',
-                'features' => json_encode([
+                'features' => [
                     'Все возможности плана Стандарт',
                     'Персональный план питания',
                     'Учет аллергий и предпочтений',
@@ -152,14 +157,14 @@ class PlanSeeder extends Seeder
                     'Консультация нутрициолога',
                     'Корректировка плана в течение месяца',
                     'Скидка 25%'
-                ]),
-                'limits' => json_encode([
+                ],
+                'limits' => [
                     'archive_access' => true,
                     'early_access' => true,
                     'personal_plans' => true,
                     'max_exports_per_month' => null,
                     'nutritionist_consultations' => 24
-                ])
+                ]
             ]
         );
 

@@ -250,37 +250,57 @@ class PaymentService
             ->where('auto_renew', true)
             ->where('ends_at', '<=', now()->addDays($days))
             ->where('ends_at', '>', now())
-            ->with(['user', 'plan'])
+            ->with(['user', 'plan', 'scheduledPlan'])
             ->get();
 
         $result['found'] = $expiring->count();
 
         foreach ($expiring as $subscription) {
+            // Определяем план для продления (текущий или запланированный)
+            $renewalPlan = $subscription->hasScheduledPlanChange() 
+                ? $subscription->scheduledPlan 
+                : $subscription->plan;
+
             if ($dryRun) {
                 $result['skipped']++;
+                $planInfo = $subscription->hasScheduledPlanChange()
+                    ? "смена на {$renewalPlan->name}, сумма {$renewalPlan->price}"
+                    : "продление {$renewalPlan->name}, сумма {$renewalPlan->price}";
                 $result['details'][] = [
                     'subscription_id' => $subscription->id,
                     'success' => true,
-                    'message' => 'Будет создан платеж на сумму ' . $subscription->plan->price,
+                    'message' => "Будет создан платеж: {$planInfo}",
                 ];
                 continue;
             }
 
             try {
+                // Если есть запланированная смена плана - применяем её
+                if ($subscription->hasScheduledPlanChange()) {
+                    $subscription->applyScheduledPlanChange();
+                    $subscription->refresh();
+                    
+                    Log::info('Scheduled plan change applied', [
+                        'subscription_id' => $subscription->id,
+                        'new_plan_id' => $renewalPlan->id,
+                    ]);
+                }
+
                 $payment = $this->createSubscriptionPayment($subscription, [
-                    'description' => 'Автопродление подписки ' . $subscription->plan->name,
+                    'description' => 'Автопродление подписки ' . $renewalPlan->name,
                 ]);
 
                 $result['processed']++;
                 $result['details'][] = [
                     'subscription_id' => $subscription->id,
                     'success' => true,
-                    'message' => 'Платеж создан: #' . $payment->id,
+                    'message' => 'Платеж создан: #' . $payment->id . ' на сумму ' . $renewalPlan->price,
                 ];
 
                 Log::info('Auto-renewal payment created', [
                     'subscription_id' => $subscription->id,
                     'payment_id' => $payment->id,
+                    'plan_id' => $renewalPlan->id,
                 ]);
             } catch (\Exception $e) {
                 $result['errors']++;

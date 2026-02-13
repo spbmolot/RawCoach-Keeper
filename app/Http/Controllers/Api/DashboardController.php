@@ -87,13 +87,14 @@ class DashboardController extends Controller
         $startOfWeek = Carbon::now()->startOfWeek();
         $endOfWeek = Carbon::now()->endOfWeek();
 
-        $weekDays = Day::with(['recipes', 'menu'])
-            ->whereBetween('date', [$startOfWeek, $endOfWeek])
-            ->orderBy('date')
-            ->get()
-            ->groupBy(function ($day) {
-                return Carbon::parse($day->date)->format('Y-m-d');
-            });
+        $weekDays = collect();
+        $currentDate = $startOfWeek->copy();
+        
+        while ($currentDate <= $endOfWeek) {
+            $day = $this->getDayForDate($currentDate);
+            $weekDays[$currentDate->format('Y-m-d')] = $day;
+            $currentDate->addDay();
+        }
 
         return response()->json([
             'success' => true,
@@ -113,16 +114,23 @@ class DashboardController extends Controller
         $year = $request->get('year', Carbon::now()->year);
         $month = $request->get('month', Carbon::now()->month);
 
-        $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth();
-        $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth();
-
-        $days = Day::with(['recipes', 'menu'])
-            ->whereBetween('date', [$startDate, $endDate])
-            ->orderBy('date')
-            ->get()
-            ->keyBy(function ($day) {
-                return Carbon::parse($day->date)->format('Y-m-d');
-            });
+        // Получаем меню за месяц
+        $menu = Menu::where('month', $month)
+            ->where('year', $year)
+            ->where('is_published', true)
+            ->with(['days.meals.recipe'])
+            ->first();
+        
+        // Преобразуем дни в формат с датами
+        $days = collect();
+        if ($menu) {
+            foreach ($menu->days as $day) {
+                $dayDate = Carbon::create($year, $month, $day->day_number);
+                if ($dayDate->month == $month) {
+                    $days[$dayDate->format('Y-m-d')] = $day;
+                }
+            }
+        }
 
         return response()->json([
             'success' => true,
@@ -139,24 +147,33 @@ class DashboardController extends Controller
      */
     public function shoppingList(Request $request): JsonResponse
     {
-        $startDate = $request->get('start_date', Carbon::now()->format('Y-m-d'));
-        $endDate = $request->get('end_date', Carbon::now()->addDays(6)->format('Y-m-d'));
+        $startDate = Carbon::parse($request->get('start_date', Carbon::now()->format('Y-m-d')));
+        $endDate = Carbon::parse($request->get('end_date', Carbon::now()->addDays(6)->format('Y-m-d')));
 
-        // Получаем все рецепты за период
-        $recipes = Recipe::whereHas('days', function ($query) use ($startDate, $endDate) {
-            $query->whereBetween('date', [$startDate, $endDate]);
-        })
-        ->with(['ingredients'])
-        ->get();
+        // Получаем дни за период
+        $recipes = collect();
+        $currentDate = $startDate->copy();
+        while ($currentDate <= $endDate) {
+            $day = $this->getDayForDate($currentDate);
+            if ($day) {
+                $day->load(['meals.recipe.ingredients']);
+                foreach ($day->meals as $meal) {
+                    if ($meal->recipe) {
+                        $recipes->push($meal->recipe);
+                    }
+                }
+            }
+            $currentDate->addDay();
+        }
 
         // Группируем ингредиенты
         $shoppingList = [];
         foreach ($recipes as $recipe) {
             foreach ($recipe->ingredients as $ingredient) {
-                $key = $ingredient->name;
+                $key = $ingredient->ingredient_name ?? $ingredient->name ?? 'unknown';
                 if (!isset($shoppingList[$key])) {
                     $shoppingList[$key] = [
-                        'name' => $ingredient->name,
+                        'name' => $key,
                         'amount' => 0,
                         'unit' => $ingredient->unit,
                         'category' => $ingredient->category ?? 'Прочее'
@@ -173,8 +190,8 @@ class DashboardController extends Controller
             'success' => true,
             'data' => [
                 'period' => [
-                    'start_date' => $startDate,
-                    'end_date' => $endDate
+                    'start_date' => $startDate->format('Y-m-d'),
+                    'end_date' => $endDate->format('Y-m-d')
                 ],
                 'shopping_list' => $groupedList
             ]
@@ -232,14 +249,29 @@ class DashboardController extends Controller
     }
 
     /**
+     * Получить день меню для конкретной даты
+     */
+    private function getDayForDate($date)
+    {
+        $dayNumber = $date->day;
+        $month = $date->month;
+        $year = $date->year;
+        
+        return Day::whereHas('menu', function($query) use ($month, $year) {
+                $query->where('month', $month)
+                    ->where('year', $year)
+                    ->where('is_published', true);
+            })
+            ->where('day_number', $dayNumber)
+            ->with(['menu', 'meals.recipe.ingredients'])
+            ->first();
+    }
+
+    /**
      * Получить меню на сегодня
      */
     private function getTodayMenu()
     {
-        $today = Carbon::now()->format('Y-m-d');
-        
-        return Day::with(['recipes', 'recipes.ingredients', 'menu'])
-            ->where('date', $today)
-            ->first();
+        return $this->getDayForDate(Carbon::now());
     }
 }

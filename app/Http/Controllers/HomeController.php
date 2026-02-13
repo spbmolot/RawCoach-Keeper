@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ContactFormMail;
 use App\Models\Plan;
 use App\Models\Menu;
 use App\Models\Recipe;
@@ -59,8 +61,7 @@ class HomeController extends Controller
             'message' => 'required|string|max:2000',
         ]);
 
-        // Здесь можно отправить email или сохранить в БД
-        // Mail::to('support@rawplan.ru')->send(new ContactFormMail($request->all()));
+        Mail::to('noreply@rawplan.ru')->send(new ContactFormMail($request->only(['name', 'email', 'subject', 'message'])));
 
         return back()->with('success', 'Ваше сообщение отправлено! Мы свяжемся с вами в ближайшее время.');
     }

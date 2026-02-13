@@ -15,16 +15,20 @@ use App\Http\Controllers\Webhook\CloudPaymentsWebhookController;
 use App\Http\Controllers\ShoppingListController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\TestPaymentController;
+use App\Http\Controllers\DiagnosticsController;
 
 // Публичные страницы
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/about', [HomeController::class, 'about'])->name('about');
 Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
-Route::post('/contact', [HomeController::class, 'contactSubmit'])->name('contact.submit');
+Route::post('/contact', [HomeController::class, 'contactSubmit'])->name('contact.submit')->middleware(['throttle:contact', 'recaptcha:contact']);
 Route::get('/privacy', [HomeController::class, 'privacy'])->name('privacy');
 Route::get('/terms', [HomeController::class, 'terms'])->name('terms');
 Route::get('/offer', [HomeController::class, 'offer'])->name('offer');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+
+// Диагностика системы (защищена ключом)
+Route::get('/diagnostics', [DiagnosticsController::class, 'index'])->name('diagnostics');
 
 // Тестовые маршруты для платежей (только в dev)
 if (app()->environment('local', 'development', 'testing')) {
@@ -42,9 +46,12 @@ Route::prefix('plans')->name('plans.')->group(function () {
     Route::get('/{plan}', [PlansController::class, 'show'])->name('show');
 });
 
-// Вебхуки платежных систем (без middleware)
-Route::post('/webhook/yookassa', YooKassaWebhookController::class)->name('webhook.yookassa');
-Route::post('/webhook/cloudpayments', CloudPaymentsWebhookController::class)->name('webhook.cloudpayments');
+// Вебхуки платежных систем (без CSRF, с rate limiting)
+Route::post('/webhook/yookassa', YooKassaWebhookController::class)->name('webhook.yookassa')->middleware('throttle:webhooks');
+Route::post('/webhook/cloudpayments', CloudPaymentsWebhookController::class)->name('webhook.cloudpayments')->middleware('throttle:webhooks');
+
+// Редирект с Jetstream профиля на наш кастомный
+Route::redirect('/user/profile', '/dashboard/profile');
 
 // Авторизованные пользователи
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {

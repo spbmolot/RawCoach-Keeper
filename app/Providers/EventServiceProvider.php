@@ -6,6 +6,7 @@ use App\Events\PaymentProcessed;
 use App\Events\SubscriptionStatusChanged;
 use App\Listeners\SendPaymentNotification;
 use App\Listeners\SendSubscriptionNotification;
+use App\Listeners\SyncSubscriptionRole;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -31,6 +32,7 @@ class EventServiceProvider extends ServiceProvider
         // Subscription events
         SubscriptionStatusChanged::class => [
             SendSubscriptionNotification::class,
+            SyncSubscriptionRole::class,
         ],
     ];
 

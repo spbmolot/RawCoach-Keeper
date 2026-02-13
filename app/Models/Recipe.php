@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Storage;
 
 class Recipe extends Model
 {
@@ -163,6 +164,22 @@ class Recipe extends Model
     public function scopeQuick($query)
     {
         return $query->where('total_time', '<=', 30);
+    }
+
+    /**
+     * Алиас для main_image (используется в шаблонах как $recipe->image)
+     */
+    public function getImageAttribute(): ?string
+    {
+        return $this->main_image;
+    }
+
+    /**
+     * Полный URL изображения (для schema.org и API)
+     */
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->main_image ? Storage::url($this->main_image) : null;
     }
 
     /**

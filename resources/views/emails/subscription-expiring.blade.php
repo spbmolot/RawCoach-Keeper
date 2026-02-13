@@ -15,7 +15,7 @@
         <p><strong>Дата окончания:</strong> {{ $subscription->ends_at->format('d.m.Y') }}</p>
         <p><strong>Осталось дней:</strong> {{ $daysLeft }}</p>
         <p><strong>Автопродление:</strong> 
-            @if($subscription->auto_renewal)
+            @if($subscription->auto_renew)
                 <span class="status-badge status-success">Включено</span>
             @else
                 <span class="status-badge status-warning">Отключено</span>
@@ -23,13 +23,13 @@
         </p>
     </div>
     
-    @if($subscription->auto_renewal)
+    @if($subscription->auto_renew)
         <p>У вас включено автоматическое продление подписки. Оплата будет произведена автоматически {{ $subscription->ends_at->subDays(1)->format('d.m.Y') }}.</p>
         
         <p>Убедитесь, что на вашей карте достаточно средств для списания {{ number_format($plan->price, 0, ',', ' ') }} ₽.</p>
         
         <div style="text-align: center; margin: 30px 0;">
-            <a href="{{ route('subscriptions.manage', $subscription) }}" class="button">
+            <a href="{{ route('dashboard.profile') }}" class="button">
                 Управление подпиской
             </a>
         </div>
@@ -39,7 +39,7 @@
         <p>У вас отключено автоматическое продление. Чтобы продолжить пользоваться планами питания, необходимо продлить подписку вручную.</p>
         
         <div style="text-align: center; margin: 30px 0;">
-            <a href="{{ route('subscriptions.renew', $subscription) }}" class="button">
+            <a href="{{ route('plans.index') }}" class="button">
                 Продлить подписку
             </a>
         </div>

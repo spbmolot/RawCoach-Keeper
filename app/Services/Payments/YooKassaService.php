@@ -4,11 +4,13 @@ namespace App\Services\Payments;
 
 use App\Models\Payment;
 use App\Models\UserSubscription;
+use App\Services\SubscriptionService;
 use App\Events\PaymentProcessed;
-use App\Events\SubscriptionStatusChanged;
+use App\Mail\PaymentFailed;
 use YooKassa\Client as YooKassaClient;
 use RuntimeException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class YooKassaService
 {
@@ -167,9 +169,15 @@ class YooKassaService
 
         $payment->update($update);
 
-        // Обновляем подписку при успешной оплате
+        // Используем единый сервис для активации подписки (предотвращает дублирование)
         if ($newStatus === 'paid' && $oldStatus !== 'paid' && $payment->subscription_id) {
-            $this->activateSubscription($payment);
+            $subscriptionService = app(SubscriptionService::class);
+            $subscriptionService->activateSubscription($payment);
+        }
+
+        // Обработка неудачного платежа
+        if ($newStatus === 'cancelled' && $oldStatus !== 'cancelled') {
+            $this->handleFailedPayment($payment, $paymentData);
         }
 
         Log::info('Payment status updated', [
@@ -179,32 +187,47 @@ class YooKassaService
             'new_status' => $newStatus,
         ]);
 
-        // Dispatch events
+        // Dispatch payment event (subscription event dispatched by SubscriptionService)
         event(new PaymentProcessed($payment, $newStatus));
-        if ($newStatus === 'paid' && $payment->subscription_id) {
-            $subscription = UserSubscription::find($payment->subscription_id);
-            if ($subscription) {
-                event(new SubscriptionStatusChanged($subscription, 'active'));
-            }
-        }
     }
 
     /**
-     * Активация подписки после успешной оплаты
+     * Обработка неудачного платежа
      */
-    private function activateSubscription(Payment $payment): void
+    private function handleFailedPayment(Payment $payment, array $paymentData): void
     {
-        $subscription = UserSubscription::find($payment->subscription_id);
-        
-        if ($subscription && $subscription->status === 'pending') {
+        $subscription = $payment->subscription_id 
+            ? UserSubscription::find($payment->subscription_id) 
+            : null;
+
+        // Если это платёж за продление и подписка активна - переводим в grace period
+        if ($subscription && $subscription->status === 'active' && $subscription->ends_at <= now()) {
             $subscription->update([
-                'status' => 'active',
-                'starts_at' => now(),
+                'status' => 'grace_period',
+                'grace_period_ends_at' => now()->addDays(3),
             ]);
 
-            Log::info('Subscription activated', [
+            Log::info('Subscription moved to grace period due to failed payment', [
                 'subscription_id' => $subscription->id,
                 'payment_id' => $payment->id,
+            ]);
+        }
+
+        // Отправляем уведомление пользователю
+        try {
+            $user = $payment->user;
+            if ($user) {
+                Mail::to($user)->send(new PaymentFailed($payment));
+                
+                Log::info('Payment failed notification sent', [
+                    'payment_id' => $payment->id,
+                    'user_id' => $user->id,
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to send payment failed notification', [
+                'payment_id' => $payment->id,
+                'error' => $e->getMessage(),
             ]);
         }
     }

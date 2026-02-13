@@ -6,19 +6,19 @@
 
 @section('content')
 <!-- Hero Section -->
-<section class="hero-gradient py-20">
+<section class="hero-gradient py-10 sm:py-20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h1 class="text-4xl sm:text-5xl font-extrabold text-white mb-6">О нас</h1>
-        <p class="text-xl text-green-100 max-w-2xl mx-auto">
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-4 sm:mb-6">О нас</h1>
+        <p class="text-base sm:text-xl text-green-100 max-w-2xl mx-auto">
             Мы помогаем людям худеть вкусно и без стресса с 2023 года
         </p>
     </div>
 </section>
 
 <!-- Mission Section -->
-<section class="py-20 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid lg:grid-cols-2 gap-16 items-center">
+<section class="py-10 sm:py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div class="grid lg:grid-cols-2 gap-8 sm:gap-16 items-center">
             <div>
                 <span class="text-green-600 font-semibold text-sm uppercase tracking-wider">Наша миссия</span>
                 <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mt-3 mb-6">

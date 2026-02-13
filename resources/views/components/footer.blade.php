@@ -9,9 +9,9 @@
     $isSubscriber = $user && $user->hasActiveSubscription();
 @endphp
 
-<footer class="bg-gray-900 text-gray-400 py-12 sm:py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 sm:gap-12 mb-8 sm:mb-12">
+<footer class="bg-gray-900 text-gray-400 py-8 sm:py-12 lg:py-16">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 lg:gap-12 mb-6 sm:mb-8 lg:mb-12">
             {{-- Логотип и описание --}}
             <div class="col-span-2">
                 <a href="{{ route('home') }}" class="flex items-center gap-2 mb-4">

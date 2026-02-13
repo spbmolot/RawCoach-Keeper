@@ -50,7 +50,7 @@
         @endif
 
         <!-- Page Content -->
-        <main class="px-6 pb-12 pt-6">
+        <main class="px-3 sm:px-6 pb-12 pt-4 sm:pt-6">
             {{ $slot }}
         </main>
     </div>

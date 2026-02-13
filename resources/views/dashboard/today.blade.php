@@ -1,27 +1,27 @@
 <x-app-layout>
     <div class="max-w-7xl mx-auto">
         {{-- Заголовок с датой --}}
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
             <div>
-                <div class="flex items-center gap-3 mb-2">
+                <div class="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
                     <a href="{{ route('dashboard') }}" class="text-gray-400 hover:text-gray-600 transition">
-                        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                        <i data-lucide="arrow-left" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                     </a>
-                    <h1 class="text-3xl font-bold text-gray-900">Меню на сегодня</h1>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Меню на сегодня</h1>
                 </div>
-                <p class="text-gray-600 flex items-center gap-2">
-                    <i data-lucide="calendar" class="w-4 h-4"></i>
+                <p class="text-gray-600 flex items-center gap-2 text-sm sm:text-base">
+                    <i data-lucide="calendar" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                     {{ $today->translatedFormat('l, d F Y') }}
                 </p>
             </div>
-            <div class="flex gap-3">
-                <a href="{{ route('dashboard.week') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition">
-                    <i data-lucide="calendar-days" class="w-4 h-4"></i>
-                    Вся неделя
+            <div class="flex flex-wrap gap-2 sm:gap-3">
+                <a href="{{ route('dashboard.week') }}" class="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-white border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition text-sm sm:text-base">
+                    <i data-lucide="calendar-days" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+                    <span class="hidden xs:inline">Вся</span> неделя
                 </a>
-                <a href="{{ route('shopping-list.index') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-xl hover:bg-green-600 transition">
-                    <i data-lucide="shopping-cart" class="w-4 h-4"></i>
-                    Список покупок
+                <a href="{{ route('shopping-list.index') }}" class="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-green-500 text-white rounded-xl hover:bg-green-600 transition text-sm sm:text-base">
+                    <i data-lucide="shopping-cart" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+                    <span class="hidden xs:inline">Список</span> покупок
                 </a>
             </div>
         </div>
@@ -58,7 +58,7 @@
                                 @foreach($recipes->get($type) as $recipe)
                                     <a href="{{ route('recipes.show', $recipe) }}" class="flex items-center gap-4 p-4 hover:bg-gray-50 transition group">
                                         @if($recipe->image)
-                                            <img src="{{ $recipe->image }}" alt="{{ $recipe->name }}" class="w-20 h-20 rounded-xl object-cover">
+                                            <img src="{{ Storage::url($recipe->image) }}" alt="{{ $recipe->title }}" class="w-20 h-20 rounded-xl object-cover">
                                         @else
                                             <div class="w-20 h-20 bg-gray-100 rounded-xl flex items-center justify-center">
                                                 <i data-lucide="chef-hat" class="w-8 h-8 text-gray-400"></i>
@@ -108,47 +108,47 @@
                 $totalFats = $recipes->flatten()->sum('fats');
                 $totalCarbs = $recipes->flatten()->sum('carbs');
             @endphp
-            <div class="mt-8 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-6 text-white">
-                <h3 class="font-semibold mb-4 flex items-center gap-2">
-                    <i data-lucide="calculator" class="w-5 h-5"></i>
+            <div class="mt-6 sm:mt-8 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white">
+                <h3 class="font-semibold mb-3 sm:mb-4 flex items-center gap-2 text-sm sm:text-base">
+                    <i data-lucide="calculator" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                     Итого за день
                 </h3>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="bg-white/20 rounded-xl p-4 backdrop-blur-sm">
-                        <div class="text-green-100 text-sm mb-1">Калории</div>
-                        <div class="text-2xl font-bold">{{ $totalCalories }} ккал</div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
+                    <div class="bg-white/20 rounded-lg sm:rounded-xl p-3 sm:p-4 backdrop-blur-sm">
+                        <div class="text-green-100 text-xs sm:text-sm mb-0.5 sm:mb-1">Калории</div>
+                        <div class="text-lg sm:text-2xl font-bold">{{ $totalCalories }} <span class="text-sm sm:text-base">ккал</span></div>
                     </div>
-                    <div class="bg-white/20 rounded-xl p-4 backdrop-blur-sm">
-                        <div class="text-green-100 text-sm mb-1">Белки</div>
-                        <div class="text-2xl font-bold">{{ $totalProteins }} г</div>
+                    <div class="bg-white/20 rounded-lg sm:rounded-xl p-3 sm:p-4 backdrop-blur-sm">
+                        <div class="text-green-100 text-xs sm:text-sm mb-0.5 sm:mb-1">Белки</div>
+                        <div class="text-lg sm:text-2xl font-bold">{{ $totalProteins }} г</div>
                     </div>
-                    <div class="bg-white/20 rounded-xl p-4 backdrop-blur-sm">
-                        <div class="text-green-100 text-sm mb-1">Жиры</div>
-                        <div class="text-2xl font-bold">{{ $totalFats }} г</div>
+                    <div class="bg-white/20 rounded-lg sm:rounded-xl p-3 sm:p-4 backdrop-blur-sm">
+                        <div class="text-green-100 text-xs sm:text-sm mb-0.5 sm:mb-1">Жиры</div>
+                        <div class="text-lg sm:text-2xl font-bold">{{ $totalFats }} г</div>
                     </div>
-                    <div class="bg-white/20 rounded-xl p-4 backdrop-blur-sm">
-                        <div class="text-green-100 text-sm mb-1">Углеводы</div>
-                        <div class="text-2xl font-bold">{{ $totalCarbs }} г</div>
+                    <div class="bg-white/20 rounded-lg sm:rounded-xl p-3 sm:p-4 backdrop-blur-sm">
+                        <div class="text-green-100 text-xs sm:text-sm mb-0.5 sm:mb-1">Углеводы</div>
+                        <div class="text-lg sm:text-2xl font-bold">{{ $totalCarbs }} г</div>
                     </div>
                 </div>
             </div>
         @else
             {{-- Пустое состояние --}}
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
-                <div class="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                    <i data-lucide="calendar-x" class="w-10 h-10 text-gray-400"></i>
+            <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-12 text-center">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                    <i data-lucide="calendar-x" class="w-8 h-8 sm:w-10 sm:h-10 text-gray-400"></i>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">Меню на сегодня не найдено</h3>
-                <p class="text-gray-600 mb-6 max-w-md mx-auto">
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Меню на сегодня не найдено</h3>
+                <p class="text-gray-600 mb-4 sm:mb-6 max-w-md mx-auto text-sm sm:text-base">
                     Возможно, меню на этот день ещё не опубликовано или у вас нет активной подписки
                 </p>
-                <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                    <a href="{{ route('menus.index') }}" class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 transition">
-                        <i data-lucide="book-open" class="w-5 h-5"></i>
-                        Посмотреть все меню
+                <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center">
+                    <a href="{{ route('menus.index') }}" class="inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 transition text-sm sm:text-base">
+                        <i data-lucide="book-open" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                        Все меню
                     </a>
-                    <a href="{{ route('plans.index') }}" class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition">
-                        <i data-lucide="crown" class="w-5 h-5"></i>
+                    <a href="{{ route('plans.index') }}" class="inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition text-sm sm:text-base">
+                        <i data-lucide="crown" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                         Выбрать план
                     </a>
                 </div>

@@ -30,7 +30,7 @@
     </ol>
     
     <div style="text-align: center; margin: 30px 0;">
-        <a href="{{ route('subscriptions.retry-payment', $payment) }}" class="button">
+        <a href="{{ route('plans.index') }}" class="button">
             Повторить оплату
         </a>
     </div>

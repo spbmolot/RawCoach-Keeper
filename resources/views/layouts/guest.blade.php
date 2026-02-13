@@ -10,20 +10,8 @@
     $hideFooter = true;
 @endphp
 
-{{-- Минимальный header только с логотипом --}}
+{{-- Без header для страниц авторизации (логотип в карточке) --}}
 @section('header')
-<header class="bg-white/95 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100 shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-center h-16">
-            <a href="{{ route('home') }}" class="flex items-center gap-2">
-                <div class="w-10 h-10 rounded-xl hero-gradient flex items-center justify-center">
-                    <i data-lucide="salad" class="w-6 h-6 text-white"></i>
-                </div>
-                <span class="text-xl font-bold text-gray-900">RawPlan</span>
-            </a>
-        </div>
-    </div>
-</header>
 @endsection
 
 {{-- Ассеты для guest layout --}}

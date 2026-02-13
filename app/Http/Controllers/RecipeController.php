@@ -144,7 +144,7 @@ class RecipeController extends Controller
         $favoriteRecipes = $user->favoriteRecipes()
             ->where('is_published', true)
             ->with(['author'])
-            ->orderBy('recipe_user.created_at', 'desc')
+            ->orderBy('user_favorite_recipes.created_at', 'desc')
             ->paginate(12);
         
         return view('recipes.favorites', compact('favoriteRecipes'));

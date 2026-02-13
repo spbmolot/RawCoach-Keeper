@@ -11,6 +11,8 @@ class UserSubscription extends Model
     protected $fillable = [
         'user_id',
         'plan_id',
+        'scheduled_plan_id', // Запланированный план для даунгрейда/смены
+        'scheduled_at', // Когда запланирована смена
         'status', // active, cancelled, expired, grace_period, pending
         'started_at',
         'ends_at',
@@ -29,6 +31,7 @@ class UserSubscription extends Model
             'started_at' => 'datetime',
             'ends_at' => 'datetime',
             'cancelled_at' => 'datetime',
+            'scheduled_at' => 'datetime',
             'trial_ends_at' => 'datetime',
             'grace_period_ends_at' => 'datetime',
             'auto_renew' => 'boolean',
@@ -50,6 +53,14 @@ class UserSubscription extends Model
     public function plan(): BelongsTo
     {
         return $this->belongsTo(Plan::class);
+    }
+
+    /**
+     * Запланированный план (для даунгрейда/смены)
+     */
+    public function scheduledPlan(): BelongsTo
+    {
+        return $this->belongsTo(Plan::class, 'scheduled_plan_id');
     }
 
     /**
@@ -181,5 +192,56 @@ class UserSubscription extends Model
     public function canBeRenewed(): bool
     {
         return in_array($this->status, ['active', 'grace_period', 'expired']);
+    }
+
+    /**
+     * Запланировать смену плана (даунгрейд/апгрейд) на следующий период
+     */
+    public function schedulePlanChange(Plan $newPlan): void
+    {
+        $this->update([
+            'scheduled_plan_id' => $newPlan->id,
+            'scheduled_at' => now(),
+        ]);
+    }
+
+    /**
+     * Отменить запланированную смену плана
+     */
+    public function cancelScheduledPlanChange(): void
+    {
+        $this->update([
+            'scheduled_plan_id' => null,
+            'scheduled_at' => null,
+        ]);
+    }
+
+    /**
+     * Есть ли запланированная смена плана
+     */
+    public function hasScheduledPlanChange(): bool
+    {
+        return $this->scheduled_plan_id !== null;
+    }
+
+    /**
+     * Применить запланированную смену плана
+     * Вызывается при продлении подписки
+     */
+    public function applyScheduledPlanChange(): ?Plan
+    {
+        if (!$this->hasScheduledPlanChange()) {
+            return null;
+        }
+
+        $newPlan = $this->scheduledPlan;
+        
+        $this->update([
+            'plan_id' => $newPlan->id,
+            'scheduled_plan_id' => null,
+            'scheduled_at' => null,
+        ]);
+
+        return $newPlan;
     }
 }

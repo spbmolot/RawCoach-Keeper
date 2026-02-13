@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'subscription' => \App\Http\Middleware\CheckSubscription::class,
             'role' => \App\Http\Middleware\CheckRole::class,
             'permission' => \App\Http\Middleware\CheckPermission::class,
+            'recaptcha' => \App\Http\Middleware\ValidateRecaptcha::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

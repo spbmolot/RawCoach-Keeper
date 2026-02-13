@@ -26,7 +26,7 @@ class CouponSeeder extends Seeder
                 'is_active' => true,
                 'valid_from' => Carbon::now(),
                 'valid_until' => Carbon::now()->addMonths(6),
-                'applicable_plans' => json_encode(['standard', 'premium'])
+                'applicable_plans' => ['standard', 'premium']
             ]
         );
 
@@ -43,7 +43,7 @@ class CouponSeeder extends Seeder
                 'is_active' => true,
                 'valid_from' => Carbon::now(),
                 'valid_until' => Carbon::now()->addMonths(12),
-                'applicable_plans' => json_encode(['premium'])
+                'applicable_plans' => ['premium']
             ]
         );
 
@@ -60,7 +60,7 @@ class CouponSeeder extends Seeder
                 'is_active' => true,
                 'valid_from' => Carbon::now(),
                 'valid_until' => Carbon::now()->addMonths(3),
-                'applicable_plans' => json_encode(['personal'])
+                'applicable_plans' => ['personal']
             ]
         );
 
@@ -77,7 +77,7 @@ class CouponSeeder extends Seeder
                 'is_active' => false, // активируется по сезону
                 'valid_from' => Carbon::create(2024, 3, 1),
                 'valid_until' => Carbon::create(2024, 5, 31),
-                'applicable_plans' => json_encode(['standard', 'premium', 'personal'])
+                'applicable_plans' => ['standard', 'premium', 'personal']
             ]
         );
 
@@ -94,7 +94,7 @@ class CouponSeeder extends Seeder
                 'is_active' => true,
                 'valid_from' => Carbon::now(),
                 'valid_until' => null, // бессрочный
-                'applicable_plans' => json_encode(['standard', 'premium'])
+                'applicable_plans' => ['standard', 'premium']
             ]
         );
     }

@@ -28,9 +28,6 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     
-    <!-- Alpine.js -->
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    
     <style>
         body { font-family: 'Inter', system-ui, sans-serif; }
     </style>
@@ -58,4 +55,6 @@
 <script>
     lucide.createIcons();
 </script>
+<!-- Alpine.js (на страницах без Livewire, загружается после Lucide) -->
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.9/dist/cdn.min.js"></script>
 @endpush

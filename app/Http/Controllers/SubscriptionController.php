@@ -40,6 +40,17 @@ class SubscriptionController extends Controller
                 ->with('error', 'У вас уже есть активная подписка');
         }
 
+        // Проверка на повторное использование пробного периода
+        // Trial недоступен для: тех кто уже использовал trial, lapsed и expired пользователей
+        if ($plan->type === 'trial') {
+            if ($user->hasUsedTrial()) {
+                return back()->with('error', 'Пробный период можно использовать только один раз');
+            }
+            if ($user->hasAnyRole(['subscriber_lapsed', 'subscriber_expired'])) {
+                return back()->with('error', 'Пробный период недоступен. Пожалуйста, выберите платную подписку.');
+            }
+        }
+
         $price = $plan->price;
         $coupon = null;
 
@@ -106,24 +117,32 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * Отмена подписки
+     * Отмена подписки (отключение автопродления)
+     * Подписка остаётся активной до ends_at, только отключается автопродление
      */
     public function cancel(UserSubscription $subscription)
     {
         $this->authorize('cancel', $subscription);
 
-        if ($subscription->status === 'cancelled') {
-            return back()->with('error', 'Подписка уже отменена');
+        // Проверяем, не отменена ли уже
+        if ($subscription->cancelled_at !== null) {
+            return back()->with('error', 'Автопродление уже отключено');
         }
 
+        // Только отключаем автопродление, статус остаётся active
+        // Подписка продолжает работать до ends_at
         $subscription->update([
-            'status' => 'cancelled',
             'cancelled_at' => Carbon::now(),
             'auto_renew' => false,
         ]);
-        event(new SubscriptionStatusChanged($subscription->fresh(), 'cancelled'));
 
-        return back()->with('success', 'Подписка успешно отменена');
+        // Не меняем статус и не снимаем роль - подписка активна до ends_at
+        // Роль снимется автоматически когда ends_at пройдёт (через CheckExpiredSubscriptions)
+
+        $endsAt = $subscription->ends_at->format('d.m.Y');
+        return back()->with('success', 
+            "Автопродление отключено. Подписка будет активна до {$endsAt}"
+        );
     }
 
     /**
@@ -185,7 +204,9 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * Обновление подписки до другого плана
+     * Смена тарифа (апгрейд или даунгрейд)
+     * Новый план применяется при следующем продлении, текущая подписка остаётся до ends_at
+     * Списание происходит только при продлении по новой стоимости
      */
     public function upgrade(Request $request, Plan $newPlan)
     {
@@ -194,63 +215,66 @@ class SubscriptionController extends Controller
 
         if (!$currentSubscription) {
             return redirect()->route('plans.index')
-                ->with('error', 'У вас нет активной подписки для обновления');
+                ->with('error', 'У вас нет активной подписки');
+        }
+
+        if (!$newPlan->is_active) {
+            return back()->with('error', 'Выбранный план недоступен');
         }
 
         if ($currentSubscription->plan_id === $newPlan->id) {
             return back()->with('error', 'Вы уже подписаны на этот план');
         }
 
-        // Логика пропорционального возврата и доплаты
-        $prorationAmount = $this->calculateProration($currentSubscription, $newPlan);
-
-        try {
-            DB::beginTransaction();
-
-            // Отменяем текущую подписку
-            $currentSubscription->update([
-                'status' => 'upgraded',
-                'cancelled_at' => Carbon::now(),
-            ]);
-            event(new SubscriptionStatusChanged($currentSubscription->fresh(), 'upgraded'));
-
-            // Создаем новую подписку
-            $newSubscription = UserSubscription::create([
-                'user_id' => $user->id,
-                'plan_id' => $newPlan->id,
-                'status' => 'active',
-                'started_at' => Carbon::now(),
-                'ends_at' => Carbon::now()->addDays($newPlan->duration_days),
-                'auto_renew' => true,
-                'upgraded_from_id' => $currentSubscription->id,
-            ]);
-            event(new SubscriptionStatusChanged($newSubscription->fresh(), 'active'));
-
-            // Если нужна доплата
-            if ($prorationAmount > 0) {
-                $payment = Payment::create([
-                    'user_id' => $user->id,
-                    'subscription_id' => $newSubscription->id,
-                    'plan_id' => $newPlan->id,
-                    'amount' => $prorationAmount,
-                    'currency' => $newPlan->currency,
-                    'status' => 'pending',
-                    'provider' => 'yookassa',
-                    'description' => "Доплата при обновлении до плана: {$newPlan->name}",
-                ]);
-
-                DB::commit();
-                return redirect()->route('payment.process', $payment);
-            }
-
-            DB::commit();
-            return redirect()->route('dashboard')
-                ->with('success', 'Подписка успешно обновлена!');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->with('error', 'Произошла ошибка при обновлении подписки');
+        // Нельзя перейти на trial
+        if ($newPlan->type === 'trial') {
+            return back()->with('error', 'Переход на пробный период невозможен');
         }
+
+        // Если уже есть запланированная смена на этот же план
+        if ($currentSubscription->scheduled_plan_id === $newPlan->id) {
+            return back()->with('error', 'Смена на этот план уже запланирована');
+        }
+
+        // Запланировать смену плана на следующий период
+        // Текущая подписка остаётся активной до ends_at
+        // Списание по новой цене произойдёт при автопродлении
+        $currentSubscription->schedulePlanChange($newPlan);
+
+        $currentPlan = $currentSubscription->plan;
+        $changeType = $newPlan->price > $currentPlan->price ? 'повышен' : 'понижен';
+        $endsAt = $currentSubscription->ends_at->format('d.m.Y');
+
+        return back()->with('success', 
+            "Тариф будет {$changeType} на \"{$newPlan->name}\" после {$endsAt}. " .
+            "До этой даты действует текущий тариф \"{$currentPlan->name}\". " .
+            "Оплата по новому тарифу ({$newPlan->price} ₽) спишется при продлении."
+        );
+    }
+
+    /**
+     * Даунгрейд подписки - алиас для upgrade
+     * Логика одинаковая: смена плана при следующем продлении
+     */
+    public function downgrade(Request $request, Plan $newPlan)
+    {
+        return $this->upgrade($request, $newPlan);
+    }
+
+    /**
+     * Отмена запланированной смены плана
+     */
+    public function cancelScheduledChange(UserSubscription $subscription)
+    {
+        $this->authorize('manage', $subscription);
+
+        if (!$subscription->hasScheduledPlanChange()) {
+            return back()->with('error', 'Нет запланированной смены плана');
+        }
+
+        $subscription->cancelScheduledPlanChange();
+
+        return back()->with('success', 'Запланированная смена плана отменена');
     }
 
     /**

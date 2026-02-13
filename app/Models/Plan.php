@@ -12,6 +12,7 @@ class Plan extends Model
         'slug',
         'description',
         'type', // monthly, yearly, individual, trial
+        'role', // роль, назначаемая при активации подписки
         'duration_days', // соответствует миграции
         'price',
         'original_price', // добавлено из миграции

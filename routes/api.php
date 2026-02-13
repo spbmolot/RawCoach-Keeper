@@ -10,10 +10,10 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\PersonalPlanController;
 
 // Публичные API маршруты
-Route::prefix('v1')->group(function () {
+Route::prefix('v1')->middleware('throttle:api')->group(function () {
     
-    // Аутентификация
-    Route::prefix('auth')->group(function () {
+    // Аутентификация (строгий rate limit — защита от брутфорса)
+    Route::prefix('auth')->middleware('throttle:auth')->group(function () {
         Route::post('/register', [AuthController::class, 'register']);
         Route::post('/login', [AuthController::class, 'login']);
         Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);

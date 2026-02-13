@@ -54,8 +54,10 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800&display=swap" rel="stylesheet" />
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Alpine.js подключается в конце body после Lucide -->
     <style>
+        [x-cloak] { display: none !important; }
         :root {
             --color-primary: #22c55e;
             --color-primary-dark: #16a34a;
@@ -656,6 +658,8 @@
         });
     }
 </script>
+<!-- Alpine.js (загружается после Lucide для корректной работы x-data/x-show) -->
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.9/dist/cdn.min.js"></script>
 
 </body>
 </html>

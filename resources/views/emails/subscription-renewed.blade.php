@@ -15,7 +15,7 @@
         <p><strong>Новый период:</strong> с {{ $subscription->starts_at->format('d.m.Y') }} по {{ $subscription->ends_at->format('d.m.Y') }}</p>
         <p><strong>Статус:</strong> <span class="status-badge status-success">Активна</span></p>
         <p><strong>Автопродление:</strong> 
-            @if($subscription->auto_renewal)
+            @if($subscription->auto_renew)
                 <span class="status-badge status-success">Включено</span>
             @else
                 <span class="status-badge status-warning">Отключено</span>

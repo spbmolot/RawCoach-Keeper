@@ -50,6 +50,7 @@
     
     {{-- Общие стили для градиентов (используются в header/footer) --}}
     <style>
+        [x-cloak] { display: none !important; }
         :root {
             --color-primary: #22c55e;
             --color-primary-dark: #16a34a;

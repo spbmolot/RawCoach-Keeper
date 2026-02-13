@@ -88,6 +88,12 @@ class RolePermissionSeeder extends Seeder
             'content.access.archive',
             'content.access.early',
             'content.access.personal',
+            'content.access.past', // Доступ к прошлым меню (для expired)
+            
+            // История (для бывших подписчиков)
+            'history.payments.view',
+            'history.menus.view',
+            'history.recipes.view',
             
             // Административные функции
             'admin.dashboard',
@@ -122,6 +128,14 @@ class RolePermissionSeeder extends Seeder
         $userRole = Role::firstOrCreate(['name' => 'user']);
         // Базовые права для зарегистрированных пользователей
         
+        // Подписчик Пробный (Trial)
+        $subscriberTrialRole = Role::firstOrCreate(['name' => 'subscriber_trial']);
+        $subscriberTrialRole->givePermissionTo([
+            'content.access.current',
+            'files.download',
+            'shopping-lists.create',
+        ]);
+        
         // Подписчик Базовый/Стандарт
         $subscriberStandardRole = Role::firstOrCreate(['name' => 'subscriber_standard']);
         $subscriberStandardRole->givePermissionTo([
@@ -131,6 +145,9 @@ class RolePermissionSeeder extends Seeder
             'files.export.excel',
             'shopping-lists.create',
             'shopping-lists.export',
+            'history.payments.view',
+            'history.menus.view',
+            'history.recipes.view',
         ]);
 
         // Подписчик Годовой (Premium)
@@ -144,6 +161,9 @@ class RolePermissionSeeder extends Seeder
             'files.export.excel',
             'shopping-lists.create',
             'shopping-lists.export',
+            'history.payments.view',
+            'history.menus.view',
+            'history.recipes.view',
         ]);
 
         // Подписчик Индивидуальный
@@ -160,6 +180,24 @@ class RolePermissionSeeder extends Seeder
             'shopping-lists.export',
             'questionnaires.create',
             'personal-plans.view',
+            'history.payments.view',
+            'history.menus.view',
+            'history.recipes.view',
+        ]);
+
+        // Бывший подписчик Trial (lapsed) - был только пробный период, не купил
+        // Нет доступа к истории и прошлым меню
+        $subscriberLapsedRole = Role::firstOrCreate(['name' => 'subscriber_lapsed']);
+        // Без прав - только демо контент и возможность купить подписку
+
+        // Бывший платный подписчик (expired) - подписка истекла
+        // Есть доступ к истории платежей и прошлым меню (read-only)
+        $subscriberExpiredRole = Role::firstOrCreate(['name' => 'subscriber_expired']);
+        $subscriberExpiredRole->givePermissionTo([
+            'content.access.past',
+            'history.payments.view',
+            'history.menus.view',
+            'history.recipes.view',
         ]);
 
         // Рекламодатель

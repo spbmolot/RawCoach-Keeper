@@ -34,7 +34,7 @@ class UserSeeder extends Seeder
             'language' => 'ru',
             'is_active' => true,
         ]);
-        $admin->assignRole('admin');
+        $admin->assignRole(['admin', 'root']);
 
         // Создание редактора/нутрициолога
         $editor = User::firstOrCreate([
@@ -95,9 +95,9 @@ class UserSeeder extends Seeder
             'weight' => 65.0,
             'activity_level' => 'moderately_active',
             'target_weight' => 60.0,
-            'allergies' => json_encode(['глютен', 'лактоза']),
-            'disliked_foods' => json_encode(['грибы', 'морепродукты']),
-            'dietary_preferences' => json_encode(['vegetarian']),
+            'allergies' => ['глютен', 'лактоза'],
+            'disliked_foods' => ['грибы', 'морепродукты'],
+            'dietary_preferences' => ['vegetarian'],
             'timezone' => 'Europe/Moscow',
             'language' => 'ru',
             'is_active' => true,
@@ -121,9 +121,9 @@ class UserSeeder extends Seeder
             'weight' => 90.0,
             'activity_level' => 'very_active',
             'target_weight' => 85.0,
-            'allergies' => json_encode(['орехи']),
-            'disliked_foods' => json_encode(['рыба']),
-            'dietary_preferences' => json_encode(['high_protein']),
+            'allergies' => ['орехи'],
+            'disliked_foods' => ['рыба'],
+            'dietary_preferences' => ['high_protein'],
             'timezone' => 'Europe/Moscow',
             'language' => 'ru',
             'is_active' => true,

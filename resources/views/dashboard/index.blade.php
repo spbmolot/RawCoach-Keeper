@@ -1,23 +1,23 @@
 <x-app-layout>
     <div class="max-w-7xl mx-auto">
         {{-- Приветствие --}}
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">
+        <div class="mb-6 sm:mb-8">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">
                 Привет, {{ auth()->user()->name }}! 👋
             </h1>
-            <p class="text-gray-600 mt-1">Добро пожаловать в личный кабинет RawPlan</p>
+            <p class="text-gray-600 mt-1 text-sm sm:text-base">Добро пожаловать в личный кабинет RawPlan</p>
         </div>
 
         {{-- Карточка подписки --}}
         @if($activeSubscription)
-            <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-6 mb-8 text-white shadow-xl shadow-green-500/20">
+            <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 text-white shadow-xl shadow-green-500/20">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div>
                         <div class="flex items-center gap-2 mb-2">
                             <i data-lucide="crown" class="w-5 h-5"></i>
                             <span class="text-green-100 text-sm font-medium">Активная подписка</span>
                         </div>
-                        <h2 class="text-2xl font-bold mb-1">{{ $activeSubscription->plan->name }}</h2>
+                        <h2 class="text-xl sm:text-2xl font-bold mb-1">{{ $activeSubscription->plan->name }}</h2>
                         <p class="text-green-100">
                             Действует до {{ $activeSubscription->ends_at->format('d.m.Y') }}
                             @if($activeSubscription->ends_at->diffInDays(now()) <= 7)
@@ -27,29 +27,32 @@
                             @endif
                         </p>
                     </div>
-                    <div class="flex flex-wrap gap-3">
+                    <div class="flex flex-wrap gap-2 sm:gap-3">
                         @if($activeSubscription->auto_renew)
                             <form action="{{ route('subscriptions.toggle-renewal', $activeSubscription) }}" method="POST">
                                 @csrf
                                 @method('PATCH')
-                                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-xl text-sm font-medium transition backdrop-blur-sm">
-                                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-                                    Автопродление вкл.
+                                <button type="submit" class="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-white/20 hover:bg-white/30 rounded-xl text-xs sm:text-sm font-medium transition backdrop-blur-sm">
+                                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+                                    <span class="hidden xs:inline">Автопродление</span>
+                                    <span class="xs:hidden">Авто</span> вкл.
                                 </button>
                             </form>
                         @else
                             <form action="{{ route('subscriptions.toggle-renewal', $activeSubscription) }}" method="POST">
                                 @csrf
                                 @method('PATCH')
-                                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-xl text-sm font-medium transition backdrop-blur-sm">
-                                    <i data-lucide="refresh-cw-off" class="w-4 h-4"></i>
-                                    Включить автопродление
+                                <button type="submit" class="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-white/20 hover:bg-white/30 rounded-xl text-xs sm:text-sm font-medium transition backdrop-blur-sm">
+                                    <i data-lucide="refresh-cw-off" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+                                    <span class="hidden sm:inline">Включить автопродление</span>
+                                    <span class="sm:hidden">Автопродление</span>
                                 </button>
                             </form>
                         @endif
-                        <a href="{{ route('plans.index') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-green-600 hover:bg-green-50 rounded-xl text-sm font-semibold transition">
-                            <i data-lucide="arrow-up-circle" class="w-4 h-4"></i>
-                            Улучшить план
+                        <a href="{{ route('plans.index') }}" class="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-white text-green-600 hover:bg-green-50 rounded-xl text-xs sm:text-sm font-semibold transition">
+                            <i data-lucide="arrow-up-circle" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+                            <span class="hidden sm:inline">Улучшить план</span>
+                            <span class="sm:hidden">Улучшить</span>
                         </a>
                     </div>
                 </div>
@@ -87,46 +90,46 @@
         @endif
 
         {{-- Быстрые действия --}}
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <a href="{{ route('dashboard.today') }}" class="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-amber-200">
-                <div class="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <i data-lucide="sun" class="w-7 h-7 text-amber-600"></i>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+            <a href="{{ route('dashboard.today') }}" class="group bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-amber-200">
+                <div class="w-10 h-10 sm:w-14 sm:h-14 bg-amber-100 rounded-lg sm:rounded-xl flex items-center justify-center mb-2 sm:mb-4 group-hover:scale-110 transition-transform">
+                    <i data-lucide="sun" class="w-5 h-5 sm:w-7 sm:h-7 text-amber-600"></i>
                 </div>
-                <h3 class="font-semibold text-gray-900 mb-1">Сегодня</h3>
-                <p class="text-sm text-gray-500">Меню на сегодня</p>
+                <h3 class="font-semibold text-gray-900 mb-0.5 sm:mb-1 text-sm sm:text-base">Сегодня</h3>
+                <p class="text-xs sm:text-sm text-gray-500 hidden xs:block">Меню на сегодня</p>
             </a>
             
-            <a href="{{ route('dashboard.week') }}" class="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-blue-200">
-                <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <i data-lucide="calendar-days" class="w-7 h-7 text-blue-600"></i>
+            <a href="{{ route('dashboard.week') }}" class="group bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-blue-200">
+                <div class="w-10 h-10 sm:w-14 sm:h-14 bg-blue-100 rounded-lg sm:rounded-xl flex items-center justify-center mb-2 sm:mb-4 group-hover:scale-110 transition-transform">
+                    <i data-lucide="calendar-days" class="w-5 h-5 sm:w-7 sm:h-7 text-blue-600"></i>
                 </div>
-                <h3 class="font-semibold text-gray-900 mb-1">Неделя</h3>
-                <p class="text-sm text-gray-500">План на 7 дней</p>
+                <h3 class="font-semibold text-gray-900 mb-0.5 sm:mb-1 text-sm sm:text-base">Неделя</h3>
+                <p class="text-xs sm:text-sm text-gray-500 hidden xs:block">План на 7 дней</p>
             </a>
             
-            <a href="{{ route('shopping-list.index') }}" class="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-green-200">
-                <div class="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <i data-lucide="shopping-cart" class="w-7 h-7 text-green-600"></i>
+            <a href="{{ route('shopping-list.index') }}" class="group bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-green-200">
+                <div class="w-10 h-10 sm:w-14 sm:h-14 bg-green-100 rounded-lg sm:rounded-xl flex items-center justify-center mb-2 sm:mb-4 group-hover:scale-110 transition-transform">
+                    <i data-lucide="shopping-cart" class="w-5 h-5 sm:w-7 sm:h-7 text-green-600"></i>
                 </div>
-                <h3 class="font-semibold text-gray-900 mb-1">Покупки</h3>
-                <p class="text-sm text-gray-500">Список продуктов</p>
+                <h3 class="font-semibold text-gray-900 mb-0.5 sm:mb-1 text-sm sm:text-base">Покупки</h3>
+                <p class="text-xs sm:text-sm text-gray-500 hidden xs:block">Список продуктов</p>
             </a>
             
-            <a href="{{ route('recipes.favorites') }}" class="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-red-200">
-                <div class="w-14 h-14 bg-red-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <i data-lucide="heart" class="w-7 h-7 text-red-500"></i>
+            <a href="{{ route('recipes.favorites') }}" class="group bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-red-200">
+                <div class="w-10 h-10 sm:w-14 sm:h-14 bg-red-100 rounded-lg sm:rounded-xl flex items-center justify-center mb-2 sm:mb-4 group-hover:scale-110 transition-transform">
+                    <i data-lucide="heart" class="w-5 h-5 sm:w-7 sm:h-7 text-red-500"></i>
                 </div>
-                <h3 class="font-semibold text-gray-900 mb-1">Избранное</h3>
-                <p class="text-sm text-gray-500">Любимые рецепты</p>
+                <h3 class="font-semibold text-gray-900 mb-0.5 sm:mb-1 text-sm sm:text-base">Избранное</h3>
+                <p class="text-xs sm:text-sm text-gray-500 hidden xs:block">Любимые рецепты</p>
             </a>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
             {{-- Основной контент --}}
-            <div class="lg:col-span-2 space-y-6">
+            <div class="lg:col-span-2 space-y-4 sm:space-y-6">
                 {{-- Меню и рецепты --}}
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="p-6 border-b border-gray-100">
+                <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="p-4 sm:p-6 border-b border-gray-100">
                         <div class="flex items-center justify-between">
                             <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
                                 <i data-lucide="utensils" class="w-5 h-5 text-green-500"></i>
@@ -184,7 +187,7 @@
                             @foreach($recentRecipes->take(4) as $recipe)
                                 <a href="{{ route('recipes.show', $recipe) }}" class="flex items-center gap-4 p-4 hover:bg-gray-50 transition">
                                     @if($recipe->image)
-                                        <img src="{{ $recipe->image }}" alt="{{ $recipe->name }}" class="w-14 h-14 rounded-xl object-cover">
+                                        <img src="{{ Storage::url($recipe->image) }}" alt="{{ $recipe->title }}" class="w-14 h-14 rounded-xl object-cover">
                                     @else
                                         <div class="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center">
                                             <i data-lucide="image" class="w-6 h-6 text-gray-400"></i>
@@ -220,24 +223,34 @@
                         Статистика
                     </h3>
                     <div class="space-y-4">
+                        @php
+                            $totalHours = auth()->user()->created_at->diffInHours(now());
+                            $daysWithUs = floor($totalHours / 24);
+                            $hoursWithUs = $totalHours % 24;
+                        @endphp
                         <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                                     <i data-lucide="calendar-check" class="w-5 h-5 text-blue-600"></i>
                                 </div>
-                                <span class="text-gray-600">Дней с нами</span>
+                                <span class="text-gray-600">С нами</span>
                             </div>
-                            <span class="text-xl font-bold text-gray-900">{{ auth()->user()->created_at->diffInDays(now()) }}</span>
+                            <span class="text-xl font-bold text-gray-900">{{ $daysWithUs }} д. {{ $hoursWithUs }} ч.</span>
                         </div>
                         @if($activeSubscription)
+                            @php
+                                $subHours = $activeSubscription->starts_at->diffInHours(now());
+                                $subDays = floor($subHours / 24);
+                                $subHoursRem = $subHours % 24;
+                            @endphp
                             <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                                         <i data-lucide="zap" class="w-5 h-5 text-green-600"></i>
                                     </div>
-                                    <span class="text-gray-600">Дней подписки</span>
+                                    <span class="text-gray-600">Подписка</span>
                                 </div>
-                                <span class="text-xl font-bold text-gray-900">{{ $activeSubscription->starts_at->diffInDays(now()) }}</span>
+                                <span class="text-xl font-bold text-gray-900">{{ $subDays }} д. {{ $subHoursRem }} ч.</span>
                             </div>
                         @endif
                         <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">

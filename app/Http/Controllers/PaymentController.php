@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Payment;
 use App\Models\UserSubscription;
 use App\Models\Coupon;
+use App\Services\SubscriptionService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -270,53 +271,26 @@ class PaymentController extends Controller
      */
     private function updatePaymentStatus(Payment $payment, string $status, array $webhookData): void
     {
-        DB::beginTransaction();
+        $subscriptionService = app(SubscriptionService::class);
+        
+        $payment->update([
+            'status' => $status,
+            'webhook_payload' => $webhookData,
+            'processed_at' => Carbon::now(),
+        ]);
 
-        try {
-            $payment->update([
-                'status' => $status,
-                'webhook_payload' => $webhookData,
-                'processed_at' => Carbon::now(),
-            ]);
-
-            // Если платеж успешен, активируем подписку
-            if ($status === 'paid' && $payment->subscription) {
-                $payment->subscription->update(['status' => 'active']);
-
-                // Если использовался купон, увеличиваем счетчик использований
-                if ($payment->coupon) {
-                    $payment->coupon->increment('used_count');
-                    
-                    // Создаем запись об использовании купона
-                    $payment->coupon->couponUsages()->create([
-                        'user_id' => $payment->user_id,
-                        'payment_id' => $payment->id,
-                        'used_at' => Carbon::now(),
-                    ]);
-                }
-            }
-
-            // Если платеж отклонен, отменяем подписку
-            if ($status === 'failed' && $payment->subscription) {
-                $payment->subscription->update(['status' => 'cancelled']);
-            }
-
-            DB::commit();
-
-            // Dispatch events after successful commit
-            event(new PaymentProcessed($payment, $status));
-
-            if ($status === 'paid' && $payment->subscription) {
-                event(new SubscriptionStatusChanged($payment->subscription, 'active'));
-            }
-            if ($status === 'failed' && $payment->subscription) {
-                event(new SubscriptionStatusChanged($payment->subscription, 'cancelled'));
-            }
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
+        // Если платеж успешен, активируем подписку через единый сервис
+        if ($status === 'paid' && $payment->subscription_id) {
+            $subscriptionService->activateSubscription($payment);
         }
+
+        // Если платеж отклонен, деактивируем подписку через единый сервис
+        if ($status === 'failed' && $payment->subscription_id) {
+            $subscriptionService->deactivateSubscription($payment, 'Платеж отклонен');
+        }
+
+        // Dispatch payment event
+        event(new PaymentProcessed($payment, $status));
     }
 
     /**
