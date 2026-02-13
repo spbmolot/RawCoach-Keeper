@@ -76,7 +76,7 @@ class MenuController extends Controller
         $format = $request->get('format', 'pdf');
         
         $days = $menu->days()
-            ->with(['recipes', 'recipes.ingredients.ingredient'])
+            ->with(['recipes', 'recipes.ingredients'])
             ->orderBy('date')
             ->get();
         

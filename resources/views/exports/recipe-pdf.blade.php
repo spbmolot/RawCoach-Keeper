@@ -230,7 +230,7 @@
             <tbody>
                 @foreach($recipe->ingredients as $ri)
                     <tr>
-                        <td>{{ $ri->ingredient->name ?? $ri->name ?? '—' }}</td>
+                        <td>{{ $ri->ingredient_name ?? '—' }}</td>
                         <td>{{ $ri->amount ? round($ri->amount, 1) : '—' }}</td>
                         <td>{{ $ri->unit ?? '—' }}</td>
                     </tr>

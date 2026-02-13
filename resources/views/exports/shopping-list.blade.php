@@ -94,7 +94,7 @@
                 @foreach($items as $item)
                     <div class="item">
                         <span class="checkbox"></span>
-                        <span class="item-name">{{ $item['ingredient']->name ?? $item['ingredient'] }}</span>
+                        <span class="item-name">{{ $item['ingredient']->ingredient_name ?? '—' }}</span>
                         <span class="item-amount">{{ round($item['amount'], 1) }} {{ $item['unit'] }}</span>
                     </div>
                 @endforeach

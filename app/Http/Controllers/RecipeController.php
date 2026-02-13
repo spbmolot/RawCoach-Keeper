@@ -86,8 +86,8 @@ class RecipeController extends Controller
                 $q->where('name', 'like', "%{$query}%")
                   ->orWhere('description', 'like', "%{$query}%")
                   ->orWhere('instructions', 'like', "%{$query}%")
-                  ->orWhereHas('ingredients.ingredient', function($ingredientQuery) use ($query) {
-                      $ingredientQuery->where('name', 'like', "%{$query}%");
+                  ->orWhereHas('ingredients', function($ingredientQuery) use ($query) {
+                      $ingredientQuery->where('ingredient_name', 'like', "%{$query}%");
                   });
             });
         
@@ -230,7 +230,7 @@ class RecipeController extends Controller
         $format = $request->get('format', 'pdf');
         $filename = "recipe-{$recipe->slug}.{$format}";
         
-        $recipe->load(['ingredients.ingredient']);
+        $recipe->load(['ingredients']);
         
         if ($format === 'pdf') {
             $pdf = Pdf::loadView('exports.recipe-pdf', compact('recipe'));

@@ -11,6 +11,7 @@ use App\Models\UserSubscription;
 use App\Models\Payment;
 use App\Models\PersonalPlan;
 use App\Models\Coupon;
+use App\Models\AdCampaign;
 use App\Policies\UserPolicy;
 use App\Policies\MenuPolicy;
 use App\Policies\RecipePolicy;
@@ -18,6 +19,7 @@ use App\Policies\UserSubscriptionPolicy;
 use App\Policies\PaymentPolicy;
 use App\Policies\PersonalPlanPolicy;
 use App\Policies\CouponPolicy;
+use App\Policies\AdCampaignPolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -34,6 +36,7 @@ class AuthServiceProvider extends ServiceProvider
         Payment::class => PaymentPolicy::class,
         PersonalPlan::class => PersonalPlanPolicy::class,
         Coupon::class => CouponPolicy::class,
+        AdCampaign::class => AdCampaignPolicy::class,
     ];
 
     /**

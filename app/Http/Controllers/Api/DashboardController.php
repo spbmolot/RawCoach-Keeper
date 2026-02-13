@@ -42,8 +42,8 @@ class DashboardController extends Controller
         // Статистика
         $stats = [
             'total_recipes_viewed' => $user->recipe_views ?? 0,
-            'favorite_recipes_count' => $user->favorites()->where('favorable_type', Recipe::class)->count(),
-            'favorite_menus_count' => $user->favorites()->where('favorable_type', Menu::class)->count(),
+            'favorite_recipes_count' => $user->favoriteRecipes()->count(),
+            'favorite_menus_count' => $user->favoriteMenus()->count(),
             'personal_plans_count' => PersonalPlan::where('user_id', $user->id)->count(),
         ];
 
@@ -253,14 +253,16 @@ class DashboardController extends Controller
      */
     private function getDayForDate($date)
     {
+        $user = auth()->user();
         $dayNumber = $date->day;
         $month = $date->month;
         $year = $date->year;
         
-        return Day::whereHas('menu', function($query) use ($month, $year) {
+        return Day::whereHas('menu', function($query) use ($user, $month, $year) {
                 $query->where('month', $month)
                     ->where('year', $year)
                     ->where('is_published', true);
+                $this->filterMenuBySubscription($query, $user);
             })
             ->where('day_number', $dayNumber)
             ->with(['menu', 'meals.recipe.ingredients'])
@@ -273,5 +275,45 @@ class DashboardController extends Controller
     private function getTodayMenu()
     {
         return $this->getDayForDate(Carbon::now());
+    }
+
+    /**
+     * Фильтрация меню по подписке пользователя
+     */
+    private function filterMenuBySubscription($query, $user)
+    {
+        if (!$user) {
+            $query->where('type', 'demo');
+            return;
+        }
+
+        $subscription = $user->activeSubscription()->with('plan')->first();
+
+        if ($user->hasRole('root') || $user->hasRole('admin')) {
+            return;
+        }
+
+        if (!$subscription) {
+            $query->where('type', 'demo');
+            return;
+        }
+
+        $plan = $subscription->plan;
+
+        if ($plan->type === 'trial') {
+            $query->whereIn('type', ['trial', 'current']);
+        } elseif ($plan->type === 'monthly' && !str_contains($plan->slug, 'personal')) {
+            $query->where('type', 'current');
+        } elseif ($plan->type === 'yearly' && !str_contains($plan->slug, 'personal')) {
+            $query->whereIn('type', ['current', 'archive', 'early']);
+        } elseif (str_contains($plan->slug, 'personal')) {
+            $query->whereIn('type', ['current', 'archive', 'early', 'personal'])
+                  ->where(function($q) use ($user) {
+                      $q->where('type', '!=', 'personal')
+                        ->orWhere('user_id', $user->id);
+                  });
+        } else {
+            $query->where('type', 'current');
+        }
     }
 }

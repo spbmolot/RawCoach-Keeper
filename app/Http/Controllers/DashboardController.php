@@ -408,30 +408,6 @@ class DashboardController extends Controller
     }
 
     /**
-     * Получить статистику пользователя
-     */
-    private function getUserStats($user)
-    {
-        $subscription = $user->activeSubscription()->first();
-        
-        return [
-            'recipes_viewed' => $user->recipeViews()->count(),
-            'shopping_lists_generated' => $user->shoppingLists()->count(),
-            'subscription_days_left' => $subscription ? $subscription->ends_at->diffInDays(Carbon::now()) : 0,
-            'favorite_recipes' => $user->favoriteRecipes()->count(),
-        ];
-    }
-
-    /**
-     * Получить последние активности пользователя
-     */
-    private function getRecentActivities($user)
-    {
-        // Здесь можно добавить логику для отслеживания активности
-        return collect();
-    }
-
-    /**
      * Генерация списка покупок из рецептов
      */
     private function generateShoppingList($recipes)
@@ -440,20 +416,21 @@ class DashboardController extends Controller
         
         foreach ($recipes as $recipe) {
             foreach ($recipe->ingredients as $recipeIngredient) {
-                $key = $recipeIngredient->ingredient->id;
+                $key = mb_strtolower($recipeIngredient->ingredient_name);
                 
                 if ($ingredients->has($key)) {
                     $ingredients[$key]['amount'] += $recipeIngredient->amount;
                 } else {
                     $ingredients[$key] = [
-                        'ingredient' => $recipeIngredient->ingredient,
+                        'ingredient' => $recipeIngredient,
                         'amount' => $recipeIngredient->amount,
                         'unit' => $recipeIngredient->unit,
+                        'category' => $recipeIngredient->category ?? 'other',
                     ];
                 }
             }
         }
         
-        return $ingredients->groupBy('ingredient.category');
+        return $ingredients->groupBy('category');
     }
 }

@@ -106,10 +106,7 @@ class AdCampaignController extends Controller
      */
     public function show(AdCampaign $adCampaign): View
     {
-        // Проверяем права доступа
-        if (!auth()->user()->hasRole('admin') && $adCampaign->advertiser_id !== auth()->id()) {
-            abort(403);
-        }
+        $this->authorize('view', $adCampaign);
 
         $adCampaign->load(['placements', 'creatives', 'advertiser']);
 
@@ -131,16 +128,7 @@ class AdCampaignController extends Controller
      */
     public function edit(AdCampaign $adCampaign): View
     {
-        // Проверяем права доступа
-        if (!auth()->user()->hasRole('admin') && $adCampaign->advertiser_id !== auth()->id()) {
-            abort(403);
-        }
-
-        // Можно редактировать только неактивные кампании
-        if (in_array($adCampaign->status, ['active', 'completed'])) {
-            return redirect()->route('ad-campaigns.show', $adCampaign)
-                ->with('error', 'Нельзя редактировать активную или завершенную кампанию');
-        }
+        $this->authorize('update', $adCampaign);
 
         $placements = AdPlacement::where('is_active', true)->get();
         
@@ -152,16 +140,7 @@ class AdCampaignController extends Controller
      */
     public function update(Request $request, AdCampaign $adCampaign): RedirectResponse
     {
-        // Проверяем права доступа
-        if (!auth()->user()->hasRole('admin') && $adCampaign->advertiser_id !== auth()->id()) {
-            abort(403);
-        }
-
-        // Можно редактировать только неактивные кампании
-        if (in_array($adCampaign->status, ['active', 'completed'])) {
-            return redirect()->route('ad-campaigns.show', $adCampaign)
-                ->with('error', 'Нельзя редактировать активную или завершенную кампанию');
-        }
+        $this->authorize('update', $adCampaign);
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -198,16 +177,7 @@ class AdCampaignController extends Controller
      */
     public function destroy(AdCampaign $adCampaign): RedirectResponse
     {
-        // Проверяем права доступа
-        if (!auth()->user()->hasRole('admin') && $adCampaign->advertiser_id !== auth()->id()) {
-            abort(403);
-        }
-
-        // Можно удалить только неактивные кампании
-        if ($adCampaign->status === 'active') {
-            return redirect()->route('ad-campaigns.show', $adCampaign)
-                ->with('error', 'Нельзя удалить активную кампанию');
-        }
+        $this->authorize('delete', $adCampaign);
 
         $adCampaign->delete();
 
@@ -220,15 +190,7 @@ class AdCampaignController extends Controller
      */
     public function pause(AdCampaign $adCampaign): RedirectResponse
     {
-        // Проверяем права доступа
-        if (!auth()->user()->hasRole('admin') && $adCampaign->advertiser_id !== auth()->id()) {
-            abort(403);
-        }
-
-        if ($adCampaign->status !== 'active') {
-            return redirect()->route('ad-campaigns.show', $adCampaign)
-                ->with('error', 'Можно приостановить только активную кампанию');
-        }
+        $this->authorize('pause', $adCampaign);
 
         $adCampaign->update([
             'status' => 'paused',
@@ -244,15 +206,7 @@ class AdCampaignController extends Controller
      */
     public function resume(AdCampaign $adCampaign): RedirectResponse
     {
-        // Проверяем права доступа
-        if (!auth()->user()->hasRole('admin') && $adCampaign->advertiser_id !== auth()->id()) {
-            abort(403);
-        }
-
-        if ($adCampaign->status !== 'paused') {
-            return redirect()->route('ad-campaigns.show', $adCampaign)
-                ->with('error', 'Можно возобновить только приостановленную кампанию');
-        }
+        $this->authorize('resume', $adCampaign);
 
         $adCampaign->update([
             'status' => 'active',
@@ -268,10 +222,7 @@ class AdCampaignController extends Controller
      */
     public function stats(AdCampaign $adCampaign): View
     {
-        // Проверяем права доступа
-        if (!auth()->user()->hasRole('admin') && $adCampaign->advertiser_id !== auth()->id()) {
-            abort(403);
-        }
+        $this->authorize('stats', $adCampaign);
 
         // Получаем реальную статистику по дням за последние 30 дней
         $startDate = Carbon::now()->subDays(29)->startOfDay();
@@ -305,10 +256,7 @@ class AdCampaignController extends Controller
      */
     public function creatives(AdCampaign $adCampaign): View
     {
-        // Проверяем права доступа
-        if (!auth()->user()->hasRole('admin') && $adCampaign->advertiser_id !== auth()->id()) {
-            abort(403);
-        }
+        $this->authorize('manageCreatives', $adCampaign);
 
         $creatives = $adCampaign->creatives()->orderBy('created_at', 'desc')->get();
 
@@ -320,10 +268,7 @@ class AdCampaignController extends Controller
      */
     public function storeCreative(Request $request, AdCampaign $adCampaign): RedirectResponse
     {
-        // Проверяем права доступа
-        if (!auth()->user()->hasRole('admin') && $adCampaign->advertiser_id !== auth()->id()) {
-            abort(403);
-        }
+        $this->authorize('manageCreatives', $adCampaign);
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
