@@ -18,6 +18,9 @@ use App\Http\Controllers\TestPaymentController;
 use App\Http\Controllers\DiagnosticsController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\MealSwapController;
+use App\Http\Controllers\ProgressController;
+use App\Http\Controllers\ReferralController;
+use App\Http\Controllers\BlogController;
 
 // Публичные страницы
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -28,6 +31,13 @@ Route::get('/privacy', [HomeController::class, 'privacy'])->name('privacy');
 Route::get('/terms', [HomeController::class, 'terms'])->name('terms');
 Route::get('/offer', [HomeController::class, 'offer'])->name('offer');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+
+// Блог (публичный, SEO)
+Route::prefix('blog')->name('blog.')->group(function () {
+    Route::get('/', [BlogController::class, 'index'])->name('index');
+    Route::get('/category/{slug}', [BlogController::class, 'category'])->name('category');
+    Route::get('/{slug}', [BlogController::class, 'show'])->name('show');
+});
 
 // Диагностика системы (защищена ключом)
 Route::get('/diagnostics', [DiagnosticsController::class, 'index'])->name('diagnostics');
@@ -40,6 +50,9 @@ if (app()->environment('local', 'development', 'testing')) {
         Route::get('/cancel', [TestPaymentController::class, 'cancel'])->name('cancel');
     });
 }
+
+// Реферальная ссылка (публичная)
+Route::get('/ref/{code}', [ReferralController::class, 'landing'])->name('referral.landing');
 
 // Планы подписки (доступны всем)
 Route::prefix('plans')->name('plans.')->group(function () {
@@ -80,6 +93,16 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
         Route::get('/personal-plans', [DashboardController::class, 'personalPlans'])->name('personal-plans');
         Route::get('/profile', [DashboardController::class, 'profile'])->name('profile');
         Route::put('/profile', [DashboardController::class, 'updateProfile'])->name('profile.update');
+        
+        // Трекинг прогресса
+        Route::get('/progress', [ProgressController::class, 'index'])->name('progress');
+        Route::post('/progress/diary', [ProgressController::class, 'storeDiary'])->name('progress.diary.store');
+        Route::delete('/progress/diary/{entry}', [ProgressController::class, 'destroyDiary'])->name('progress.diary.destroy');
+        Route::post('/progress/weight', [ProgressController::class, 'storeWeight'])->name('progress.weight.store');
+        Route::get('/progress/recipes/search', [ProgressController::class, 'searchRecipes'])->name('progress.recipes.search');
+        
+        // Реферальная программа
+        Route::get('/referrals', [ReferralController::class, 'index'])->name('referrals');
     });
     
     // Подписки (только для авторизованных)

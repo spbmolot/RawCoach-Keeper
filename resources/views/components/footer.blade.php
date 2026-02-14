@@ -44,6 +44,7 @@
                 <ul class="space-y-2 text-sm">
                     <li><a href="{{ route('home') }}#features" class="hover:text-white transition">Возможности</a></li>
                     <li><a href="{{ route('plans.index') }}" class="hover:text-white transition">Тарифы</a></li>
+                    <li><a href="{{ route('blog.index') }}" class="hover:text-white transition">Блог</a></li>
                     @if($isGuest)
                         <li><a href="{{ route('about') }}" class="hover:text-white transition">О нас</a></li>
                         <li><a href="{{ route('contact') }}" class="hover:text-white transition">Контакты</a></li>

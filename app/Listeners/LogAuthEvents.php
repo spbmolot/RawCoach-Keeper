@@ -31,6 +31,11 @@ class LogAuthEvents
 
     public function handleLogin(Login $event): void
     {
+        // Обновляем last_login_at
+        $event->user->forceFill([
+            'last_login_at' => now(),
+        ])->saveQuietly();
+
         Log::channel('auth')->info('User logged in', [
             'user_id' => $event->user->id,
             'email' => $event->user->email,
@@ -43,6 +48,11 @@ class LogAuthEvents
     public function handleLogout(Logout $event): void
     {
         if ($event->user) {
+            // Обновляем last_logout_at
+            $event->user->forceFill([
+                'last_logout_at' => now(),
+            ])->saveQuietly();
+
             Log::channel('auth')->info('User logged out', [
                 'user_id' => $event->user->id,
                 'email' => $event->user->email,

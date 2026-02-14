@@ -9,6 +9,7 @@ use App\Listeners\SendPaymentNotification;
 use App\Listeners\SendSubscriptionNotification;
 use App\Listeners\StartWelcomeEmailSeries;
 use App\Listeners\SyncSubscriptionRole;
+use App\Listeners\ProcessReferralReward;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -36,6 +37,7 @@ class EventServiceProvider extends ServiceProvider
         SubscriptionStatusChanged::class => [
             SendSubscriptionNotification::class,
             SyncSubscriptionRole::class,
+            ProcessReferralReward::class,
         ],
     ];
 

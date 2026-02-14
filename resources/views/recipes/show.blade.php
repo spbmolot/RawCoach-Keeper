@@ -31,7 +31,7 @@
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
-        <div class="grid lg:grid-cols-3 gap-4 sm:gap-8">
+        <div class="grid lg:grid-cols-3 gap-4 sm:gap-8" x-data="portionCalculator({{ $recipe->servings }}, {{ json_encode($recipe->ingredients->map(fn($i) => ['amount' => (float)$i->amount])->values()) }}, { calories: {{ $recipe->calories }}, proteins: {{ $recipe->proteins }}, fats: {{ $recipe->fats }}, carbs: {{ $recipe->carbs }} })">
             
             <!-- Left Column: Recipe Details -->
             <div class="lg:col-span-2 space-y-4 sm:space-y-8">
@@ -116,10 +116,27 @@
                 <!-- Ingredients -->
                 <x-subscription-gate :locked="!($canAccessFull ?? true)">
                 <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm p-4 sm:p-6 md:p-8">
-                    <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
-                        <i data-lucide="shopping-basket" class="w-5 h-5 sm:w-7 sm:h-7 text-green-500"></i>
-                        Ингредиенты
-                    </h2>
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
+                        <h2 class="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-2 sm:gap-3">
+                            <i data-lucide="shopping-basket" class="w-5 h-5 sm:w-7 sm:h-7 text-green-500"></i>
+                            Ингредиенты
+                        </h2>
+                        <div class="flex items-center gap-2 sm:gap-3">
+                            <span class="text-sm text-gray-500">Порции:</span>
+                            <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+                                <button @click="decrease()" class="w-8 h-8 rounded-lg flex items-center justify-center transition" :class="servings <= 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:bg-white hover:shadow-sm'" :disabled="servings <= 1">
+                                    <i data-lucide="minus" class="w-4 h-4"></i>
+                                </button>
+                                <span class="w-8 text-center font-bold text-gray-900" x-text="servings"></span>
+                                <button @click="increase()" class="w-8 h-8 rounded-lg flex items-center justify-center transition" :class="servings >= 20 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:bg-white hover:shadow-sm'" :disabled="servings >= 20">
+                                    <i data-lucide="plus" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                            <button x-show="servings !== originalServings" x-transition @click="reset()" class="text-xs text-green-600 hover:text-green-700 underline underline-offset-2">
+                                сброс
+                            </button>
+                        </div>
+                    </div>
                     
                     <ul class="space-y-2 sm:space-y-3">
                         @foreach($recipe->ingredients as $ingredient)
@@ -133,7 +150,9 @@
                                         <span class="text-[10px] sm:text-xs text-gray-400 flex-shrink-0">(опц.)</span>
                                     @endif
                                 </div>
-                                <span class="text-gray-600 font-medium text-xs sm:text-sm flex-shrink-0 ml-2">{{ $ingredient->amount }} {{ $ingredient->unit }}</span>
+                                <span class="text-gray-600 font-medium text-xs sm:text-sm flex-shrink-0 ml-2">
+                                    <span x-text="scaledAmount({{ $loop->index }})"></span> {{ $ingredient->unit }}
+                                </span>
                             </li>
                         @endforeach
                     </ul>
@@ -142,7 +161,13 @@
 
                 <!-- Instructions -->
                 <x-subscription-gate :locked="!($canAccessFull ?? true)">
-                <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm overflow-hidden" x-data="cookingSteps({{ count(array_filter(explode("\n", $recipe->instructions), fn($l) => trim($l) && !preg_match('/^(?:\*\*|#{1,3}\s*)?(?:Шаг\s*\d+[:\.]?\s*|Этап\s*\d+[:\.]?\s*)/iu', trim($l)))) }})">
+                @php
+                    // Единый паттерн для определения заголовков инструкций
+                    $headerPattern = '/^(?:(?:\*\*|#{1,3}\s*)?(?:Шаг\s*\d+[:\.]?\s*|Этап\s*\d+[:\.]?\s*).+(?:\*\*)?|\*\*.+\*\*|#{1,3}\s+.+|(?!\d+\.).{3,50}:\s*)$/iu';
+                    $instructionLines = array_filter(explode("\n", $recipe->instructions), fn($l) => trim($l));
+                    $stepsCount = count(array_filter($instructionLines, fn($l) => !preg_match($headerPattern, trim($l))));
+                @endphp
+                <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm overflow-hidden" x-data="cookingSteps({{ $stepsCount }})">
                     <!-- Header with progress -->
                     <div class="bg-gradient-to-r from-green-500 to-emerald-600 p-4 sm:p-6 md:p-8">
                         <div class="flex items-center justify-between mb-3 sm:mb-4">
@@ -177,8 +202,14 @@
                             
                             foreach ($lines as $line) {
                                 $trimmed = trim($line);
-                                if (preg_match('/^(?:\*\*|#{1,3}\s*)?(?:Шаг\s*\d+[:\.]?\s*|Этап\s*\d+[:\.]?\s*)(.+?)(?:\*\*)?$/iu', $trimmed, $m)) {
-                                    $currentGroup = trim($m[1], ' *:');
+                                // Заголовок: «Шаг N:», «Этап N:», **жирный**, # markdown, «Короткий текст:»
+                                if (preg_match($headerPattern, $trimmed)) {
+                                    // Извлекаем чистый текст заголовка
+                                    $clean = preg_replace('/^(?:\*\*|#{1,3}\s*)?(?:Шаг\s*\d+[:\.]?\s*|Этап\s*\d+[:\.]?\s*)?/iu', '', $trimmed);
+                                    $clean = trim($clean, " \t*:#");
+                                    if ($clean !== '') {
+                                        $currentGroup = $clean;
+                                    }
                                 } else {
                                     $stepNum++;
                                     $steps[] = [
@@ -303,7 +334,10 @@
                         <i data-lucide="pie-chart" class="w-5 h-5 sm:w-6 sm:h-6 text-green-500"></i>
                         Пищевая ценность
                     </h3>
-                    <p class="text-xs sm:text-sm text-gray-500 mb-4 sm:mb-6">На 1 порцию</p>
+                    <p class="text-xs sm:text-sm text-gray-500 mb-4 sm:mb-6">
+                        <span x-show="servings === originalServings">На 1 порцию</span>
+                        <span x-show="servings !== originalServings" x-cloak>На <span x-text="servings"></span> <span x-text="portionWord()"></span> (всего)</span>
+                    </p>
                     
                     <div class="space-y-3 sm:space-y-4">
                         <!-- Calories -->
@@ -313,22 +347,22 @@
                                     <i data-lucide="flame" class="w-5 h-5 sm:w-6 sm:h-6 text-orange-500"></i>
                                     <span class="font-medium text-gray-900 text-sm sm:text-base">Калории</span>
                                 </div>
-                                <span class="text-xl sm:text-2xl font-bold text-gray-900">{{ $recipe->calories }}</span>
+                                <span class="text-xl sm:text-2xl font-bold text-gray-900" x-text="scaledNutrition('calories')"></span>
                             </div>
                         </div>
                         
                         <!-- Macros -->
                         <div class="grid grid-cols-3 gap-2 sm:gap-3">
                             <div class="bg-blue-50 rounded-lg sm:rounded-xl p-2 sm:p-4 text-center">
-                                <div class="text-lg sm:text-2xl font-bold text-blue-600">{{ $recipe->proteins }}</div>
+                                <div class="text-lg sm:text-2xl font-bold text-blue-600" x-text="scaledNutrition('proteins')"></div>
                                 <div class="text-[10px] sm:text-sm text-gray-600">Белки (г)</div>
                             </div>
                             <div class="bg-yellow-50 rounded-lg sm:rounded-xl p-2 sm:p-4 text-center">
-                                <div class="text-lg sm:text-2xl font-bold text-yellow-600">{{ $recipe->fats }}</div>
+                                <div class="text-lg sm:text-2xl font-bold text-yellow-600" x-text="scaledNutrition('fats')"></div>
                                 <div class="text-[10px] sm:text-sm text-gray-600">Жиры (г)</div>
                             </div>
                             <div class="bg-purple-50 rounded-lg sm:rounded-xl p-2 sm:p-4 text-center">
-                                <div class="text-lg sm:text-2xl font-bold text-purple-600">{{ $recipe->carbs }}</div>
+                                <div class="text-lg sm:text-2xl font-bold text-purple-600" x-text="scaledNutrition('carbs')"></div>
                                 <div class="text-[10px] sm:text-sm text-gray-600">Углеводы (г)</div>
                             </div>
                         </div>
@@ -478,6 +512,55 @@
         });
     }
     
+    function portionCalculator(originalServings, ingredients, nutrition) {
+        return {
+            originalServings: originalServings,
+            servings: originalServings,
+            ingredients: ingredients,
+            nutrition: nutrition,
+
+            get ratio() {
+                return this.originalServings > 0 ? this.servings / this.originalServings : 1;
+            },
+
+            increase() {
+                if (this.servings < 20) this.servings++;
+            },
+
+            decrease() {
+                if (this.servings > 1) this.servings--;
+            },
+
+            reset() {
+                this.servings = this.originalServings;
+            },
+
+            scaledAmount(index) {
+                const original = this.ingredients[index]?.amount ?? 0;
+                const scaled = original * this.ratio;
+                // Красивое округление: целые если >= 10, один знак если >= 1, два знака для мелких
+                if (scaled >= 10) return Math.round(scaled);
+                if (scaled >= 1) return Math.round(scaled * 10) / 10;
+                return Math.round(scaled * 100) / 100;
+            },
+
+            scaledNutrition(key) {
+                const original = this.nutrition[key] ?? 0;
+                const scaled = original * this.ratio;
+                return Math.round(scaled * 10) / 10;
+            },
+
+            portionWord() {
+                const n = this.servings;
+                const mod10 = n % 10;
+                const mod100 = n % 100;
+                if (mod10 === 1 && mod100 !== 11) return 'порцию';
+                if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return 'порции';
+                return 'порций';
+            }
+        };
+    }
+
     function cookingSteps(totalSteps) {
         return {
             totalSteps: totalSteps,

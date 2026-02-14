@@ -116,7 +116,7 @@
 
                                 <x-dropdown-link href="{{ route('logout') }}"
                                          @click.prevent="$root.submit();">
-                                    {{ __('Log Out') }}
+                                    Выйти
                                 </x-dropdown-link>
                             </form>
                         </x-slot>
@@ -177,7 +177,7 @@
 
                     <x-responsive-nav-link href="{{ route('logout') }}"
                                    @click.prevent="$root.submit();">
-                        {{ __('Log Out') }}
+                        Выйти
                     </x-responsive-nav-link>
                 </form>
 

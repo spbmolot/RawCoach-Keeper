@@ -66,6 +66,23 @@
         <priority>0.3</priority>
     </url>
 
+    {{-- Блог --}}
+    <url>
+        <loc>{{ route('blog.index') }}</loc>
+        <lastmod>{{ now()->toW3cString() }}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+
+    @foreach($blogPosts as $post)
+    <url>
+        <loc>{{ route('blog.show', $post->slug) }}</loc>
+        <lastmod>{{ $post->updated_at->toW3cString() }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    @endforeach
+
     {{-- Меню --}}
     @foreach($menus as $menu)
     <url>

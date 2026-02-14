@@ -75,6 +75,10 @@
                            class="{{ $activeNav === 'about' ? 'text-green-600 font-medium' : 'text-gray-600 hover:text-green-600 font-medium transition' }}">
                             О нас
                         </a>
+                        <a href="{{ route('blog.index') }}" 
+                           class="{{ $activeNav === 'blog' ? 'text-green-600 font-medium' : 'text-gray-600 hover:text-green-600 font-medium transition' }}">
+                            Блог
+                        </a>
                         <a href="{{ route('contact') }}" 
                            class="{{ $activeNav === 'contact' ? 'text-green-600 font-medium' : 'text-gray-600 hover:text-green-600 font-medium transition' }}">
                             Контакты
@@ -215,6 +219,11 @@
                    class="block px-4 py-3 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-xl font-medium transition text-lg">
                     <i data-lucide="info" class="w-5 h-5 inline mr-3"></i>
                     О нас
+                </a>
+                <a href="{{ route('blog.index') }}" onclick="closeMobileMenu()"
+                   class="block px-4 py-3 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-xl font-medium transition text-lg">
+                    <i data-lucide="newspaper" class="w-5 h-5 inline mr-3"></i>
+                    Блог
                 </a>
                 <a href="{{ route('contact') }}" onclick="closeMobileMenu()"
                    class="block px-4 py-3 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-xl font-medium transition text-lg">

@@ -4,7 +4,9 @@ namespace App\Actions\Fortify;
 
 use App\Models\User;
 use App\Rules\Recaptcha;
+use App\Services\ReferralService;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 use Laravel\Jetstream\Jetstream;
@@ -33,10 +35,33 @@ class CreateNewUser implements CreatesNewUsers
 
         Validator::make($input, $rules)->validate();
 
-        return User::create([
+        $user = User::create([
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => Hash::make($input['password']),
         ]);
+
+        // Обработка реферального кода из cookie
+        $referralCode = request()->cookie('referral_code');
+        if ($referralCode) {
+            $referrer = User::where('referral_code', $referralCode)->first();
+            if ($referrer) {
+                try {
+                    app(ReferralService::class)->registerReferral(
+                        $referrer,
+                        $user,
+                        request()->ip()
+                    );
+                } catch (\Exception $e) {
+                    Log::warning('Referral registration failed during signup', [
+                        'referral_code' => $referralCode,
+                        'user_id' => $user->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+        }
+
+        return $user;
     }
 }

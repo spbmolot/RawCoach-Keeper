@@ -90,7 +90,7 @@
         @endif
 
         {{-- Быстрые действия --}}
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4 mb-6 sm:mb-8">
             <a href="{{ route('dashboard.today') }}" class="group bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-amber-200">
                 <div class="w-10 h-10 sm:w-14 sm:h-14 bg-amber-100 rounded-lg sm:rounded-xl flex items-center justify-center mb-2 sm:mb-4 group-hover:scale-110 transition-transform">
                     <i data-lucide="sun" class="w-5 h-5 sm:w-7 sm:h-7 text-amber-600"></i>
@@ -114,6 +114,14 @@
                 <h3 class="font-semibold text-gray-900 mb-0.5 sm:mb-1 text-sm sm:text-base">Покупки</h3>
                 <p class="text-xs sm:text-sm text-gray-500 hidden xs:block">Список продуктов</p>
             </a>
+
+            <a href="{{ route('dashboard.progress') }}" class="group bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-orange-200">
+                <div class="w-10 h-10 sm:w-14 sm:h-14 bg-orange-100 rounded-lg sm:rounded-xl flex items-center justify-center mb-2 sm:mb-4 group-hover:scale-110 transition-transform">
+                    <i data-lucide="trending-up" class="w-5 h-5 sm:w-7 sm:h-7 text-orange-600"></i>
+                </div>
+                <h3 class="font-semibold text-gray-900 mb-0.5 sm:mb-1 text-sm sm:text-base">Прогресс</h3>
+                <p class="text-xs sm:text-sm text-gray-500 hidden xs:block">Дневник и вес</p>
+            </a>
             
             <a href="{{ route('recipes.favorites') }}" class="group bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-red-200">
                 <div class="w-10 h-10 sm:w-14 sm:h-14 bg-red-100 rounded-lg sm:rounded-xl flex items-center justify-center mb-2 sm:mb-4 group-hover:scale-110 transition-transform">
@@ -121,6 +129,14 @@
                 </div>
                 <h3 class="font-semibold text-gray-900 mb-0.5 sm:mb-1 text-sm sm:text-base">Избранное</h3>
                 <p class="text-xs sm:text-sm text-gray-500 hidden xs:block">Любимые рецепты</p>
+            </a>
+
+            <a href="{{ route('dashboard.referrals') }}" class="group bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-purple-200">
+                <div class="w-10 h-10 sm:w-14 sm:h-14 bg-purple-100 rounded-lg sm:rounded-xl flex items-center justify-center mb-2 sm:mb-4 group-hover:scale-110 transition-transform">
+                    <i data-lucide="gift" class="w-5 h-5 sm:w-7 sm:h-7 text-purple-600"></i>
+                </div>
+                <h3 class="font-semibold text-gray-900 mb-0.5 sm:mb-1 text-sm sm:text-base">Друзья</h3>
+                <p class="text-xs sm:text-sm text-gray-500 hidden xs:block">Пригласить друга</p>
             </a>
         </div>
 
