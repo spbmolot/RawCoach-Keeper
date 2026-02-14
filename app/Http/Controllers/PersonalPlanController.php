@@ -7,6 +7,7 @@ use App\Models\PersonalPlan;
 use App\Models\Questionnaire;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class PersonalPlanController extends Controller
 {
@@ -135,11 +136,22 @@ class PersonalPlanController extends Controller
 
             \DB::commit();
 
+            Log::channel('user-actions')->info('Personal plan created', [
+                'user_id' => $user->id,
+                'plan_id' => $personalPlan->id,
+                'questionnaire_id' => $questionnaire->id,
+                'goal' => $request->goal,
+            ]);
+
             return redirect()->route('personal-plans.show', $personalPlan)
                 ->with('success', 'Анкета отправлена! Наш нутрициолог создаст для вас персональный план в течение 3-5 рабочих дней.');
 
         } catch (\Exception $e) {
             \DB::rollBack();
+            Log::channel('user-actions')->error('Personal plan creation failed', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
             return back()->with('error', 'Произошла ошибка при создании персонального плана');
         }
     }
@@ -190,6 +202,12 @@ class PersonalPlanController extends Controller
             'additional_notes' => 'nullable|string|max:1000',
         ]);
 
+        Log::channel('user-actions')->info('Personal plan questionnaire updated', [
+            'user_id' => auth()->id(),
+            'plan_id' => $personalPlan->id,
+            'goal' => $request->goal,
+        ]);
+
         $personalPlan->questionnaire->update([
             'goal' => $request->goal,
             'current_weight' => $request->current_weight,
@@ -226,6 +244,11 @@ class PersonalPlanController extends Controller
         $personalPlan->update([
             'status' => 'cancelled',
             'cancelled_at' => Carbon::now(),
+        ]);
+
+        Log::channel('user-actions')->info('Personal plan cancelled', [
+            'user_id' => auth()->id(),
+            'plan_id' => $personalPlan->id,
         ]);
 
         return redirect()->route('personal-plans.index')

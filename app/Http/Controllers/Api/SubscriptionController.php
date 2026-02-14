@@ -7,6 +7,7 @@ use App\Models\Plan;
 use App\Models\UserSubscription;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 
@@ -92,6 +93,16 @@ class SubscriptionController extends Controller
             'coupon_id' => $coupon?->id,
         ]);
 
+        Log::channel('subscriptions')->info('API: Subscription created', [
+            'user_id' => $user->id,
+            'subscription_id' => $subscription->id,
+            'plan_id' => $plan->id,
+            'billing_cycle' => $billingCycle,
+            'amount' => $amount,
+            'coupon' => $coupon?->code,
+            'ip' => request()->ip(),
+        ]);
+
         return response()->json([
             'success' => true,
             'message' => 'Подписка создана, необходимо произвести оплату',
@@ -125,6 +136,12 @@ class SubscriptionController extends Controller
             'cancelled_at' => now(),
         ]);
 
+        Log::channel('subscriptions')->info('API: Subscription cancelled', [
+            'user_id' => $user->id,
+            'subscription_id' => $subscription->id,
+            'ip' => request()->ip(),
+        ]);
+
         return response()->json([
             'success' => true,
             'message' => 'Подписка отменена'
@@ -155,6 +172,12 @@ class SubscriptionController extends Controller
         $subscription->update([
             'status' => 'paused',
             'paused_at' => now(),
+        ]);
+
+        Log::channel('subscriptions')->info('API: Subscription paused', [
+            'user_id' => $user->id,
+            'subscription_id' => $subscription->id,
+            'ip' => request()->ip(),
         ]);
 
         return response()->json([
@@ -192,6 +215,13 @@ class SubscriptionController extends Controller
             'status' => 'active',
             'ends_at' => $newEndDate,
             'paused_at' => null,
+        ]);
+
+        Log::channel('subscriptions')->info('API: Subscription resumed', [
+            'user_id' => $user->id,
+            'subscription_id' => $subscription->id,
+            'new_ends_at' => $newEndDate->toDateString(),
+            'ip' => request()->ip(),
         ]);
 
         return response()->json([

@@ -11,6 +11,7 @@ use App\Models\Recipe;
 use App\Models\User;
 use App\Models\UserSubscription;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class HomeController extends Controller
 {
@@ -80,6 +81,13 @@ class HomeController extends Controller
         ]);
 
         Mail::to(config('mail.from.address', 'support@rawplan.ru'))->send(new ContactFormMail($request->only(['name', 'email', 'subject', 'message'])));
+
+        Log::channel('user-actions')->info('Contact form submitted', [
+            'name' => $request->name,
+            'email' => $request->email,
+            'subject' => $request->subject,
+            'ip' => $request->ip(),
+        ]);
 
         return back()->with('success', 'Ваше сообщение отправлено! Мы свяжемся с вами в ближайшее время.');
     }

@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class CheckSubscription
@@ -76,6 +77,14 @@ class CheckSubscription
         }
 
         // Если доступ запрещен
+        Log::channel('user-actions')->info('Subscription access denied', [
+            'user_id' => $user->id,
+            'required_access' => $requiredAccess,
+            'current_plan' => $activeSubscription?->plan?->slug,
+            'url' => $request->fullUrl(),
+            'ip' => $request->ip(),
+        ]);
+
         return $this->redirectToUpgrade($requiredAccess);
     }
 
