@@ -85,6 +85,36 @@ class PlansController extends Controller
     }
 
     /**
+     * Страница выбора плана для покупки
+     */
+    public function choose(Plan $plan)
+    {
+        if (!$plan->is_active) {
+            abort(404, 'План не найден или неактивен');
+        }
+
+        if (!auth()->check()) {
+            return redirect()->route('login')
+                ->with('intended_plan', $plan->id)
+                ->with('message', 'Войдите в систему для оформления подписки');
+        }
+
+        $user = auth()->user();
+        $activeSubscription = $user->activeSubscription()->with('plan')->first();
+
+        if ($activeSubscription) {
+            if ($activeSubscription->plan_id === $plan->id) {
+                return redirect()->route('dashboard')
+                    ->with('info', 'У вас уже активна подписка на этот план');
+            }
+
+            return view('plans.upgrade', compact('plan', 'activeSubscription'));
+        }
+
+        return view('plans.choose', compact('plan'));
+    }
+
+    /**
      * Страница обновления плана для авторизованных пользователей
      */
     public function upgrade()

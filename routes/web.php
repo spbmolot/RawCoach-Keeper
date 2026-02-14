@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PlansController;
-use App\Http\Controllers\PlanController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\DashboardController;
@@ -46,7 +45,7 @@ if (app()->environment('local', 'development', 'testing')) {
 Route::prefix('plans')->name('plans.')->group(function () {
     Route::get('/', [PlansController::class, 'index'])->name('index');
     Route::get('/compare', [PlansController::class, 'compare'])->name('compare');
-    Route::get('/choose/{plan}', [PlanController::class, 'choose'])->name('choose');
+    Route::get('/choose/{plan}', [PlansController::class, 'choose'])->name('choose');
     Route::get('/{plan}', [PlansController::class, 'show'])->name('show');
 });
 
