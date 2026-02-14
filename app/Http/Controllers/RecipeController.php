@@ -197,17 +197,14 @@ class RecipeController extends Controller
     {
         $user = auth()->user();
         
-        $query = Recipe::where('is_published', true)
-            ->withCount('views');
+        $query = Recipe::where('recipes.is_published', true);
         
         if ($user && $user->activeSubscription()) {
             $this->filterRecipesBySubscription($query, $user);
-        } else {
-            $query->where('is_published', true);
         }
         
         $recipes = $query->with(['author'])
-            ->orderBy('views_count', 'desc')
+            ->orderBy('recipes.views_count', 'desc')
             ->paginate(12);
         
         return view('recipes.popular', compact('recipes'));
@@ -269,7 +266,7 @@ class RecipeController extends Controller
     private function filterRecipesBySubscription($query, $user)
     {
         // Все авторизованные пользователи видят опубликованные рецепты
-        $query->where('is_published', true);
+        $query->where('recipes.is_published', true);
     }
 
     /**

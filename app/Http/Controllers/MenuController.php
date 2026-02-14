@@ -109,10 +109,10 @@ class MenuController extends Controller
                 ->with('error', 'Для доступа к архиву необходима подписка');
         }
         
-        $subscription = $user->activeSubscription()->first();
+        $subscription = $user->activeSubscription()->with('plan')->first();
         
         // Проверяем, есть ли доступ к архиву (годовая или персональная подписка)
-        if (!$subscription || !in_array($subscription->plan->slug, ['yearly', 'personal'])) {
+        if (!$subscription || ($subscription->plan->type !== 'yearly' && !str_contains($subscription->plan->slug, 'personal'))) {
             return redirect()->route('plans.index')
                 ->with('error', 'Доступ к архиву доступен только для годовой и персональной подписки');
         }
@@ -149,9 +149,9 @@ class MenuController extends Controller
                 ->with('error', 'Для раннего доступа необходима подписка');
         }
         
-        $subscription = $user->activeSubscription()->first();
+        $subscription = $user->activeSubscription()->with('plan')->first();
         
-        if (!$subscription || !in_array($subscription->plan->slug, ['yearly', 'personal'])) {
+        if (!$subscription || ($subscription->plan->type !== 'yearly' && !str_contains($subscription->plan->slug, 'personal'))) {
             return redirect()->route('plans.index')
                 ->with('error', 'Ранний доступ доступен только для годовой и персональной подписки');
         }
@@ -261,9 +261,9 @@ class MenuController extends Controller
         
         return match($menu->type) {
             'current' => true, // Доступно всем подписчикам
-            'archive', 'early' => in_array($plan->slug, ['yearly', 'personal']),
-            'personal' => $plan->slug === 'personal' && $menu->user_id === $user->id,
-            'trial' => $plan->slug === 'trial',
+            'archive', 'early' => $plan->type === 'yearly' || str_contains($plan->slug, 'personal'),
+            'personal' => str_contains($plan->slug, 'personal') && $menu->user_id === $user->id,
+            'trial' => $plan->type === 'trial',
             default => false
         };
     }
@@ -273,6 +273,11 @@ class MenuController extends Controller
      */
     private function filterMenuBySubscription($query, $user)
     {
+        // Root-пользователи имеют доступ ко всему контенту
+        if ($user->hasRole('root')) {
+            return;
+        }
+
         $subscription = $user->activeSubscription()->with('plan')->first();
         
         if (!$subscription) {
@@ -282,17 +287,29 @@ class MenuController extends Controller
 
         $plan = $subscription->plan;
         
-        if ($plan->slug === 'monthly') {
-            $query->whereIn('type', ['current', 'demo']);
-        } elseif ($plan->slug === 'yearly') {
-            $query->whereIn('type', ['current', 'archive', 'early', 'demo']);
-        } elseif ($plan->slug === 'personal') {
-            $query->whereIn('type', ['current', 'archive', 'early', 'demo'])
-                  ->orWhere(function($q) use ($user) {
-                      $q->where('type', 'personal')->where('user_id', $user->id);
+        // Пробная подписка - ограниченный контент
+        if ($plan->type === 'trial') {
+            $query->whereIn('type', ['trial', 'current']);
+        }
+        // Месячная подписка - текущие меню
+        elseif ($plan->type === 'monthly' && !str_contains($plan->slug, 'personal')) {
+            $query->where('type', 'current');
+        }
+        // Годовая подписка - текущие + архивы + ранний доступ
+        elseif ($plan->type === 'yearly' && !str_contains($plan->slug, 'personal')) {
+            $query->whereIn('type', ['current', 'archive', 'early']);
+        }
+        // Персональная подписка (месячная или годовая) - все + персональные
+        elseif (str_contains($plan->slug, 'personal')) {
+            $query->whereIn('type', ['current', 'archive', 'early', 'personal'])
+                  ->where(function($q) use ($user) {
+                      $q->where('type', '!=', 'personal')
+                        ->orWhere('user_id', $user->id);
                   });
-        } elseif ($plan->slug === 'trial') {
-            $query->whereIn('type', ['trial', 'demo']);
+        }
+        // Fallback - только текущие
+        else {
+            $query->where('type', 'current');
         }
     }
 
@@ -308,16 +325,16 @@ class MenuController extends Controller
             
             $types['current'] = 'Текущие';
             
-            if (in_array($plan->slug, ['yearly', 'personal'])) {
+            if ($plan->type === 'yearly' || str_contains($plan->slug, 'personal')) {
                 $types['archive'] = 'Архив';
                 $types['early'] = 'Ранний доступ';
             }
             
-            if ($plan->slug === 'personal') {
+            if (str_contains($plan->slug, 'personal')) {
                 $types['personal'] = 'Персональные';
             }
             
-            if ($plan->slug === 'trial') {
+            if ($plan->type === 'trial') {
                 $types['trial'] = 'Пробные';
             }
         }

@@ -75,6 +75,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     
     // Подписки (только для авторизованных)
     Route::prefix('subscriptions')->name('subscriptions.')->group(function () {
+        Route::get('/', [SubscriptionController::class, 'index'])->name('index');
         Route::post('/{plan}', [SubscriptionController::class, 'create'])->name('create');
         Route::patch('/{subscription}/cancel', [SubscriptionController::class, 'cancel'])->name('cancel');
         Route::patch('/{subscription}/pause', [SubscriptionController::class, 'pause'])->name('pause');

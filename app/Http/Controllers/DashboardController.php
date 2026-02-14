@@ -25,10 +25,13 @@ class DashboardController extends Controller
         $user = auth()->user();
         $activeSubscription = $user->activeSubscription()->with('plan')->first();
         
-        // Получаем текущее меню
+        // Получаем текущее меню (с учётом подписки)
         $currentMenu = Menu::where('is_published', true)
             ->where('month', Carbon::now()->month)
             ->where('year', Carbon::now()->year)
+            ->where(function($query) use ($user) {
+                $this->filterMenuBySubscription($query, $user);
+            })
             ->with(['days.meals.recipe'])
             ->first();
         

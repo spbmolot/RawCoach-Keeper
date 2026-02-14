@@ -19,6 +19,26 @@ class SubscriptionController extends Controller
     }
 
     /**
+     * Страница текущей подписки пользователя
+     */
+    public function index()
+    {
+        $user = auth()->user();
+        $subscription = $user->activeSubscription()->with('plan')->first();
+        $payments = $user->payments()
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
+
+        $availablePlans = Plan::where('is_active', true)
+            ->orderBy('sort_order', 'asc')
+            ->orderBy('price', 'asc')
+            ->get();
+
+        return view('subscriptions.index', compact('subscription', 'payments', 'availablePlans'));
+    }
+
+    /**
      * Создание новой подписки
      */
     public function create(Request $request, Plan $plan)
