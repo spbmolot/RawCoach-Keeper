@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Events\PaymentProcessed;
 use App\Events\SubscriptionStatusChanged;
+use App\Listeners\LogAuthEvents;
 use App\Listeners\SendPaymentNotification;
 use App\Listeners\SendSubscriptionNotification;
 use App\Listeners\StartWelcomeEmailSeries;
@@ -36,6 +37,15 @@ class EventServiceProvider extends ServiceProvider
             SendSubscriptionNotification::class,
             SyncSubscriptionRole::class,
         ],
+    ];
+
+    /**
+     * The subscriber classes to register.
+     *
+     * @var array
+     */
+    protected $subscribe = [
+        LogAuthEvents::class,
     ];
 
     /**

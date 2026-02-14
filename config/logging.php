@@ -143,6 +143,30 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'auth' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/auth.log'),
+            'level' => 'debug',
+            'days' => 30,
+            'replace_placeholders' => true,
+        ],
+
+        'security' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/security.log'),
+            'level' => 'debug',
+            'days' => 90,
+            'replace_placeholders' => true,
+        ],
+
+        'user-actions' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/user-actions.log'),
+            'level' => 'debug',
+            'days' => 30,
+            'replace_placeholders' => true,
+        ],
+
     ],
 
 ];

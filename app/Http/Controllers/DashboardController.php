@@ -10,6 +10,7 @@ use App\Models\PersonalPlan;
 use App\Services\RecipeSwapService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
@@ -362,7 +363,23 @@ class DashboardController extends Controller
         $data['email_notifications'] = $request->boolean('email_notifications');
         $data['push_notifications'] = $request->boolean('push_notifications');
 
+        // Логируем изменения email отдельно (безопасность)
+        if ($user->email !== $data['email']) {
+            Log::channel('security')->info('User email changed', [
+                'user_id' => $user->id,
+                'old_email' => $user->email,
+                'new_email' => $data['email'],
+                'ip' => request()->ip(),
+            ]);
+        }
+
         $user->update($data);
+
+        Log::channel('user-actions')->info('Profile updated', [
+            'user_id' => $user->id,
+            'fields' => array_keys($data),
+            'ip' => request()->ip(),
+        ]);
 
         return back()->with('success', 'Профиль успешно обновлен');
     }

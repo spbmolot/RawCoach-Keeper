@@ -9,6 +9,7 @@ use App\Models\Payment;
 use App\Models\Coupon;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Events\SubscriptionStatusChanged;
 
 class SubscriptionController extends Controller
@@ -88,6 +89,14 @@ class SubscriptionController extends Controller
         try {
             DB::beginTransaction();
 
+            Log::channel('subscriptions')->info('Creating subscription', [
+                'user_id' => $user->id,
+                'plan' => $plan->slug,
+                'price' => $price,
+                'coupon' => $coupon?->code,
+                'ip' => request()->ip(),
+            ]);
+
             // Создаем подписку
             $subscription = UserSubscription::create([
                 'user_id' => $user->id,
@@ -119,6 +128,13 @@ class SubscriptionController extends Controller
                 $subscription->update(['status' => 'active']);
                 
                 DB::commit();
+
+                Log::channel('subscriptions')->info('Trial subscription activated', [
+                    'user_id' => $user->id,
+                    'subscription_id' => $subscription->id,
+                    'plan' => $plan->slug,
+                ]);
+
                 event(new SubscriptionStatusChanged($subscription->fresh(), 'active'));
                 
                 return redirect()->route('dashboard')
@@ -132,6 +148,11 @@ class SubscriptionController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::channel('subscriptions')->error('Subscription creation failed', [
+                'user_id' => $user->id,
+                'plan' => $plan->slug,
+                'error' => $e->getMessage(),
+            ]);
             return back()->with('error', 'Произошла ошибка при создании подписки');
         }
     }
@@ -154,6 +175,13 @@ class SubscriptionController extends Controller
         $subscription->update([
             'cancelled_at' => Carbon::now(),
             'auto_renew' => false,
+        ]);
+
+        Log::channel('subscriptions')->info('Subscription auto-renewal cancelled', [
+            'user_id' => auth()->id(),
+            'subscription_id' => $subscription->id,
+            'ends_at' => $subscription->ends_at->toDateString(),
+            'ip' => request()->ip(),
         ]);
 
         // Не меняем статус и не снимаем роль - подписка активна до ends_at
@@ -180,6 +208,13 @@ class SubscriptionController extends Controller
             'status' => 'paused',
             'paused_at' => Carbon::now(),
         ]);
+
+        Log::channel('subscriptions')->info('Subscription paused', [
+            'user_id' => auth()->id(),
+            'subscription_id' => $subscription->id,
+            'ip' => request()->ip(),
+        ]);
+
         event(new SubscriptionStatusChanged($subscription->fresh(), 'paused'));
 
         return back()->with('success', 'Подписка приостановлена');
@@ -200,6 +235,13 @@ class SubscriptionController extends Controller
             'status' => 'active',
             'paused_at' => null,
         ]);
+
+        Log::channel('subscriptions')->info('Subscription resumed', [
+            'user_id' => auth()->id(),
+            'subscription_id' => $subscription->id,
+            'ip' => request()->ip(),
+        ]);
+
         event(new SubscriptionStatusChanged($subscription->fresh(), 'active'));
 
         return back()->with('success', 'Подписка возобновлена');
@@ -262,6 +304,15 @@ class SubscriptionController extends Controller
         $currentSubscription->schedulePlanChange($newPlan);
 
         $currentPlan = $currentSubscription->plan;
+
+        Log::channel('subscriptions')->info('Plan change scheduled', [
+            'user_id' => $user->id,
+            'subscription_id' => $currentSubscription->id,
+            'from_plan' => $currentPlan->slug,
+            'to_plan' => $newPlan->slug,
+            'effective_after' => $currentSubscription->ends_at->toDateString(),
+            'ip' => request()->ip(),
+        ]);
         $changeType = $newPlan->price > $currentPlan->price ? 'повышен' : 'понижен';
         $endsAt = $currentSubscription->ends_at->format('d.m.Y');
 

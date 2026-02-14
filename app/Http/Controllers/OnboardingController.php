@@ -9,6 +9,7 @@ use App\Models\Payment;
 use App\Events\SubscriptionStatusChanged;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class OnboardingController extends Controller
 {
@@ -109,6 +110,14 @@ class OnboardingController extends Controller
             'allergies' => !empty($allergies) ? $allergies : null,
         ]);
 
+        Log::channel('user-actions')->info('Onboarding survey completed', [
+            'user_id' => $user->id,
+            'goal' => $request->goal,
+            'dietary' => $dietary,
+            'allergies' => $allergies,
+            'ip' => request()->ip(),
+        ]);
+
         // Автоактивация Trial (если ещё не использован)
         $trialActivated = false;
         if (!$user->hasUsedTrial() && !$user->hasActiveSubscription()) {
@@ -180,11 +189,21 @@ class OnboardingController extends Controller
 
             DB::commit();
 
+            Log::channel('subscriptions')->info('Trial activated via onboarding', [
+                'user_id' => $user->id,
+                'subscription_id' => $subscription->id,
+                'ends_at' => $subscription->ends_at->toDateString(),
+            ]);
+
             event(new SubscriptionStatusChanged($subscription->fresh(), 'active'));
 
             return true;
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::channel('subscriptions')->error('Trial activation failed in onboarding', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
             report($e);
             return false;
         }

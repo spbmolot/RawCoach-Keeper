@@ -18,11 +18,27 @@ class CloudPaymentsWebhookController
         $payload = $request->json()->all();
         $rawBody = $request->getContent();
 
+        Log::channel('payments')->info('CloudPayments webhook received', [
+            'transaction_id' => $payload['TransactionId'] ?? null,
+            'status' => $payload['Status'] ?? null,
+            'amount' => $payload['Amount'] ?? null,
+            'ip' => $request->ip(),
+        ]);
+
+        if (empty($signature)) {
+            Log::channel('security')->warning('CloudPayments webhook: missing HMAC signature', [
+                'ip' => $request->ip(),
+            ]);
+        }
+
         try {
             $this->service->handleWebhook($payload, $rawBody, (string) $signature);
+            Log::channel('payments')->info('CloudPayments webhook processed', [
+                'transaction_id' => $payload['TransactionId'] ?? null,
+            ]);
         } catch (RuntimeException $e) {
-            Log::error('CloudPayments webhook error: ' . $e->getMessage(), [
-                'exception' => $e,
+            Log::channel('payments')->error('CloudPayments webhook error: ' . $e->getMessage(), [
+                'transaction_id' => $payload['TransactionId'] ?? null,
             ]);
 
             return response()->json(['code' => 13], 200);

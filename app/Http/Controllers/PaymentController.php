@@ -8,6 +8,7 @@ use App\Models\UserSubscription;
 use App\Models\Coupon;
 use App\Services\Payments\YooKassaService;
 use App\Services\Payments\CloudPaymentsService;
+use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
@@ -53,6 +54,14 @@ class PaymentController extends Controller
             $provider = $request->provider;
             $payment->update(['provider' => $provider]);
 
+            Log::channel('payments')->info('Payment creation initiated', [
+                'payment_id' => $payment->id,
+                'user_id' => auth()->id(),
+                'provider' => $provider,
+                'amount' => $payment->amount,
+                'ip' => request()->ip(),
+            ]);
+
             // В зависимости от провайдера создаем платеж
             if ($provider === 'yookassa') {
                 $result = $this->createYooKassaPayment($payment);
@@ -66,6 +75,12 @@ class PaymentController extends Controller
                 'payload' => $result,
             ]);
 
+            Log::channel('payments')->info('Payment created in provider', [
+                'payment_id' => $payment->id,
+                'external_id' => $result['payment_id'],
+                'provider' => $provider,
+            ]);
+
             return response()->json([
                 'success' => true,
                 'payment_url' => $result['payment_url'],
@@ -73,6 +88,12 @@ class PaymentController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            Log::channel('payments')->error('Payment creation failed', [
+                'payment_id' => $payment->id,
+                'user_id' => auth()->id(),
+                'provider' => $request->provider,
+                'error' => $e->getMessage(),
+            ]);
             return response()->json(['error' => 'Ошибка создания платежа: ' . $e->getMessage()], 500);
         }
     }
@@ -92,9 +113,21 @@ class PaymentController extends Controller
         $payment = Payment::where('external_id', $paymentId)->first();
         
         if (!$payment || $payment->user_id !== auth()->id()) {
+            Log::channel('payments')->warning('Payment success page: payment not found or unauthorized', [
+                'external_id' => $paymentId,
+                'user_id' => auth()->id(),
+                'ip' => request()->ip(),
+            ]);
             return redirect()->route('dashboard')
                 ->with('error', 'Платеж не найден');
         }
+
+        Log::channel('payments')->info('Payment success page visited', [
+            'payment_id' => $payment->id,
+            'user_id' => auth()->id(),
+            'status' => $payment->status,
+            'amount' => $payment->amount,
+        ]);
 
         return view('payments.success', compact('payment'));
     }
@@ -110,6 +143,12 @@ class PaymentController extends Controller
             $payment = Payment::where('external_id', $paymentId)->first();
             if ($payment && $payment->user_id === auth()->id()) {
                 $payment->update(['status' => 'cancelled']);
+                Log::channel('payments')->info('Payment cancelled by user', [
+                    'payment_id' => $payment->id,
+                    'user_id' => auth()->id(),
+                    'amount' => $payment->amount,
+                    'ip' => request()->ip(),
+                ]);
             }
         }
 

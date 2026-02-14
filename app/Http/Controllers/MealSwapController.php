@@ -7,6 +7,7 @@ use App\Models\Recipe;
 use App\Services\RecipeSwapService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class MealSwapController extends Controller
 {
@@ -31,6 +32,13 @@ class MealSwapController extends Controller
         }
 
         $alternatives = $this->swapService->getAlternatives($dayMeal, $user);
+
+        Log::channel('user-actions')->debug('Meal swap alternatives loaded', [
+            'user_id' => $user->id,
+            'day_meal_id' => $dayMeal->id,
+            'original_recipe' => $dayMeal->recipe->title,
+            'alternatives_count' => $alternatives->count(),
+        ]);
 
         return response()->json([
             'success' => true,
@@ -85,6 +93,15 @@ class MealSwapController extends Controller
 
         $swap = $this->swapService->swap($user, $dayMeal, $newRecipe, $request->reason);
 
+        Log::channel('user-actions')->info('Meal recipe swapped', [
+            'user_id' => $user->id,
+            'day_meal_id' => $dayMeal->id,
+            'original_recipe_id' => $dayMeal->recipe_id,
+            'new_recipe_id' => $newRecipe->id,
+            'new_recipe' => $newRecipe->title,
+            'reason' => $request->reason,
+        ]);
+
         return response()->json([
             'success' => true,
             'message' => 'Рецепт успешно заменён',
@@ -113,6 +130,14 @@ class MealSwapController extends Controller
         $user = auth()->user();
 
         $deleted = $this->swapService->reset($user, $dayMeal);
+
+        if ($deleted) {
+            Log::channel('user-actions')->info('Meal swap reset', [
+                'user_id' => $user->id,
+                'day_meal_id' => $dayMeal->id,
+                'restored_recipe' => $dayMeal->recipe->title,
+            ]);
+        }
 
         if (!$deleted) {
             return response()->json([
