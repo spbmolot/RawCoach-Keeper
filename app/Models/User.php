@@ -24,6 +24,12 @@ class User extends Authenticatable implements FilamentUser
     use HasRoles;
 
     /**
+     * Per-request кеш активной подписки (избегаем повторных SQL-запросов)
+     */
+    protected ?UserSubscription $_cachedSubscription;
+    protected bool $_subscriptionLoaded = false;
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
@@ -55,6 +61,8 @@ class User extends Authenticatable implements FilamentUser
         'is_active',
         'onboarding_completed_at',
         'onboarding_goal',
+        'referral_code',
+        'referred_by',
     ];
 
     /**
@@ -182,6 +190,56 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
+     * Дневник питания
+     */
+    public function foodDiaryEntries()
+    {
+        return $this->hasMany(FoodDiaryEntry::class);
+    }
+
+    /**
+     * Лог веса
+     */
+    public function weightLogs()
+    {
+        return $this->hasMany(WeightLog::class)->orderBy('date');
+    }
+
+    /**
+     * Достижения пользователя
+     */
+    public function achievements()
+    {
+        return $this->belongsToMany(Achievement::class, 'user_achievements')
+            ->withPivot('unlocked_at')
+            ->withTimestamps();
+    }
+
+    /**
+     * Кто пригласил этого пользователя
+     */
+    public function referrer()
+    {
+        return $this->belongsTo(User::class, 'referred_by');
+    }
+
+    /**
+     * Рефералы этого пользователя (кого он пригласил)
+     */
+    public function referrals()
+    {
+        return $this->hasMany(Referral::class, 'referrer_id');
+    }
+
+    /**
+     * Награды за рефералов
+     */
+    public function referralRewards()
+    {
+        return $this->hasMany(ReferralReward::class);
+    }
+
+    /**
      * Замены рецептов в меню
      */
     public function mealSwaps()
@@ -211,11 +269,32 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
+     * Получить активную подписку с plan (мемоизировано per-request)
+     */
+    public function getCachedSubscription(): ?UserSubscription
+    {
+        if (!$this->_subscriptionLoaded) {
+            $this->_cachedSubscription = $this->activeSubscription()->with('plan')->first();
+            $this->_subscriptionLoaded = true;
+        }
+        return $this->_cachedSubscription;
+    }
+
+    /**
+     * Сбросить кеш подписки (при изменении)
+     */
+    public function clearSubscriptionCache(): void
+    {
+        $this->_subscriptionLoaded = false;
+        $this->_cachedSubscription = null;
+    }
+
+    /**
      * Проверка активной подписки
      */
     public function hasActiveSubscription(): bool
     {
-        return $this->activeSubscription()->exists();
+        return $this->getCachedSubscription() !== null;
     }
 
     /**

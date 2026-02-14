@@ -20,19 +20,25 @@ class HomeController extends Controller
      */
     public function index()
     {
-        // Получаем активные планы для отображения тарифов
-        $plans = Plan::where('is_active', true)
-            ->orderBy('sort_order')
-            ->get();
+        // Получаем активные планы для отображения тарифов (кэш 1 час)
+        $plans = Cache::remember('active_plans', 3600, function () {
+            return Plan::where('is_active', true)
+                ->orderBy('sort_order')
+                ->get();
+        });
 
-        // Получаем несколько рецептов для демо
-        $featuredRecipes = Recipe::where('is_published', true)
-            ->limit(6)
-            ->get();
+        // Получаем несколько рецептов для демо (кэш 30 мин)
+        $featuredRecipes = Cache::remember('featured_recipes_6', 1800, function () {
+            return Recipe::where('is_published', true)
+                ->limit(6)
+                ->get();
+        });
 
-        // Получаем текущее меню для демонстрации
-        $currentMenu = Menu::where('is_published', true)
-            ->first();
+        // Получаем текущее меню для демонстрации (кэш 30 мин)
+        $currentMenu = Cache::remember('landing_current_menu', 1800, function () {
+            return Menu::where('is_published', true)
+                ->first();
+        });
 
         // Реальные счётчики для социального доказательства (кэш 1 час)
         $stats = Cache::remember('landing_stats', 3600, function () {
@@ -113,10 +119,12 @@ class HomeController extends Controller
      */
     public function demo()
     {
-        // Показываем ограниченный набор опубликованных рецептов
-        $demoRecipes = Recipe::where('is_published', true)
-            ->limit(3)
-            ->get();
+        // Показываем ограниченный набор опубликованных рецептов (кэш 30 мин)
+        $demoRecipes = Cache::remember('demo_recipes_3', 1800, function () {
+            return Recipe::where('is_published', true)
+                ->limit(3)
+                ->get();
+        });
 
         return view('home.demo', compact('demoRecipes'));
     }

@@ -139,7 +139,7 @@ class OnboardingController extends Controller
     {
         $user = auth()->user();
         $trialActivated = session('trial_activated', false);
-        $subscription = $user->activeSubscription()->with('plan')->first();
+        $subscription = $user->getCachedSubscription();
 
         // Получаем демо-день для показа
         $demoDay = $this->getDemoDay($user);

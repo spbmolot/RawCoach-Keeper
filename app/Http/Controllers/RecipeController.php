@@ -61,13 +61,15 @@ class RecipeController extends Controller
         // Загружаем связанные данные
         $recipe->load('ingredients');
         
-        // Получаем похожие рецепты
-        $similarRecipes = Recipe::where('is_published', true)
-            ->where('id', '!=', $recipe->id)
-            ->where('category', $recipe->category)
-            ->inRandomOrder()
-            ->limit(4)
-            ->get();
+        // Получаем похожие рецепты (кэш 10 мин)
+        $similarRecipes = Cache::remember("similar_recipes_{$recipe->id}", 600, function () use ($recipe) {
+            return Recipe::where('is_published', true)
+                ->where('id', '!=', $recipe->id)
+                ->where('category', $recipe->category)
+                ->inRandomOrder()
+                ->limit(4)
+                ->get();
+        });
         
         // Проверяем, добавлен ли в избранное
         $isFavorite = $user ? $user->favoriteRecipes()->where('recipe_id', $recipe->id)->exists() : false;

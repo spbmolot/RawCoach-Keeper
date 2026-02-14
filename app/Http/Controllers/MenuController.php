@@ -104,12 +104,12 @@ class MenuController extends Controller
     {
         $user = auth()->user();
         
-        if (!$user || !$user->activeSubscription()) {
+        if (!$user || !$user->hasActiveSubscription()) {
             return redirect()->route('plans.index')
                 ->with('error', 'Для доступа к архиву необходима подписка');
         }
         
-        $subscription = $user->activeSubscription()->with('plan')->first();
+        $subscription = $user->getCachedSubscription();
         
         // Проверяем, есть ли доступ к архиву (годовая или персональная подписка)
         if (!$subscription || ($subscription->plan->type !== 'yearly' && !str_contains($subscription->plan->slug, 'personal'))) {
@@ -144,12 +144,12 @@ class MenuController extends Controller
     {
         $user = auth()->user();
         
-        if (!$user || !$user->activeSubscription()) {
+        if (!$user || !$user->hasActiveSubscription()) {
             return redirect()->route('plans.index')
                 ->with('error', 'Для раннего доступа необходима подписка');
         }
         
-        $subscription = $user->activeSubscription()->with('plan')->first();
+        $subscription = $user->getCachedSubscription();
         
         if (!$subscription || ($subscription->plan->type !== 'yearly' && !str_contains($subscription->plan->slug, 'personal'))) {
             return redirect()->route('plans.index')
@@ -256,7 +256,7 @@ class MenuController extends Controller
             return false;
         }
         
-        $subscription = $user->activeSubscription()->with('plan')->first();
+        $subscription = $user->getCachedSubscription();
         $plan = $subscription->plan;
         
         return match($menu->type) {
@@ -278,7 +278,7 @@ class MenuController extends Controller
             return;
         }
 
-        $subscription = $user->activeSubscription()->with('plan')->first();
+        $subscription = $user->getCachedSubscription();
         
         if (!$subscription) {
             $query->where('type', 'demo');
@@ -321,7 +321,7 @@ class MenuController extends Controller
         $types = ['demo' => 'Демо'];
         
         if ($user && $user->hasActiveSubscription()) {
-            $plan = $user->activeSubscription()->with('plan')->first()->plan;
+            $plan = $user->getCachedSubscription()->plan;
             
             $types['current'] = 'Текущие';
             

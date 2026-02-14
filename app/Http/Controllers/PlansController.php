@@ -100,7 +100,7 @@ class PlansController extends Controller
         }
 
         $user = auth()->user();
-        $activeSubscription = $user->activeSubscription()->with('plan')->first();
+        $activeSubscription = $user->getCachedSubscription();
 
         if ($activeSubscription) {
             if ($activeSubscription->plan_id === $plan->id) {

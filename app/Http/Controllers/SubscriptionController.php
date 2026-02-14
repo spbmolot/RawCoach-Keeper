@@ -8,9 +8,11 @@ use App\Models\UserSubscription;
 use App\Models\Payment;
 use App\Models\Coupon;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Events\SubscriptionStatusChanged;
+use App\Services\ReferralService;
 
 class SubscriptionController extends Controller
 {
@@ -25,16 +27,18 @@ class SubscriptionController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $subscription = $user->activeSubscription()->with('plan')->first();
+        $subscription = $user->getCachedSubscription();
         $payments = $user->payments()
             ->orderBy('created_at', 'desc')
             ->limit(10)
             ->get();
 
-        $availablePlans = Plan::where('is_active', true)
-            ->orderBy('sort_order', 'asc')
-            ->orderBy('price', 'asc')
-            ->get();
+        $availablePlans = Cache::remember('active_plans', 3600, function () {
+            return Plan::where('is_active', true)
+                ->orderBy('sort_order', 'asc')
+                ->orderBy('price', 'asc')
+                ->get();
+        });
 
         return view('subscriptions.index', compact('subscription', 'payments', 'availablePlans'));
     }
@@ -83,6 +87,20 @@ class SubscriptionController extends Controller
                 $price = $this->calculateDiscountedPrice($price, $coupon);
             } else {
                 return back()->with('error', 'Купон недействителен или не может быть применен');
+            }
+        }
+
+        // Реферальная скидка (если нет купона и пользователь был приглашён)
+        $referralDiscount = 0;
+        if (!$coupon && $plan->type !== 'trial') {
+            $referralDiscount = app(ReferralService::class)->getRefereeDiscount($user);
+            if ($referralDiscount > 0) {
+                $price = round($price * (1 - $referralDiscount / 100), 2);
+                Log::channel('subscriptions')->info('Referral discount applied', [
+                    'user_id' => $user->id,
+                    'discount' => $referralDiscount . '%',
+                    'new_price' => $price,
+                ]);
             }
         }
 

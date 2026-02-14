@@ -10,6 +10,7 @@ use App\Models\PersonalPlan;
 use App\Services\RecipeSwapService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
@@ -26,7 +27,7 @@ class DashboardController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $activeSubscription = $user->activeSubscription()->with('plan')->first();
+        $activeSubscription = $user->getCachedSubscription();
         
         // Получаем текущее меню (с учётом подписки)
         $currentMenu = Menu::where('is_published', true)
@@ -38,11 +39,13 @@ class DashboardController extends Controller
             ->with(['days.meals.recipe'])
             ->first();
         
-        // Получаем недавние рецепты
-        $recentRecipes = Recipe::where('is_published', true)
-            ->orderBy('created_at', 'desc')
-            ->limit(5)
-            ->get();
+        // Получаем недавние рецепты (кэш 10 мин, одинаковые для всех)
+        $recentRecipes = Cache::remember('recent_recipes_5', 600, function () {
+            return Recipe::where('is_published', true)
+                ->orderBy('created_at', 'desc')
+                ->limit(5)
+                ->get();
+        });
 
         return view('dashboard.index', compact(
             'user', 
@@ -389,15 +392,17 @@ class DashboardController extends Controller
      */
     private function getFreeDayPreview($month, $year)
     {
-        return Day::whereHas('menu', function($query) use ($month, $year) {
-                $query->where('month', $month)
-                    ->where('year', $year)
-                    ->where('is_published', true)
-                    ->where('type', 'current');
-            })
-            ->where('day_number', 1)
-            ->with(['menu', 'meals.recipe'])
-            ->first();
+        return Cache::remember("free_day_preview_{$month}_{$year}", 1800, function () use ($month, $year) {
+            return Day::whereHas('menu', function($query) use ($month, $year) {
+                    $query->where('month', $month)
+                        ->where('year', $year)
+                        ->where('is_published', true)
+                        ->where('type', 'current');
+                })
+                ->where('day_number', 1)
+                ->with(['menu', 'meals.recipe'])
+                ->first();
+        });
     }
 
     /**
@@ -467,7 +472,7 @@ class DashboardController extends Controller
      */
     private function filterMenuBySubscription($query, $user)
     {
-        $subscription = $user->activeSubscription()->with('plan')->first();
+        $subscription = $user->getCachedSubscription();
         
         // Администраторы имеют доступ ко всему контенту
         if ($user->hasRole('admin')) {

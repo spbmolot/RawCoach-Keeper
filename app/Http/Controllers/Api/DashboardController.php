@@ -287,7 +287,7 @@ class DashboardController extends Controller
             return;
         }
 
-        $subscription = $user->activeSubscription()->with('plan')->first();
+        $subscription = $user->getCachedSubscription();
 
         if ($user->hasRole('root') || $user->hasRole('admin')) {
             return;
