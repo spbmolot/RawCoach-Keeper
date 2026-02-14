@@ -57,11 +57,19 @@ class DashboardController extends Controller
         $user = auth()->user();
         $today = Carbon::today();
         $dayNumber = $today->day;
+        $hasSubscription = $user->hasActiveSubscription();
+        $isFreePreview = false;
         
         $todayDay = $this->getDayForDate($user, $today);
         
+        // Freemium: если нет подписки и нет меню на сегодня — показываем бесплатный день (day 1)
+        if (!$todayDay && !$hasSubscription) {
+            $todayDay = $this->getFreeDayPreview($today->month, $today->year);
+            $isFreePreview = true;
+        }
+        
         if (!$todayDay) {
-            return view('dashboard.today-empty');
+            return view('dashboard.today-empty', compact('hasSubscription'));
         }
 
         $todayDay->load(['meals.recipe.ingredients']);
@@ -70,7 +78,7 @@ class DashboardController extends Controller
             ->groupBy('meal_type')
             ->map(fn($meals) => $meals->pluck('recipe')->filter());
 
-        return view('dashboard.today', compact('todayDay', 'recipes', 'today'));
+        return view('dashboard.today', compact('todayDay', 'recipes', 'today', 'hasSubscription', 'isFreePreview'));
     }
 
     /**
@@ -342,6 +350,22 @@ class DashboardController extends Controller
         $user->update($data);
 
         return back()->with('success', 'Профиль успешно обновлен');
+    }
+
+    /**
+     * Freemium: получить бесплатный день (day 1) текущего месяца
+     */
+    private function getFreeDayPreview($month, $year)
+    {
+        return Day::whereHas('menu', function($query) use ($month, $year) {
+                $query->where('month', $month)
+                    ->where('year', $year)
+                    ->where('is_published', true)
+                    ->where('type', 'current');
+            })
+            ->where('day_number', 1)
+            ->with(['menu', 'meals.recipe'])
+            ->first();
     }
 
     /**

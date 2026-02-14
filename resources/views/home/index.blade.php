@@ -103,10 +103,10 @@
                 @foreach($featuredRecipes as $recipe)
                 <div class="bg-white rounded-lg shadow-md overflow-hidden">
                     @if($recipe->image)
-                    <img src="{{ Storage::url($recipe->image) }}" alt="{{ $recipe->name }}" class="w-full h-48 object-cover">
+                    <img src="{{ Storage::url($recipe->image) }}" alt="{{ $recipe->title }}" class="w-full h-48 object-cover">
                     @endif
                     <div class="p-6">
-                        <h3 class="text-xl font-semibold mb-2">{{ $recipe->name }}</h3>
+                        <h3 class="text-xl font-semibold mb-2">{{ $recipe->title }}</h3>
                         <p class="text-gray-600 mb-4">{{ Str::limit($recipe->description, 100) }}</p>
                         <div class="flex justify-between text-sm text-gray-500 mb-4">
                             <span>{{ $recipe->calories }} ккал</span>

@@ -30,6 +30,7 @@ class Recipe extends Model
         'main_image',
         'gallery_images',
         'is_published',
+        'is_free',
         'published_at',
         'views_count',
         'rating',
@@ -41,6 +42,7 @@ class Recipe extends Model
     {
         return [
             'is_published' => 'boolean',
+            'is_free' => 'boolean',
             'published_at' => 'datetime',
             'dietary_tags' => 'array',
             'allergens' => 'array',
@@ -81,6 +83,14 @@ class Recipe extends Model
     }
 
     /**
+     * Оценки рецепта
+     */
+    public function ratings(): HasMany
+    {
+        return $this->hasMany(RecipeRating::class);
+    }
+
+    /**
      * Просмотры рецепта
      */
     public function views(): HasMany
@@ -102,6 +112,14 @@ class Recipe extends Model
     public function scopePublished($query)
     {
         return $query->where('is_published', true);
+    }
+
+    /**
+     * Бесплатные рецепты
+     */
+    public function scopeFree($query)
+    {
+        return $query->where('is_free', true);
     }
 
     /**

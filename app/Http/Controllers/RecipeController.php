@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Recipe;
+use App\Models\RecipeRating;
 use App\Models\RecipeView;
 use App\Services\SpreadsheetExporter;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -53,6 +54,10 @@ class RecipeController extends Controller
         
         $user = auth()->user();
         
+        // Freemium: полный доступ если рецепт бесплатный, есть подписка или роль admin/editor
+        $canAccessFull = $recipe->is_free 
+            || ($user && $user->canAccessContent());
+        
         // Загружаем связанные данные
         $recipe->load('ingredients');
         
@@ -67,7 +72,10 @@ class RecipeController extends Controller
         // Проверяем, добавлен ли в избранное
         $isFavorite = $user ? $user->favoriteRecipes()->where('recipe_id', $recipe->id)->exists() : false;
         
-        return view('recipes.show', compact('recipe', 'similarRecipes', 'isFavorite'));
+        // Текущая оценка пользователя
+        $userRating = $user ? RecipeRating::where('user_id', $user->id)->where('recipe_id', $recipe->id)->value('rating') : null;
+        
+        return view('recipes.show', compact('recipe', 'similarRecipes', 'isFavorite', 'canAccessFull', 'userRating'));
     }
 
     /**
@@ -240,6 +248,42 @@ class RecipeController extends Controller
         }
         
         return back()->with('error', 'Формат экспорта не поддерживается');
+    }
+
+    /**
+     * Оценка рецепта
+     */
+    public function rate(Request $request, Recipe $recipe)
+    {
+        $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+        ]);
+
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json(['error' => 'Необходима авторизация'], 401);
+        }
+
+        RecipeRating::updateOrCreate(
+            ['user_id' => $user->id, 'recipe_id' => $recipe->id],
+            ['rating' => $request->rating]
+        );
+
+        // Пересчитываем средний рейтинг
+        $avgRating = $recipe->ratings()->avg('rating');
+        $ratingsCount = $recipe->ratings()->count();
+
+        $recipe->update([
+            'rating' => round($avgRating, 1),
+            'ratings_count' => $ratingsCount,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'rating' => round($avgRating, 1),
+            'ratings_count' => $ratingsCount,
+            'user_rating' => $request->rating,
+        ]);
     }
 
     /**

@@ -67,7 +67,31 @@
                             </span>
                         </div>
                         
-                        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2 sm:mb-4">{{ $recipe->title }}</h1>
+                        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2 sm:mb-3">{{ $recipe->title }}</h1>
+                        
+                        <!-- Rating -->
+                        <div class="flex items-center gap-3 mb-3 sm:mb-4" x-data="recipeRating({{ $recipe->id }}, {{ $recipe->rating ?? 0 }}, {{ $recipe->ratings_count ?? 0 }}, {{ $userRating ?? 'null' }})">
+                            <div class="flex items-center gap-0.5">
+                                <template x-for="star in 5" :key="star">
+                                    <button 
+                                        @click="rate(star)" 
+                                        @mouseenter="hoverRating = star" 
+                                        @mouseleave="hoverRating = 0"
+                                        class="focus:outline-none transition-transform hover:scale-110"
+                                        :class="{'cursor-pointer': {{ auth()->check() ? 'true' : 'false' }}, 'cursor-default': {{ auth()->check() ? 'false' : 'true' }}}"
+                                    >
+                                        <svg class="w-5 h-5 sm:w-6 sm:h-6 transition-colors" 
+                                             :class="(hoverRating >= star || (!hoverRating && displayRating >= star)) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'"
+                                             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1">
+                                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                        </svg>
+                                    </button>
+                                </template>
+                            </div>
+                            <span class="text-sm sm:text-base font-semibold text-gray-700" x-text="avgRating > 0 ? avgRating.toFixed(1) : '—'"></span>
+                            <span class="text-xs sm:text-sm text-gray-400" x-text="'(' + ratingsCount + ' ' + pluralize(ratingsCount) + ')'"></span>
+                            <span x-show="userRated" x-transition class="text-xs text-green-600 font-medium">Ваша оценка: <span x-text="myRating"></span></span>
+                        </div>
                         
                         <p class="text-sm sm:text-lg text-gray-600 mb-4 sm:mb-6">{{ $recipe->description }}</p>
                         
@@ -90,6 +114,7 @@
                 </div>
 
                 <!-- Ingredients -->
+                <x-subscription-gate :locked="!($canAccessFull ?? true)">
                 <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm p-4 sm:p-6 md:p-8">
                     <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
                         <i data-lucide="shopping-basket" class="w-5 h-5 sm:w-7 sm:h-7 text-green-500"></i>
@@ -113,8 +138,10 @@
                         @endforeach
                     </ul>
                 </div>
+                </x-subscription-gate>
 
                 <!-- Instructions -->
+                <x-subscription-gate :locked="!($canAccessFull ?? true)">
                 <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm overflow-hidden" x-data="cookingSteps({{ count(array_filter(explode("\n", $recipe->instructions), fn($l) => trim($l) && !preg_match('/^(?:\*\*|#{1,3}\s*)?(?:Шаг\s*\d+[:\.]?\s*|Этап\s*\d+[:\.]?\s*)/iu', trim($l)))) }})">
                     <!-- Header with progress -->
                     <div class="bg-gradient-to-r from-green-500 to-emerald-600 p-4 sm:p-6 md:p-8">
@@ -264,6 +291,7 @@
                         </div>
                     </div>
                 </div>
+                </x-subscription-gate>
             </div>
 
             <!-- Right Column: Nutrition & Actions -->
@@ -386,6 +414,56 @@
 
 @push('scripts')
 <script>
+    function recipeRating(recipeId, initialRating, initialCount, initialUserRating) {
+        return {
+            recipeId: recipeId,
+            avgRating: initialRating,
+            ratingsCount: initialCount,
+            myRating: initialUserRating,
+            hoverRating: 0,
+            userRated: initialUserRating !== null,
+            isSubmitting: false,
+
+            get displayRating() {
+                return this.myRating || Math.round(this.avgRating);
+            },
+
+            pluralize(n) {
+                if (n % 10 === 1 && n % 100 !== 11) return 'оценка';
+                if (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) return 'оценки';
+                return 'оценок';
+            },
+
+            rate(star) {
+                @auth
+                if (this.isSubmitting) return;
+                this.isSubmitting = true;
+                this.myRating = star;
+                this.userRated = true;
+
+                fetch(`/recipes/${this.recipeId}/rate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ rating: star })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        this.avgRating = data.rating;
+                        this.ratingsCount = data.ratings_count;
+                    }
+                })
+                .finally(() => { this.isSubmitting = false; });
+                @else
+                window.location.href = '{{ route("login") }}';
+                @endauth
+            }
+        };
+    }
+
     function toggleFavorite(recipeId) {
         fetch(`/recipes/${recipeId}/favorite`, {
             method: 'POST',

@@ -6,6 +6,7 @@ use App\Events\PaymentProcessed;
 use App\Events\SubscriptionStatusChanged;
 use App\Listeners\SendPaymentNotification;
 use App\Listeners\SendSubscriptionNotification;
+use App\Listeners\StartWelcomeEmailSeries;
 use App\Listeners\SyncSubscriptionRole;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -22,6 +23,7 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
+            StartWelcomeEmailSeries::class,
         ],
         
         // Payment events

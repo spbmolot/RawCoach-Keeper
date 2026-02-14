@@ -45,12 +45,29 @@
         </div>
     </div>
 
+    @php
+        $userHasAccess = auth()->check() && auth()->user()->canAccessContent();
+    @endphp
+
     <!-- Recipes Grid -->
     <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-12">
         @if($recipes->count() > 0)
             <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
                 @foreach($recipes as $recipe)
-                    <a href="{{ route('recipes.show', $recipe) }}" class="bg-white rounded-xl sm:rounded-2xl shadow-sm overflow-hidden card-hover group">
+                    <a href="{{ route('recipes.show', $recipe) }}" class="bg-white rounded-xl sm:rounded-2xl shadow-sm overflow-hidden card-hover group relative">
+                        {{-- Бейдж доступа --}}
+                        @if($recipe->is_free)
+                            <div class="absolute top-2 left-2 z-10 px-2 py-0.5 bg-green-500 text-white rounded-full text-[10px] sm:text-xs font-bold shadow-lg flex items-center gap-1">
+                                <i data-lucide="lock-open" class="w-3 h-3"></i>
+                                <span class="hidden sm:inline">Бесплатно</span>
+                                <span class="sm:hidden">Free</span>
+                            </div>
+                        @elseif(!$userHasAccess)
+                            <div class="absolute top-2 right-2 z-10 w-7 h-7 sm:w-8 sm:h-8 bg-black/40 backdrop-blur-sm text-white rounded-full flex items-center justify-center">
+                                <i data-lucide="lock" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+                            </div>
+                        @endif
+
                         @if($recipe->image)
                             <img src="{{ Storage::url($recipe->image) }}" alt="{{ $recipe->title }}" class="w-full h-32 sm:h-48 object-cover group-hover:scale-105 transition duration-300">
                         @else
@@ -77,7 +94,16 @@
                             
                             <h3 class="font-bold text-gray-900 mb-1 sm:mb-2 group-hover:text-green-600 transition line-clamp-2 text-sm sm:text-base">{{ $recipe->title }}</h3>
                             
-                            <p class="text-xs sm:text-sm text-gray-500 mb-2 sm:mb-4 line-clamp-2 hidden sm:block">{{ $recipe->description }}</p>
+                            <p class="text-xs sm:text-sm text-gray-500 mb-2 sm:mb-3 line-clamp-2 hidden sm:block">{{ $recipe->description }}</p>
+                            
+                            @if($recipe->ratings_count > 0)
+                            <div class="flex items-center gap-1 mb-2 sm:mb-3">
+                                @for($i = 1; $i <= 5; $i++)
+                                    <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 {{ $i <= round($recipe->rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200 fill-gray-200' }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                @endfor
+                                <span class="text-[10px] sm:text-xs text-gray-400 ml-0.5">{{ number_format($recipe->rating, 1) }}</span>
+                            </div>
+                            @endif
                             
                             <div class="flex items-center justify-between pt-2 sm:pt-4 border-t border-gray-100">
                                 <div class="flex items-center gap-1 text-orange-500">

@@ -53,6 +53,8 @@ class User extends Authenticatable implements FilamentUser
         'bio',
         'settings',
         'is_active',
+        'onboarding_completed_at',
+        'onboarding_goal',
     ];
 
     /**
@@ -99,6 +101,7 @@ class User extends Authenticatable implements FilamentUser
             'push_notifications' => 'boolean',
             'is_active' => 'boolean',
             'last_login_at' => 'datetime',
+            'onboarding_completed_at' => 'datetime',
         ];
     }
 
@@ -171,6 +174,14 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
+     * Email-серии пользователя
+     */
+    public function emailSequences()
+    {
+        return $this->hasMany(EmailSequence::class);
+    }
+
+    /**
      * Активный персональный план
      */
     public function activePersonalPlan()
@@ -197,6 +208,22 @@ class User extends Authenticatable implements FilamentUser
     public function hasActiveSubscription(): bool
     {
         return $this->activeSubscription()->exists();
+    }
+
+    /**
+     * Проверка прохождения онбординга
+     */
+    public function hasCompletedOnboarding(): bool
+    {
+        return $this->onboarding_completed_at !== null;
+    }
+
+    /**
+     * Отметить онбординг как завершённый
+     */
+    public function completeOnboarding(): void
+    {
+        $this->update(['onboarding_completed_at' => now()]);
     }
 
     /**

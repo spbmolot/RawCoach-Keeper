@@ -52,3 +52,37 @@ Schedule::command('subscriptions:notify-expiring --days=3')
     ->dailyAt('10:00')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/subscriptions-notify-expiring.log'));
+
+/*
+|--------------------------------------------------------------------------
+| Email Marketing & Lifecycle
+|--------------------------------------------------------------------------
+*/
+
+// Welcome-серия — каждые 2 часа проверяет и отправляет следующий шаг
+Schedule::command('emails:send-welcome-series')
+    ->everyTwoHours()
+    ->withoutOverlapping()
+    ->runInBackground()
+    ->appendOutputTo(storage_path('logs/emails-welcome-series.log'));
+
+// Реактивация — ежедневно в 11:00 (через 7 дней после истечения подписки)
+Schedule::command('emails:send-reactivation --days=7')
+    ->dailyAt('11:00')
+    ->withoutOverlapping()
+    ->runInBackground()
+    ->appendOutputTo(storage_path('logs/emails-reactivation.log'));
+
+// Еженедельный дайджест с превью меню — каждый понедельник в 09:00
+Schedule::command('emails:send-weekly-digest')
+    ->weeklyOn(1, '09:00')
+    ->withoutOverlapping()
+    ->runInBackground()
+    ->appendOutputTo(storage_path('logs/emails-weekly-digest.log'));
+
+// Напоминание о неактивности (пропустили 3 дня) — ежедневно в 18:00
+Schedule::command('emails:send-inactivity-reminder --days=3')
+    ->dailyAt('18:00')
+    ->withoutOverlapping()
+    ->runInBackground()
+    ->appendOutputTo(storage_path('logs/emails-inactivity-reminder.log'));

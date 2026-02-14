@@ -178,16 +178,23 @@
                     </div>
                     <div class="hero-stats flex items-center gap-3 sm:gap-6">
                         <div class="stats-card px-3 py-2 sm:px-4 sm:py-3 rounded-xl">
-                            <div class="stat-value text-xl sm:text-2xl font-bold">1200+</div>
+                            <div class="stat-value text-xl sm:text-2xl font-bold">{{ $stats['recipes'] ?? 0 }}+</div>
                             <div class="stat-label text-green-200 text-xs sm:text-sm">рецептов</div>
                         </div>
                         <div class="stats-card px-3 py-2 sm:px-4 sm:py-3 rounded-xl">
-                            <div class="stat-value text-xl sm:text-2xl font-bold">50+</div>
+                            <div class="stat-value text-xl sm:text-2xl font-bold">{{ $stats['menus'] ?? 0 }}+</div>
                             <div class="stat-label text-green-200 text-xs sm:text-sm">меню</div>
                         </div>
                         <div class="stats-card px-3 py-2 sm:px-4 sm:py-3 rounded-xl">
-                            <div class="stat-value text-xl sm:text-2xl font-bold">10k+</div>
+                            <div class="stat-value text-xl sm:text-2xl font-bold">{{ $stats['users'] ?? 0 }}+</div>
                             <div class="stat-label text-green-200 text-xs sm:text-sm">пользователей</div>
+                        </div>
+                        <div class="stats-card px-3 py-2 sm:px-4 sm:py-3 rounded-xl">
+                            <div class="stat-value text-xl sm:text-2xl font-bold flex items-center gap-1">
+                                <svg class="w-5 h-5 text-yellow-400 fill-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                {{ $stats['avg_rating'] ?? '4.8' }}
+                            </div>
+                            <div class="stat-label text-green-200 text-xs sm:text-sm">рейтинг</div>
                         </div>
                     </div>
                 </div>
@@ -471,69 +478,180 @@
         </div>
     </section>
 
-    <!-- Testimonials -->
+    <!-- Success Stories -->
     <section class="py-16 sm:py-24 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-10 sm:mb-16">
-                <span class="text-green-600 font-semibold text-xs sm:text-sm uppercase tracking-wider">Отзывы</span>
-                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mt-2 sm:mt-3 mb-4">Что говорят пользователи</h2>
+            <div class="text-center mb-10 sm:mb-16" data-aos="fade-up">
+                <span class="text-green-600 font-semibold text-xs sm:text-sm uppercase tracking-wider">Результаты</span>
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mt-2 sm:mt-3 mb-4">Истории успеха наших пользователей</h2>
+                <p class="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">Реальные люди, реальные результаты. Посмотрите, чего добились наши подписчики.</p>
             </div>
             <div class="grid md:grid-cols-3 gap-6 lg:gap-8">
-                <div class="bg-gray-50 rounded-2xl p-5 sm:p-8 card-hover">
+                {{-- История 1 --}}
+                <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 sm:p-8 border border-green-100 card-hover" data-aos="fade-up" data-aos-delay="100">
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="w-14 h-14 rounded-full bg-green-200 flex items-center justify-center text-green-700 font-bold text-lg">АК</div>
+                        <div>
+                            <div class="font-bold text-gray-900">Анна Козлова</div>
+                            <div class="text-sm text-gray-500">32 года, Москва</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 mb-5">
+                        <div class="flex-1 text-center p-3 bg-white rounded-xl">
+                            <div class="text-xs text-gray-400 mb-1">Было</div>
+                            <div class="text-xl font-bold text-gray-400">78 кг</div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i data-lucide="arrow-right" class="w-5 h-5 text-green-500"></i>
+                        </div>
+                        <div class="flex-1 text-center p-3 bg-green-500 text-white rounded-xl">
+                            <div class="text-xs opacity-80 mb-1">Стало</div>
+                            <div class="text-xl font-bold">66 кг</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 mb-4 px-3 py-2 bg-green-100 rounded-lg">
+                        <i data-lucide="trending-down" class="w-4 h-4 text-green-600"></i>
+                        <span class="text-sm font-semibold text-green-700">-12 кг за 3 месяца</span>
+                    </div>
+                    <p class="text-gray-600 text-sm">"Рецепты простые и вкусные. Не чувствуешь, что на диете! Семья тоже с удовольствием ест."</p>
+                </div>
+
+                {{-- История 2 --}}
+                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 sm:p-8 border border-blue-100 card-hover" data-aos="fade-up" data-aos-delay="200">
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="w-14 h-14 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 font-bold text-lg">ДН</div>
+                        <div>
+                            <div class="font-bold text-gray-900">Дмитрий Новиков</div>
+                            <div class="text-sm text-gray-500">28 лет, Екатеринбург</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 mb-5">
+                        <div class="flex-1 text-center p-3 bg-white rounded-xl">
+                            <div class="text-xs text-gray-400 mb-1">Было</div>
+                            <div class="text-xl font-bold text-gray-400">95 кг</div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i data-lucide="arrow-right" class="w-5 h-5 text-blue-500"></i>
+                        </div>
+                        <div class="flex-1 text-center p-3 bg-blue-500 text-white rounded-xl">
+                            <div class="text-xs opacity-80 mb-1">Стало</div>
+                            <div class="text-xl font-bold">79 кг</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 mb-4 px-3 py-2 bg-blue-100 rounded-lg">
+                        <i data-lucide="trending-down" class="w-4 h-4 text-blue-600"></i>
+                        <span class="text-sm font-semibold text-blue-700">-16 кг за 5 месяцев</span>
+                    </div>
+                    <p class="text-gray-600 text-sm">"Списки покупок — это гениально. Экономлю время и деньги. Готовлю за 30 минут."</p>
+                </div>
+
+                {{-- История 3 --}}
+                <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 sm:p-8 border border-purple-100 card-hover" data-aos="fade-up" data-aos-delay="300">
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="w-14 h-14 rounded-full bg-purple-200 flex items-center justify-center text-purple-700 font-bold text-lg">МС</div>
+                        <div>
+                            <div class="font-bold text-gray-900">Мария Смирнова</div>
+                            <div class="text-sm text-gray-500">35 лет, Казань</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 mb-5">
+                        <div class="flex-1 text-center p-3 bg-white rounded-xl">
+                            <div class="text-xs text-gray-400 mb-1">Было</div>
+                            <div class="text-xl font-bold text-gray-400">72 кг</div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i data-lucide="arrow-right" class="w-5 h-5 text-purple-500"></i>
+                        </div>
+                        <div class="flex-1 text-center p-3 bg-purple-500 text-white rounded-xl">
+                            <div class="text-xs opacity-80 mb-1">Стало</div>
+                            <div class="text-xl font-bold">64 кг</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 mb-4 px-3 py-2 bg-purple-100 rounded-lg">
+                        <i data-lucide="trending-down" class="w-4 h-4 text-purple-600"></i>
+                        <span class="text-sm font-semibold text-purple-700">-8 кг за 2 месяца</span>
+                    </div>
+                    <p class="text-gray-600 text-sm">"После родов не могла вернуться в форму 2 года. С RawPlan получилось за 2 месяца!"</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="py-16 sm:py-24 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-10 sm:mb-16" data-aos="fade-up">
+                <span class="text-green-600 font-semibold text-xs sm:text-sm uppercase tracking-wider">Отзывы</span>
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mt-2 sm:mt-3 mb-4">Что говорят пользователи</h2>
+                <div class="flex items-center justify-center gap-2 mt-3">
+                    <div class="flex items-center gap-0.5">
+                        @for($i = 0; $i < 5; $i++)
+                        <svg class="w-5 h-5 text-yellow-400 fill-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        @endfor
+                    </div>
+                    <span class="text-gray-700 font-semibold">{{ $stats['avg_rating'] ?? '4.8' }}</span>
+                    <span class="text-gray-400 text-sm">средняя оценка</span>
+                </div>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6 lg:gap-8">
+                <div class="bg-white rounded-2xl p-5 sm:p-8 card-hover shadow-sm" data-aos="fade-up" data-aos-delay="100">
                     <div class="flex items-center gap-1 mb-4">
-                        <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-yellow-400"></i>
-                        <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-yellow-400"></i>
-                        <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-yellow-400"></i>
-                        <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-yellow-400"></i>
-                        <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-yellow-400"></i>
+                        @for($i = 0; $i < 5; $i++)
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        @endfor
                     </div>
-                    <p class="text-gray-700 mb-4 sm:mb-6 text-base sm:text-lg">"За 3 месяца похудела на 12 кг! Рецепты простые и вкусные."</p>
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                            <span class="text-green-600 font-bold">АК</span>
+                    <p class="text-gray-700 mb-4 sm:mb-6 text-base sm:text-lg leading-relaxed">"За 3 месяца похудела на 12 кг! Рецепты простые и вкусные. Муж даже не заметил, что это диетическое питание."</p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-green-100 flex items-center justify-center">
+                                <span class="text-green-600 font-bold text-sm">АК</span>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-gray-900 text-sm sm:text-base">Анна Козлова</div>
+                                <div class="text-xs sm:text-sm text-gray-500">Москва</div>
+                            </div>
                         </div>
-                        <div>
-                            <div class="font-semibold text-gray-900">Анна Козлова</div>
-                            <div class="text-sm text-gray-500">Москва</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-gray-50 rounded-2xl p-5 sm:p-8 card-hover">
-                    <div class="flex items-center gap-1 mb-3 sm:mb-4">
-                        <i data-lucide="star" class="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-yellow-400"></i>
-                        <i data-lucide="star" class="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-yellow-400"></i>
-                        <i data-lucide="star" class="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-yellow-400"></i>
-                        <i data-lucide="star" class="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-yellow-400"></i>
-                        <i data-lucide="star" class="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-yellow-400"></i>
-                    </div>
-                    <p class="text-gray-700 mb-4 sm:mb-6 text-base sm:text-lg">"Списки покупок — это гениально! Не нужно думать, что готовить."</p>
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                            <span class="text-blue-600 font-bold">ИП</span>
-                        </div>
-                        <div>
-                            <div class="font-semibold text-gray-900">Игорь Петров</div>
-                            <div class="text-sm text-gray-500">Санкт-Петербург</div>
-                        </div>
+                        <div class="text-xs text-green-600 font-semibold bg-green-50 px-2 py-1 rounded-full">-12 кг</div>
                     </div>
                 </div>
-                <div class="bg-gray-50 rounded-2xl p-5 sm:p-8 card-hover">
+                <div class="bg-white rounded-2xl p-5 sm:p-8 card-hover shadow-sm" data-aos="fade-up" data-aos-delay="200">
                     <div class="flex items-center gap-1 mb-3 sm:mb-4">
-                        <i data-lucide="star" class="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-yellow-400"></i>
-                        <i data-lucide="star" class="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-yellow-400"></i>
-                        <i data-lucide="star" class="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-yellow-400"></i>
-                        <i data-lucide="star" class="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-yellow-400"></i>
-                        <i data-lucide="star" class="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-yellow-400"></i>
+                        @for($i = 0; $i < 5; $i++)
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        @endfor
                     </div>
-                    <p class="text-gray-700 mb-4 sm:mb-6 text-base sm:text-lg">"Минус 8 кг и отличное самочувствие. Рекомендую!"</p>
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
-                            <span class="text-purple-600 font-bold">МС</span>
+                    <p class="text-gray-700 mb-4 sm:mb-6 text-base sm:text-lg leading-relaxed">"Как программист, я не умел готовить. С RawPlan всё расписано по шагам — ошибиться невозможно. Плюс экономлю на доставке еды."</p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                                <span class="text-blue-600 font-bold text-sm">ИП</span>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-gray-900 text-sm sm:text-base">Игорь Петров</div>
+                                <div class="text-xs sm:text-sm text-gray-500">Санкт-Петербург</div>
+                            </div>
                         </div>
-                        <div>
-                            <div class="font-semibold text-gray-900">Мария Смирнова</div>
-                            <div class="text-sm text-gray-500">Казань</div>
+                        <div class="text-xs text-blue-600 font-semibold bg-blue-50 px-2 py-1 rounded-full">6 мес</div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-5 sm:p-8 card-hover shadow-sm" data-aos="fade-up" data-aos-delay="300">
+                    <div class="flex items-center gap-1 mb-3 sm:mb-4">
+                        @for($i = 0; $i < 5; $i++)
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        @endfor
+                    </div>
+                    <p class="text-gray-700 mb-4 sm:mb-6 text-base sm:text-lg leading-relaxed">"Минус 8 кг и отличное самочувствие! Энергии стало больше, одежда снова по размеру. Подписку продлила на год."</p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-purple-100 flex items-center justify-center">
+                                <span class="text-purple-600 font-bold text-sm">МС</span>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-gray-900 text-sm sm:text-base">Мария Смирнова</div>
+                                <div class="text-xs sm:text-sm text-gray-500">Казань</div>
+                            </div>
                         </div>
+                        <div class="text-xs text-purple-600 font-semibold bg-purple-50 px-2 py-1 rounded-full">-8 кг</div>
                     </div>
                 </div>
             </div>

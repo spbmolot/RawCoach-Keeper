@@ -51,7 +51,11 @@
 
         <!-- Page Content -->
         <main class="px-3 sm:px-6 pb-12 pt-4 sm:pt-6">
-            {{ $slot }}
+            @if(isset($slot) && $slot->isNotEmpty())
+                {{ $slot }}
+            @else
+                @yield('content')
+            @endif
         </main>
     </div>
 

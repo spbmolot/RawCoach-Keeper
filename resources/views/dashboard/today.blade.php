@@ -26,6 +26,25 @@
             </div>
         </div>
 
+        {{-- Баннер бесплатного превью --}}
+        @if(!empty($isFreePreview))
+            <div class="mb-6 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-4 sm:p-6">
+                <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+                    <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="gift" class="w-6 h-6 text-amber-600"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-gray-900 mb-1">Бесплатный день меню</h3>
+                        <p class="text-sm text-gray-600">Это превью первого дня меню. Оформите подписку, чтобы получить меню на каждый день с рецептами, списками покупок и БЖУ.</p>
+                    </div>
+                    <a href="{{ route('plans.index') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl font-semibold transition shadow-lg shadow-green-500/25 flex-shrink-0 text-sm">
+                        <i data-lucide="sparkles" class="w-4 h-4"></i>
+                        Оформить подписку
+                    </a>
+                </div>
+            </div>
+        @endif
+
         @if($recipes->count() > 0)
             @php
                 $mealTypes = [
@@ -65,7 +84,7 @@
                                             </div>
                                         @endif
                                         <div class="flex-1 min-w-0">
-                                            <h4 class="font-medium text-gray-900 group-hover:text-green-600 transition">{{ $recipe->name }}</h4>
+                                            <h4 class="font-medium text-gray-900 group-hover:text-green-600 transition">{{ $recipe->title }}</h4>
                                             <div class="flex flex-wrap items-center gap-4 mt-2 text-sm text-gray-500">
                                                 <span class="flex items-center gap-1">
                                                     <i data-lucide="flame" class="w-4 h-4 text-orange-400"></i>

@@ -135,6 +135,11 @@ class RecipeResource extends Resource
                         Forms\Components\Toggle::make('is_published')
                             ->label('Опубликовано')
                             ->default(false),
+                        
+                        Forms\Components\Toggle::make('is_free')
+                            ->label('Бесплатный')
+                            ->helperText('Доступен без подписки (Freemium)')
+                            ->default(false),
                     ])->columns(2),
             ]);
     }
@@ -207,6 +212,14 @@ class RecipeResource extends Resource
                     ->label('Опубликовано')
                     ->boolean(),
                 
+                Tables\Columns\IconColumn::make('is_free')
+                    ->label('Бесплатный')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-lock-open')
+                    ->falseIcon('heroicon-o-lock-closed')
+                    ->trueColor('success')
+                    ->falseColor('gray'),
+                
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Создано')
                     ->dateTime()
@@ -234,6 +247,9 @@ class RecipeResource extends Resource
                 
                 Tables\Filters\TernaryFilter::make('is_published')
                     ->label('Опубликовано'),
+                
+                Tables\Filters\TernaryFilter::make('is_free')
+                    ->label('Бесплатный'),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

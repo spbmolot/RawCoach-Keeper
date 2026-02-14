@@ -58,8 +58,8 @@
                 </div>
                 {{-- Прогресс-бар --}}
                 @php
-                    $totalDays = $activeSubscription->starts_at->diffInDays($activeSubscription->ends_at);
-                    $passedDays = $activeSubscription->starts_at->diffInDays(now());
+                    $totalDays = $activeSubscription->started_at->diffInDays($activeSubscription->ends_at);
+                    $passedDays = $activeSubscription->started_at->diffInDays(now());
                     $progress = $totalDays > 0 ? min(100, ($passedDays / $totalDays) * 100) : 0;
                     $remainingDays = max(0, $activeSubscription->ends_at->diffInDays(now()));
                 @endphp
@@ -194,7 +194,7 @@
                                         </div>
                                     @endif
                                     <div class="flex-1 min-w-0">
-                                        <h4 class="font-medium text-gray-900 truncate">{{ $recipe->name }}</h4>
+                                        <h4 class="font-medium text-gray-900 truncate">{{ $recipe->title }}</h4>
                                         <div class="flex items-center gap-3 text-sm text-gray-500">
                                             <span class="flex items-center gap-1">
                                                 <i data-lucide="flame" class="w-4 h-4 text-orange-400"></i>
@@ -239,7 +239,7 @@
                         </div>
                         @if($activeSubscription)
                             @php
-                                $subHours = $activeSubscription->starts_at->diffInHours(now());
+                                $subHours = $activeSubscription->started_at->diffInHours(now());
                                 $subDays = floor($subHours / 24);
                                 $subHoursRem = $subHours % 24;
                             @endphp

@@ -17,6 +17,7 @@ use App\Http\Controllers\ShoppingListController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\TestPaymentController;
 use App\Http\Controllers\DiagnosticsController;
+use App\Http\Controllers\OnboardingController;
 
 // Публичные страницы
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -55,8 +56,16 @@ Route::post('/webhook/cloudpayments', CloudPaymentsWebhookController::class)->na
 // Редирект с Jetstream профиля на наш кастомный
 Route::redirect('/user/profile', '/dashboard/profile');
 
-// Авторизованные пользователи
-Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
+// Онбординг-воронка (авторизован, но БЕЗ middleware onboarding — чтобы не было цикла)
+Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->prefix('onboarding')->name('onboarding.')->group(function () {
+    Route::get('/', [OnboardingController::class, 'welcome'])->name('welcome');
+    Route::get('/survey', [OnboardingController::class, 'survey'])->name('survey');
+    Route::post('/survey', [OnboardingController::class, 'storeSurvey'])->name('survey.store');
+    Route::get('/complete', [OnboardingController::class, 'complete'])->name('complete');
+});
+
+// Авторизованные пользователи (с проверкой онбординга)
+Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified', 'onboarding'])->group(function () {
     
     // Личный кабинет
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -120,6 +129,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::get('/meal/{mealType}', [RecipeController::class, 'byMealType'])->name('by-meal-type');
         Route::get('/{recipe}', [RecipeController::class, 'show'])->name('show');
         Route::post('/{recipe}/favorite', [RecipeController::class, 'favorite'])->name('favorite');
+        Route::post('/{recipe}/rate', [RecipeController::class, 'rate'])->name('rate');
         Route::get('/{recipe}/export', [RecipeController::class, 'export'])->name('export');
     });
     
