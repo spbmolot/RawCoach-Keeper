@@ -244,14 +244,14 @@
                             $daysWithUs = floor($totalHours / 24);
                             $hoursWithUs = $totalHours % 24;
                         @endphp
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                    <i data-lucide="calendar-check" class="w-5 h-5 text-blue-600"></i>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl gap-2">
+                            <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                                <div class="w-9 h-9 sm:w-10 sm:h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i data-lucide="calendar-check" class="w-4 h-4 sm:w-5 sm:h-5 text-blue-600"></i>
                                 </div>
-                                <span class="text-gray-600">С нами</span>
+                                <span class="text-gray-600 text-sm sm:text-base">С нами</span>
                             </div>
-                            <span class="text-xl font-bold text-gray-900">{{ $daysWithUs }} д. {{ $hoursWithUs }} ч.</span>
+                            <span class="text-base sm:text-xl font-bold text-gray-900 flex-shrink-0">{{ $daysWithUs }} д. {{ $hoursWithUs }} ч.</span>
                         </div>
                         @if($activeSubscription)
                             @php
@@ -259,24 +259,24 @@
                                 $subDays = floor($subHours / 24);
                                 $subHoursRem = $subHours % 24;
                             @endphp
-                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                                        <i data-lucide="zap" class="w-5 h-5 text-green-600"></i>
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl gap-2">
+                                <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                                    <div class="w-9 h-9 sm:w-10 sm:h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i data-lucide="zap" class="w-4 h-4 sm:w-5 sm:h-5 text-green-600"></i>
                                     </div>
-                                    <span class="text-gray-600">Подписка</span>
+                                    <span class="text-gray-600 text-sm sm:text-base">Подписка</span>
                                 </div>
-                                <span class="text-xl font-bold text-gray-900">{{ $subDays }} д. {{ $subHoursRem }} ч.</span>
+                                <span class="text-base sm:text-xl font-bold text-gray-900 flex-shrink-0">{{ $subDays }} д. {{ $subHoursRem }} ч.</span>
                             </div>
                         @endif
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                                    <i data-lucide="heart" class="w-5 h-5 text-red-500"></i>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl gap-2">
+                            <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                                <div class="w-9 h-9 sm:w-10 sm:h-10 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i data-lucide="heart" class="w-4 h-4 sm:w-5 sm:h-5 text-red-500"></i>
                                 </div>
-                                <span class="text-gray-600">Избранное</span>
+                                <span class="text-gray-600 text-sm sm:text-base">Избранное</span>
                             </div>
-                            <span class="text-xl font-bold text-gray-900">{{ auth()->user()->favoriteRecipes()->count() }}</span>
+                            <span class="text-base sm:text-xl font-bold text-gray-900 flex-shrink-0">{{ auth()->user()->favoriteRecipes()->count() }}</span>
                         </div>
                     </div>
                 </div>

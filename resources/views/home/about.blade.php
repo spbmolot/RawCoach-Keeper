@@ -32,51 +32,51 @@
                     Наши планы питания разработаны профессиональными нутрициологами и содержат 1200–1400 ккал в день — 
                     оптимальный дефицит для здорового похудения без голодания.
                 </p>
-                <div class="flex items-center gap-8">
+                <div class="flex items-center gap-4 sm:gap-8 flex-wrap">
                     <div class="text-center">
-                        <div class="text-3xl font-bold text-green-600">10 000+</div>
-                        <div class="text-gray-500 text-sm">пользователей</div>
+                        <div class="text-2xl sm:text-3xl font-bold text-green-600">10 000+</div>
+                        <div class="text-gray-500 text-xs sm:text-sm">пользователей</div>
                     </div>
                     <div class="text-center">
-                        <div class="text-3xl font-bold text-green-600">1 200+</div>
-                        <div class="text-gray-500 text-sm">рецептов</div>
+                        <div class="text-2xl sm:text-3xl font-bold text-green-600">1 200+</div>
+                        <div class="text-gray-500 text-xs sm:text-sm">рецептов</div>
                     </div>
                     <div class="text-center">
-                        <div class="text-3xl font-bold text-green-600">50+</div>
-                        <div class="text-gray-500 text-sm">меню</div>
+                        <div class="text-2xl sm:text-3xl font-bold text-green-600">50+</div>
+                        <div class="text-gray-500 text-xs sm:text-sm">меню</div>
                     </div>
                 </div>
             </div>
             <div class="relative">
-                <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-3xl p-8 lg:p-12">
-                    <div class="grid grid-cols-2 gap-6">
-                        <div class="bg-white rounded-2xl p-6 shadow-sm">
-                            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4">
-                                <i data-lucide="heart" class="w-6 h-6 text-green-600"></i>
+                <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl sm:rounded-3xl p-4 sm:p-8 lg:p-12">
+                    <div class="grid grid-cols-2 gap-3 sm:gap-6">
+                        <div class="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-sm">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg sm:rounded-xl flex items-center justify-center mb-2 sm:mb-4">
+                                <i data-lucide="heart" class="w-5 h-5 sm:w-6 sm:h-6 text-green-600"></i>
                             </div>
-                            <h3 class="font-semibold text-gray-900 mb-2">Забота о здоровье</h3>
-                            <p class="text-sm text-gray-600">Сбалансированное питание без экстремальных диет</p>
+                            <h3 class="font-semibold text-gray-900 mb-1 sm:mb-2 text-sm sm:text-base">Забота о здоровье</h3>
+                            <p class="text-xs sm:text-sm text-gray-600">Сбалансированное питание без экстремальных диет</p>
                         </div>
-                        <div class="bg-white rounded-2xl p-6 shadow-sm">
-                            <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-4">
-                                <i data-lucide="clock" class="w-6 h-6 text-orange-600"></i>
+                        <div class="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-sm">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-orange-100 rounded-lg sm:rounded-xl flex items-center justify-center mb-2 sm:mb-4">
+                                <i data-lucide="clock" class="w-5 h-5 sm:w-6 sm:h-6 text-orange-600"></i>
                             </div>
-                            <h3 class="font-semibold text-gray-900 mb-2">Экономия времени</h3>
-                            <p class="text-sm text-gray-600">Готовые меню и списки покупок</p>
+                            <h3 class="font-semibold text-gray-900 mb-1 sm:mb-2 text-sm sm:text-base">Экономия времени</h3>
+                            <p class="text-xs sm:text-sm text-gray-600">Готовые меню и списки покупок</p>
                         </div>
-                        <div class="bg-white rounded-2xl p-6 shadow-sm">
-                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
-                                <i data-lucide="calculator" class="w-6 h-6 text-blue-600"></i>
+                        <div class="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-sm">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-lg sm:rounded-xl flex items-center justify-center mb-2 sm:mb-4">
+                                <i data-lucide="calculator" class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600"></i>
                             </div>
-                            <h3 class="font-semibold text-gray-900 mb-2">Точный расчёт</h3>
-                            <p class="text-sm text-gray-600">КБЖУ посчитаны для каждого блюда</p>
+                            <h3 class="font-semibold text-gray-900 mb-1 sm:mb-2 text-sm sm:text-base">Точный расчёт</h3>
+                            <p class="text-xs sm:text-sm text-gray-600">КБЖУ посчитаны для каждого блюда</p>
                         </div>
-                        <div class="bg-white rounded-2xl p-6 shadow-sm">
-                            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
-                                <i data-lucide="sparkles" class="w-6 h-6 text-purple-600"></i>
+                        <div class="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-sm">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-lg sm:rounded-xl flex items-center justify-center mb-2 sm:mb-4">
+                                <i data-lucide="sparkles" class="w-5 h-5 sm:w-6 sm:h-6 text-purple-600"></i>
                             </div>
-                            <h3 class="font-semibold text-gray-900 mb-2">Простота</h3>
-                            <p class="text-sm text-gray-600">Рецепты за 30 минут из доступных продуктов</p>
+                            <h3 class="font-semibold text-gray-900 mb-1 sm:mb-2 text-sm sm:text-base">Простота</h3>
+                            <p class="text-xs sm:text-sm text-gray-600">Рецепты за 30 минут из доступных продуктов</p>
                         </div>
                     </div>
                 </div>
@@ -86,37 +86,37 @@
 </section>
 
 <!-- Values Section -->
-<section class="py-20 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<section class="py-10 sm:py-20 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
             <span class="text-green-600 font-semibold text-sm uppercase tracking-wider">Наши ценности</span>
             <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mt-3 mb-4">Что для нас важно</h2>
         </div>
         <div class="grid md:grid-cols-3 gap-8">
-            <div class="bg-white rounded-2xl p-8 text-center shadow-sm">
-                <div class="w-16 h-16 mx-auto mb-6 rounded-2xl bg-green-100 flex items-center justify-center">
-                    <i data-lucide="shield-check" class="w-8 h-8 text-green-600"></i>
+            <div class="bg-white rounded-xl sm:rounded-2xl p-5 sm:p-8 text-center shadow-sm">
+                <div class="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 sm:mb-6 rounded-xl sm:rounded-2xl bg-green-100 flex items-center justify-center">
+                    <i data-lucide="shield-check" class="w-7 h-7 sm:w-8 sm:h-8 text-green-600"></i>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-3">Научный подход</h3>
-                <p class="text-gray-600">
+                <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">Научный подход</h3>
+                <p class="text-sm sm:text-base text-gray-600">
                     Все наши рекомендации основаны на современных исследованиях в области нутрициологии и диетологии.
                 </p>
             </div>
-            <div class="bg-white rounded-2xl p-8 text-center shadow-sm">
-                <div class="w-16 h-16 mx-auto mb-6 rounded-2xl bg-orange-100 flex items-center justify-center">
-                    <i data-lucide="users" class="w-8 h-8 text-orange-600"></i>
+            <div class="bg-white rounded-xl sm:rounded-2xl p-5 sm:p-8 text-center shadow-sm">
+                <div class="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 sm:mb-6 rounded-xl sm:rounded-2xl bg-orange-100 flex items-center justify-center">
+                    <i data-lucide="users" class="w-7 h-7 sm:w-8 sm:h-8 text-orange-600"></i>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-3">Забота о клиентах</h3>
-                <p class="text-gray-600">
+                <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">Забота о клиентах</h3>
+                <p class="text-sm sm:text-base text-gray-600">
                     Мы всегда на связи и готовы помочь. Ваш успех — наша главная цель.
                 </p>
             </div>
-            <div class="bg-white rounded-2xl p-8 text-center shadow-sm">
-                <div class="w-16 h-16 mx-auto mb-6 rounded-2xl bg-blue-100 flex items-center justify-center">
-                    <i data-lucide="trending-up" class="w-8 h-8 text-blue-600"></i>
+            <div class="bg-white rounded-xl sm:rounded-2xl p-5 sm:p-8 text-center shadow-sm">
+                <div class="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 sm:mb-6 rounded-xl sm:rounded-2xl bg-blue-100 flex items-center justify-center">
+                    <i data-lucide="trending-up" class="w-7 h-7 sm:w-8 sm:h-8 text-blue-600"></i>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-3">Постоянное развитие</h3>
-                <p class="text-gray-600">
+                <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">Постоянное развитие</h3>
+                <p class="text-sm sm:text-base text-gray-600">
                     Мы регулярно обновляем меню, добавляем новые рецепты и улучшаем сервис на основе ваших отзывов.
                 </p>
             </div>

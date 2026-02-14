@@ -1,7 +1,7 @@
 <x-app-layout>
     <div class="max-w-6xl mx-auto" x-data="{ activeTab: 'personal' }">
         {{-- Hero секция с аватаром --}}
-        <div class="bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 rounded-3xl p-8 mb-8 relative overflow-hidden">
+        <div class="bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 rounded-2xl sm:rounded-3xl p-4 sm:p-8 mb-6 sm:mb-8 relative overflow-hidden">
             <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.05\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
             <div class="relative flex flex-col md:flex-row items-center gap-6">
                 {{-- Аватар --}}
@@ -22,8 +22,8 @@
                 
                 {{-- Информация --}}
                 <div class="text-center md:text-left flex-1">
-                    <h1 class="text-3xl font-bold text-white mb-1">{{ $user->name }}</h1>
-                    <p class="text-green-100 mb-3">{{ $user->email }}</p>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-white mb-1">{{ $user->name }}</h1>
+                    <p class="text-green-100 mb-3 text-sm sm:text-base break-all sm:break-normal">{{ $user->email }}</p>
                     <div class="flex flex-wrap justify-center md:justify-start gap-3">
                         @if($user->activeSubscription)
                             <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-sm text-white">
@@ -44,7 +44,7 @@
                 </div>
 
                 {{-- Прогресс профиля --}}
-                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 min-w-[200px]">
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 w-full md:min-w-[200px]">
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-sm text-green-100">Профиль заполнен</span>
                         <span class="text-lg font-bold text-white">{{ $profileProgress }}%</span>
@@ -71,7 +71,7 @@
             </div>
         @endif
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
             {{-- Левая колонка - Статистика и ИМТ --}}
             <div class="space-y-6">
                 {{-- Карточка ИМТ --}}
@@ -87,14 +87,14 @@
                         };
                         $bmiPercent = min(100, max(0, (($bmi - 15) / 25) * 100));
                     @endphp
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                            <i data-lucide="scale" class="w-5 h-5 text-{{ $bmiColor }}-500"></i>
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
+                        <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
+                            <i data-lucide="scale" class="w-4 h-4 text-{{ $bmiColor }}-500 flex-shrink-0 min-w-0"></i>
                             Индекс массы тела
                         </h3>
                         <div class="text-center mb-4">
-                            <div class="text-4xl font-bold text-{{ $bmiColor }}-500">{{ $bmi }}</div>
-                            <div class="text-sm text-gray-500 mt-1">{{ $bmiStatus }}</div>
+                            <div class="text-3xl font-bold text-{{ $bmiColor }}-500">{{ $bmi }}</div>
+                            <div class="text-xs text-gray-500 mt-1">{{ $bmiStatus }}</div>
                         </div>
                         <div class="relative h-3 bg-gradient-to-r from-blue-400 via-green-400 via-yellow-400 to-red-400 rounded-full mb-2">
                             <div class="absolute w-4 h-4 bg-white border-2 border-gray-800 rounded-full -top-0.5 shadow-md transition-all" style="left: calc({{ $bmiPercent }}% - 8px)"></div>
@@ -123,39 +123,39 @@
                 @endif
 
                 {{-- Статистика --}}
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
+                    <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
                         <i data-lucide="bar-chart-3" class="w-5 h-5 text-indigo-500"></i>
                         Статистика
                     </h3>
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                                    <i data-lucide="heart" class="w-5 h-5 text-red-500"></i>
+                    <div class="space-y-3 sm:space-y-4">
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl gap-2">
+                            <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                                <div class="w-9 h-9 sm:w-10 sm:h-10 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i data-lucide="heart" class="w-4 h-4 sm:w-5 sm:h-5 text-red-500"></i>
                                 </div>
-                                <span class="text-gray-600">Избранных рецептов</span>
+                                <span class="text-gray-600 text-sm sm:text-base">Избранных</span>
                             </div>
-                            <span class="text-xl font-bold text-gray-900">{{ $stats['favorite_recipes'] }}</span>
+                            <span class="text-base sm:text-xl font-bold text-gray-900 flex-shrink-0">{{ $stats['favorite_recipes'] }}</span>
                         </div>
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                                    <i data-lucide="credit-card" class="w-5 h-5 text-green-600"></i>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl gap-2">
+                            <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                                <div class="w-9 h-9 sm:w-10 sm:h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i data-lucide="credit-card" class="w-4 h-4 sm:w-5 sm:h-5 text-green-600"></i>
                                 </div>
-                                <span class="text-gray-600">Платежей</span>
+                                <span class="text-gray-600 text-sm sm:text-base">Платежей</span>
                             </div>
-                            <span class="text-xl font-bold text-gray-900">{{ $stats['payments_count'] }}</span>
+                            <span class="text-base sm:text-xl font-bold text-gray-900 flex-shrink-0">{{ $stats['payments_count'] }}</span>
                         </div>
                         @if($stats['total_spent'] > 0)
-                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                                        <i data-lucide="wallet" class="w-5 h-5 text-purple-600"></i>
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl gap-2">
+                                <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                                    <div class="w-9 h-9 sm:w-10 sm:h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i data-lucide="wallet" class="w-4 h-4 sm:w-5 sm:h-5 text-purple-600"></i>
                                     </div>
-                                    <span class="text-gray-600">Всего оплачено</span>
+                                    <span class="text-gray-600 text-sm sm:text-base">Оплачено</span>
                                 </div>
-                                <span class="text-xl font-bold text-gray-900">{{ number_format($stats['total_spent'], 0, ',', ' ') }} ₽</span>
+                                <span class="text-base sm:text-xl font-bold text-gray-900 flex-shrink-0">{{ number_format($stats['total_spent'], 0, ',', ' ') }} ₽</span>
                             </div>
                         @endif
                     </div>

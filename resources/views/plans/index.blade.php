@@ -5,18 +5,18 @@
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-6 sm:py-12">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
             <!-- Hero секция -->
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg mb-8">
                 <div class="p-6 lg:p-8 bg-gradient-to-r from-amber-500 to-orange-500 text-white">
-                    <h1 class="text-3xl font-bold mb-4">Выберите свой план питания</h1>
-                    <p class="text-lg opacity-90">Готовые планы питания для похудения с подробными рецептами и граммовкой</p>
+                    <h1 class="text-2xl sm:text-3xl font-bold mb-2 sm:mb-4">Выберите свой план питания</h1>
+                    <p class="text-base sm:text-lg opacity-90">Готовые планы питания для похудения с подробными рецептами и граммовкой</p>
                 </div>
             </div>
 
             <!-- Планы -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-8">
                 @foreach($plans as $plan)
                     <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg {{ $plan->type === 'yearly' ? 'ring-2 ring-amber-500' : '' }}">
                         @if($plan->type === 'yearly')
@@ -25,13 +25,13 @@
                             </div>
                         @endif
                         
-                        <div class="p-6">
-                            <div class="text-center mb-6">
-                                <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ $plan->name }}</h3>
+                        <div class="p-4 sm:p-6">
+                            <div class="text-center mb-4 sm:mb-6">
+                                <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{{ $plan->name }}</h3>
                                 <p class="text-gray-600 mb-4">{{ $plan->description }}</p>
                                 
                                 <div class="mb-4">
-                                    <span class="text-4xl font-bold text-gray-900">{{ number_format($plan->price, 0, ',', ' ') }} ₽</span>
+                                    <span class="text-3xl sm:text-4xl font-bold text-gray-900">{{ number_format($plan->price, 0, ',', ' ') }} ₽</span>
                                     @if($plan->original_price && $plan->original_price > $plan->price)
                                         <span class="text-sm text-gray-500 line-through ml-2">{{ number_format($plan->original_price, 0, ',', ' ') }} ₽</span>
                                         @php
@@ -52,7 +52,7 @@
                             </div>
 
                             <!-- Особенности плана -->
-                            <ul class="space-y-3 mb-6">
+                            <ul class="space-y-2 sm:space-y-3 mb-4 sm:mb-6 text-sm sm:text-base">
                                 @if($plan->limits)
                                     @if($plan->limits['current_access'] ?? true)
                                         <li class="flex items-center">
@@ -138,10 +138,10 @@
             </div>
 
             <!-- Дополнительная информация -->
-            <div class="mt-12 bg-white overflow-hidden shadow-xl sm:rounded-lg">
-                <div class="p-6 lg:p-8">
-                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Почему выбирают RawPlan?</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="mt-8 sm:mt-12 bg-white overflow-hidden shadow-xl sm:rounded-lg">
+                <div class="p-4 sm:p-6 lg:p-8">
+                    <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-4">Почему выбирают RawPlan?</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                         <div class="text-center">
                             <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <svg class="w-8 h-8 text-amber-500" fill="currentColor" viewBox="0 0 20 20">

@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.public')
 
 @section('title', ($category->meta_title ?: $category->name . ' — Блог RawPlan'))
 @section('description', $category->meta_description ?: 'Статьи в категории «' . $category->name . '». Полезная информация о правильном питании и похудении.')

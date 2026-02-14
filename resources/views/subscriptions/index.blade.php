@@ -1,23 +1,23 @@
 <x-app-layout>
     @section('title', 'Моя подписка — RawPlan')
 
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">Моя подписка</h1>
+<div class="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">Моя подписка</h1>
 
     @if($subscription)
         {{-- Активная подписка --}}
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 mb-8">
-            <div class="flex items-start justify-between mb-6">
+        <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-8 mb-6 sm:mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
                 <div>
-                    <div class="flex items-center gap-3 mb-2">
-                        <h2 class="text-xl font-bold text-gray-900">{{ $subscription->plan->name }}</h2>
-                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">Активна</span>
+                    <div class="flex items-center gap-3 mb-2 flex-wrap">
+                        <h2 class="text-lg sm:text-xl font-bold text-gray-900">{{ $subscription->plan->name }}</h2>
+                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs sm:text-sm font-medium">Активна</span>
                     </div>
-                    <p class="text-gray-500">{{ $subscription->plan->description ?? '' }}</p>
+                    <p class="text-gray-500 text-sm sm:text-base">{{ $subscription->plan->description ?? '' }}</p>
                 </div>
-                <div class="text-right">
-                    <div class="text-2xl font-bold text-gray-900">{{ number_format($subscription->plan->price, 0, ',', ' ') }} ₽</div>
-                    <div class="text-sm text-gray-500">
+                <div class="sm:text-right flex-shrink-0">
+                    <div class="text-xl sm:text-2xl font-bold text-gray-900">{{ number_format($subscription->plan->price, 0, ',', ' ') }} ₽</div>
+                    <div class="text-xs sm:text-sm text-gray-500">
                         @if($subscription->plan->type === 'monthly') / месяц
                         @elseif($subscription->plan->type === 'yearly') / год
                         @elseif($subscription->plan->type === 'trial') пробный период
@@ -26,7 +26,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <div class="bg-gray-50 rounded-xl p-4">
                     <div class="text-sm text-gray-500 mb-1">Начало</div>
                     <div class="font-semibold text-gray-900">{{ $subscription->started_at?->format('d.m.Y') ?? '—' }}</div>
@@ -82,7 +82,7 @@
         </div>
     @else
         {{-- Нет подписки --}}
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center mb-8">
+        <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 text-center mb-6 sm:mb-8">
             <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i data-lucide="credit-card" class="w-8 h-8 text-gray-400"></i>
             </div>
@@ -97,7 +97,7 @@
 
     {{-- История платежей --}}
     @if($payments->count() > 0)
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
+        <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-8">
             <h2 class="text-lg font-bold text-gray-900 mb-4">История платежей</h2>
             <div class="divide-y divide-gray-100">
                 @foreach($payments as $payment)

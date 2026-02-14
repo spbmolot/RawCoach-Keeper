@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.public')
 
 @section('title', ($post->meta_title ?: $post->title) . ' — Блог RawPlan')
 @section('description', $post->meta_description ?: $post->getExcerptOrTruncatedBody(160))
@@ -71,7 +71,7 @@
                 <p class="text-lg sm:text-xl text-gray-500 leading-relaxed mb-6">{{ $post->excerpt }}</p>
             @endif
 
-            <div class="flex items-center gap-4 text-sm text-gray-400 border-b border-gray-100 pb-6">
+            <div class="flex items-center gap-x-4 gap-y-2 flex-wrap text-sm text-gray-400 border-b border-gray-100 pb-6">
                 @if($post->author)
                     <div class="flex items-center gap-2">
                         <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">

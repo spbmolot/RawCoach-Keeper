@@ -123,8 +123,8 @@
             .faq-answer { font-size: 0.8rem !important; }
         }
         
-        /* Экстремально маленькие экраны (до 320px) */
-        @media (max-width: 320px) {
+        /* Экстремально маленькие экраны (до 340px) */
+        @media (max-width: 340px) {
             .hero-title { font-size: 1.5rem !important; }
             .hero-stats { flex-wrap: wrap; justify-content: center; }
             .hero-stats > div { flex: 0 0 auto; }
