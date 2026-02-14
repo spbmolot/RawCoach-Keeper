@@ -143,26 +143,41 @@ class PaymentService
             $query->where('status', $filters['status']);
         }
 
-        $payments = $query->get();
+        // Агрегатные запросы вместо загрузки всех записей в память
+        $totals = (clone $query)->selectRaw("
+            COUNT(*) as total_count,
+            COALESCE(SUM(amount), 0) as total_amount,
+            COUNT(CASE WHEN status = 'paid' THEN 1 END) as succeeded_count,
+            COALESCE(SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END), 0) as succeeded_amount,
+            COUNT(CASE WHEN status = 'failed' THEN 1 END) as failed_count,
+            COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending_count,
+            COUNT(CASE WHEN status = 'refunded' THEN 1 END) as refunded_count,
+            COALESCE(SUM(CASE WHEN status = 'refunded' THEN amount ELSE 0 END), 0) as refunded_amount
+        ")->first();
+
+        $byProvider = (clone $query)->selectRaw("
+            provider,
+            COUNT(*) as count,
+            COALESCE(SUM(amount), 0) as amount,
+            COALESCE(SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END), 0) as succeeded_amount
+        ")->groupBy('provider')->get()->keyBy('provider')->map(fn($row) => [
+            'count' => (int) $row->count,
+            'amount' => (float) $row->amount,
+            'succeeded_amount' => (float) $row->succeeded_amount,
+        ]);
 
         return [
-            'total_count' => $payments->count(),
-            'total_amount' => $payments->sum('amount'),
-            'succeeded_count' => $payments->where('status', 'paid')->count(),
-            'succeeded_amount' => $payments->where('status', 'paid')->sum('amount'),
-            'failed_count' => $payments->where('status', 'failed')->count(),
-            'pending_count' => $payments->where('status', 'pending')->count(),
-            'refunded_count' => $payments->where('status', 'refunded')->count(),
-            'refunded_amount' => $payments->where('status', 'refunded')->sum('amount'),
-            'by_provider' => $payments->groupBy('provider')->map(function ($providerPayments) {
-                return [
-                    'count' => $providerPayments->count(),
-                    'amount' => $providerPayments->sum('amount'),
-                    'succeeded_amount' => $providerPayments->where('status', 'paid')->sum('amount'),
-                ];
-            }),
-            'conversion_rate' => $payments->count() > 0 
-                ? round(($payments->where('status', 'paid')->count() / $payments->count()) * 100, 2)
+            'total_count' => (int) $totals->total_count,
+            'total_amount' => (float) $totals->total_amount,
+            'succeeded_count' => (int) $totals->succeeded_count,
+            'succeeded_amount' => (float) $totals->succeeded_amount,
+            'failed_count' => (int) $totals->failed_count,
+            'pending_count' => (int) $totals->pending_count,
+            'refunded_count' => (int) $totals->refunded_count,
+            'refunded_amount' => (float) $totals->refunded_amount,
+            'by_provider' => $byProvider,
+            'conversion_rate' => $totals->total_count > 0
+                ? round(($totals->succeeded_count / $totals->total_count) * 100, 2)
                 : 0,
         ];
     }

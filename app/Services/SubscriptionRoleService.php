@@ -183,25 +183,25 @@ class SubscriptionRoleService
             'expired_assigned' => 0,
         ];
 
-        $users = User::with(['subscriptions.plan'])->get();
+        User::with(['subscriptions.plan'])->chunk(100, function ($users) use (&$result) {
+            foreach ($users as $user) {
+                $activeSubscription = $user->activeSubscription()->with('plan')->first();
 
-        foreach ($users as $user) {
-            $activeSubscription = $user->activeSubscription()->with('plan')->first();
-
-            if ($activeSubscription && $activeSubscription->plan && $activeSubscription->plan->role) {
-                $this->assignSubscriberRole($user, $activeSubscription->plan->role);
-                $result['roles_assigned']++;
-            } else {
-                // Нет активной подписки - назначаем lapsed или expired
-                $hadAnySubscription = $user->subscriptions()->exists();
-                if ($hadAnySubscription) {
-                    $this->assignExpiredRole($user);
-                    $result['expired_assigned']++;
+                if ($activeSubscription && $activeSubscription->plan && $activeSubscription->plan->role) {
+                    $this->assignSubscriberRole($user, $activeSubscription->plan->role);
+                    $result['roles_assigned']++;
+                } else {
+                    // Нет активной подписки - назначаем lapsed или expired
+                    $hadAnySubscription = $user->subscriptions()->exists();
+                    if ($hadAnySubscription) {
+                        $this->assignExpiredRole($user);
+                        $result['expired_assigned']++;
+                    }
                 }
-            }
 
-            $result['processed']++;
-        }
+                $result['processed']++;
+            }
+        });
 
         return $result;
     }
