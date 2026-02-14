@@ -18,6 +18,7 @@ use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\TestPaymentController;
 use App\Http\Controllers\DiagnosticsController;
 use App\Http\Controllers\OnboardingController;
+use App\Http\Controllers\MealSwapController;
 
 // Публичные страницы
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -133,6 +134,13 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
         Route::get('/{recipe}/export', [RecipeController::class, 'export'])->name('export');
     });
     
+    // Замена рецептов в меню
+    Route::prefix('meal-swap')->name('meal-swap.')->group(function () {
+        Route::get('/{dayMeal}/alternatives', [MealSwapController::class, 'alternatives'])->name('alternatives');
+        Route::post('/{dayMeal}/swap', [MealSwapController::class, 'swap'])->name('swap');
+        Route::delete('/{dayMeal}/reset', [MealSwapController::class, 'reset'])->name('reset');
+    });
+
     // Демо-страница (только для авторизованных)
     Route::get('/demo', [HomeController::class, 'demo'])->name('demo');
     

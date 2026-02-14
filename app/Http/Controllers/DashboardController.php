@@ -7,13 +7,15 @@ use App\Models\Menu;
 use App\Models\Recipe;
 use App\Models\Day;
 use App\Models\PersonalPlan;
+use App\Services\RecipeSwapService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
-    public function __construct()
-    {
+    public function __construct(
+        private RecipeSwapService $swapService
+    ) {
         $this->middleware('auth');
     }
 
@@ -74,11 +76,18 @@ class DashboardController extends Controller
 
         $todayDay->load(['meals.recipe.ingredients']);
         
-        $recipes = $todayDay->meals
+        // Применяем замены пользователя
+        $swaps = $hasSubscription 
+            ? $this->swapService->getSwapsForDay($user, $todayDay->id) 
+            : collect();
+        
+        $meals = $this->swapService->applySwaps($todayDay->meals, $swaps);
+        
+        $recipes = $meals
             ->groupBy('meal_type')
-            ->map(fn($meals) => $meals->pluck('recipe')->filter());
+            ->map(fn($meals) => $meals->values());
 
-        return view('dashboard.today', compact('todayDay', 'recipes', 'today', 'hasSubscription', 'isFreePreview'));
+        return view('dashboard.today', compact('todayDay', 'recipes', 'meals', 'today', 'hasSubscription', 'isFreePreview', 'swaps'));
     }
 
     /**
@@ -91,10 +100,17 @@ class DashboardController extends Controller
             ? Carbon::parse($request->get('date'))->startOfWeek()
             : Carbon::now()->startOfWeek();
         
+        $hasSubscription = $user->hasActiveSubscription();
         $weekDays = collect();
         for ($i = 0; $i < 7; $i++) {
             $date = $startDate->copy()->addDays($i);
             $day = $this->getDayForDate($user, $date);
+            
+            if ($day && $hasSubscription) {
+                $day->load(['meals.recipe.ingredients']);
+                $swaps = $this->swapService->getSwapsForDay($user, $day->id);
+                $this->swapService->applySwaps($day->meals, $swaps);
+            }
             
             $weekDays->push([
                 'date' => $date,
@@ -166,10 +182,17 @@ class DashboardController extends Controller
             $currentDate->addDay();
         }
         
-        // Собираем все рецепты из дней
+        // Собираем все рецепты из дней (с учётом замен)
+        $hasSubscription = $user->hasActiveSubscription();
         $recipes = collect();
         foreach ($days as $day) {
             $day->load(['meals.recipe.ingredients']);
+            
+            if ($hasSubscription) {
+                $swaps = $this->swapService->getSwapsForDay($user, $day->id);
+                $this->swapService->applySwaps($day->meals, $swaps);
+            }
+            
             foreach ($day->meals as $meal) {
                 if ($meal->recipe) {
                     $recipes->push($meal->recipe);
@@ -214,10 +237,17 @@ class DashboardController extends Controller
             $currentDate->addDay();
         }
         
-        // Собираем все рецепты из дней
+        // Собираем все рецепты из дней (с учётом замен)
+        $hasSubscription = $user->hasActiveSubscription();
         $recipes = collect();
         foreach ($days as $day) {
             $day->load(['meals.recipe.ingredients']);
+            
+            if ($hasSubscription) {
+                $swaps = $this->swapService->getSwapsForDay($user, $day->id);
+                $this->swapService->applySwaps($day->meals, $swaps);
+            }
+            
             foreach ($day->meals as $meal) {
                 if ($meal->recipe) {
                     $recipes->push($meal->recipe);

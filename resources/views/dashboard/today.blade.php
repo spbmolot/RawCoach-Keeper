@@ -74,45 +74,78 @@
                                 </div>
                             </div>
                             <div class="divide-y divide-gray-100">
-                                @foreach($recipes->get($type) as $recipe)
-                                    <a href="{{ route('recipes.show', $recipe) }}" class="flex items-center gap-4 p-4 hover:bg-gray-50 transition group">
-                                        @if($recipe->image)
-                                            <img src="{{ Storage::url($recipe->image) }}" alt="{{ $recipe->title }}" class="w-20 h-20 rounded-xl object-cover">
-                                        @else
-                                            <div class="w-20 h-20 bg-gray-100 rounded-xl flex items-center justify-center">
-                                                <i data-lucide="chef-hat" class="w-8 h-8 text-gray-400"></i>
+                                @foreach($recipes->get($type) as $meal)
+                                    @php $recipe = $meal->recipe; @endphp
+                                    @if($recipe)
+                                    <div class="flex items-center gap-4 p-4 hover:bg-gray-50 transition group relative" id="meal-card-{{ $meal->id }}">
+                                        <a href="{{ route('recipes.show', $recipe) }}" class="flex items-center gap-4 flex-1 min-w-0">
+                                            @if($recipe->image)
+                                                <img src="{{ Storage::url($recipe->image) }}" alt="{{ $recipe->title }}" class="w-20 h-20 rounded-xl object-cover flex-shrink-0">
+                                            @else
+                                                <div class="w-20 h-20 bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                                                    <i data-lucide="chef-hat" class="w-8 h-8 text-gray-400"></i>
+                                                </div>
+                                            @endif
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-center gap-2">
+                                                    <h4 class="font-medium text-gray-900 group-hover:text-green-600 transition truncate">{{ $recipe->title }}</h4>
+                                                    @if($meal->swapped)
+                                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full flex-shrink-0">
+                                                            <i data-lucide="repeat-2" class="w-3 h-3"></i>
+                                                            Замена
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                                <div class="flex flex-wrap items-center gap-4 mt-2 text-sm text-gray-500">
+                                                    <span class="flex items-center gap-1">
+                                                        <i data-lucide="flame" class="w-4 h-4 text-orange-400"></i>
+                                                        {{ $recipe->calories ?? 0 }} ккал
+                                                    </span>
+                                                    <span class="flex items-center gap-1">
+                                                        <i data-lucide="timer" class="w-4 h-4 text-blue-400"></i>
+                                                        {{ $recipe->total_time ?? 0 }} мин
+                                                    </span>
+                                                    @if($recipe->proteins)
+                                                        <span class="hidden sm:flex items-center gap-1">
+                                                            Б: {{ $recipe->proteins }}г
+                                                        </span>
+                                                    @endif
+                                                    @if($recipe->fats)
+                                                        <span class="hidden sm:flex items-center gap-1">
+                                                            Ж: {{ $recipe->fats }}г
+                                                        </span>
+                                                    @endif
+                                                    @if($recipe->carbs)
+                                                        <span class="hidden sm:flex items-center gap-1">
+                                                            У: {{ $recipe->carbs }}г
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </a>
+                                        {{-- Кнопки замены / сброса --}}
+                                        @if($hasSubscription && empty($isFreePreview))
+                                            <div class="flex items-center gap-1 flex-shrink-0">
+                                                @if($meal->swapped)
+                                                    <button
+                                                        onclick="resetSwap({{ $meal->id }})"
+                                                        class="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition"
+                                                        title="Вернуть оригинал"
+                                                    >
+                                                        <i data-lucide="undo-2" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                                                    </button>
+                                                @endif
+                                                <button
+                                                    onclick="openSwapModal({{ $meal->id }})"
+                                                    class="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition"
+                                                    title="Заменить рецепт"
+                                                >
+                                                    <i data-lucide="arrow-left-right" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                                                </button>
                                             </div>
                                         @endif
-                                        <div class="flex-1 min-w-0">
-                                            <h4 class="font-medium text-gray-900 group-hover:text-green-600 transition">{{ $recipe->title }}</h4>
-                                            <div class="flex flex-wrap items-center gap-4 mt-2 text-sm text-gray-500">
-                                                <span class="flex items-center gap-1">
-                                                    <i data-lucide="flame" class="w-4 h-4 text-orange-400"></i>
-                                                    {{ $recipe->calories ?? 0 }} ккал
-                                                </span>
-                                                <span class="flex items-center gap-1">
-                                                    <i data-lucide="timer" class="w-4 h-4 text-blue-400"></i>
-                                                    {{ $recipe->cooking_time ?? 0 }} мин
-                                                </span>
-                                                @if($recipe->proteins)
-                                                    <span class="hidden sm:flex items-center gap-1">
-                                                        Б: {{ $recipe->proteins }}г
-                                                    </span>
-                                                @endif
-                                                @if($recipe->fats)
-                                                    <span class="hidden sm:flex items-center gap-1">
-                                                        Ж: {{ $recipe->fats }}г
-                                                    </span>
-                                                @endif
-                                                @if($recipe->carbs)
-                                                    <span class="hidden sm:flex items-center gap-1">
-                                                        У: {{ $recipe->carbs }}г
-                                                    </span>
-                                                @endif
-                                            </div>
-                                        </div>
-                                        <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400 group-hover:text-green-500 transition flex-shrink-0"></i>
-                                    </a>
+                                    </div>
+                                    @endif
                                 @endforeach
                             </div>
                         </div>
@@ -122,10 +155,11 @@
 
             {{-- Итого за день --}}
             @php
-                $totalCalories = $recipes->flatten()->sum('calories');
-                $totalProteins = $recipes->flatten()->sum('proteins');
-                $totalFats = $recipes->flatten()->sum('fats');
-                $totalCarbs = $recipes->flatten()->sum('carbs');
+                $allRecipes = $recipes->flatten()->map(fn($m) => $m->recipe)->filter();
+                $totalCalories = $allRecipes->sum('calories');
+                $totalProteins = $allRecipes->sum('proteins');
+                $totalFats = $allRecipes->sum('fats');
+                $totalCarbs = $allRecipes->sum('carbs');
             @endphp
             <div class="mt-6 sm:mt-8 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white">
                 <h3 class="font-semibold mb-3 sm:mb-4 flex items-center gap-2 text-sm sm:text-base">
@@ -174,4 +208,172 @@
             </div>
         @endif
     </div>
+
+    {{-- Модалка замены рецепта --}}
+    @if($hasSubscription && empty($isFreePreview))
+    <div id="swapModal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeSwapModal()"></div>
+        <div class="absolute inset-x-4 top-[5%] bottom-[5%] sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 sm:w-full sm:max-w-lg bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+            {{-- Заголовок модалки --}}
+            <div class="p-4 sm:p-5 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
+                <div>
+                    <h3 class="font-bold text-gray-900 text-lg">Заменить рецепт</h3>
+                    <p class="text-sm text-gray-500 mt-0.5" id="swapModalSubtitle">Выберите альтернативу</p>
+                </div>
+                <button onclick="closeSwapModal()" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            {{-- Причина замены (опционально) --}}
+            <div class="px-4 sm:px-5 py-3 border-b border-gray-100 flex-shrink-0">
+                <select id="swapReason" class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 text-gray-700 focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                    <option value="">Причина замены (необязательно)</option>
+                    <option value="Не нравится вкус">Не нравится вкус</option>
+                    <option value="Аллергия/непереносимость">Аллергия/непереносимость</option>
+                    <option value="Нет ингредиентов">Нет ингредиентов</option>
+                    <option value="Слишком сложно готовить">Слишком сложно готовить</option>
+                    <option value="Слишком долго">Слишком долго</option>
+                    <option value="Хочу разнообразия">Хочу разнообразия</option>
+                </select>
+            </div>
+
+            {{-- Список альтернатив --}}
+            <div class="flex-1 overflow-y-auto" id="swapAlternativesList">
+                <div class="flex items-center justify-center h-32">
+                    <div class="flex items-center gap-3 text-gray-500">
+                        <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        Загрузка альтернатив...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    let currentDayMealId = null;
+
+    function openSwapModal(dayMealId) {
+        currentDayMealId = dayMealId;
+        const modal = document.getElementById('swapModal');
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        loadAlternatives(dayMealId);
+    }
+
+    function closeSwapModal() {
+        const modal = document.getElementById('swapModal');
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+        currentDayMealId = null;
+    }
+
+    async function loadAlternatives(dayMealId) {
+        const list = document.getElementById('swapAlternativesList');
+        list.innerHTML = '<div class="flex items-center justify-center h-32"><div class="flex items-center gap-3 text-gray-500"><svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>Загрузка альтернатив...</div></div>';
+
+        try {
+            const resp = await fetch(`/meal-swap/${dayMealId}/alternatives`, {
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const data = await resp.json();
+
+            if (!data.success || !data.data.alternatives.length) {
+                list.innerHTML = '<div class="flex flex-col items-center justify-center h-32 text-gray-500"><i data-lucide="search-x" class="w-8 h-8 mb-2"></i><p>Альтернатив не найдено</p></div>';
+                if (window.lucide) lucide.createIcons();
+                return;
+            }
+
+            const orig = data.data.original;
+            document.getElementById('swapModalSubtitle').textContent = `Замена для: ${orig.title}`;
+
+            let html = '<div class="divide-y divide-gray-100">';
+            data.data.alternatives.forEach(alt => {
+                const diffSign = alt.calorie_diff > 0 ? '+' : '';
+                const diffColor = Math.abs(alt.calorie_diff) <= 50 ? 'text-green-600' : 'text-amber-600';
+                html += `
+                <button onclick="performSwap(${dayMealId}, ${alt.id})" class="w-full flex items-center gap-3 p-4 hover:bg-green-50 transition text-left">
+                    <div class="w-14 h-14 rounded-xl flex-shrink-0 overflow-hidden bg-gray-100">
+                        ${alt.image_url ? `<img src="${alt.image_url}" alt="" class="w-full h-full object-cover">` : '<div class="w-full h-full flex items-center justify-center"><i data-lucide="chef-hat" class="w-6 h-6 text-gray-400"></i></div>'}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="font-medium text-gray-900 text-sm truncate">${alt.title}</h4>
+                        <div class="flex items-center gap-3 mt-1 text-xs text-gray-500">
+                            <span>${alt.calories} ккал</span>
+                            <span class="${diffColor}">(${diffSign}${alt.calorie_diff})</span>
+                            <span>${alt.cook_time} мин</span>
+                        </div>
+                        <div class="flex items-center gap-2 mt-1 text-xs text-gray-400">
+                            <span>Б:${alt.proteins}г</span>
+                            <span>Ж:${alt.fats}г</span>
+                            <span>У:${alt.carbs}г</span>
+                        </div>
+                    </div>
+                    <i data-lucide="arrow-right" class="w-4 h-4 text-green-500 flex-shrink-0"></i>
+                </button>`;
+            });
+            html += '</div>';
+            list.innerHTML = html;
+            if (window.lucide) lucide.createIcons();
+        } catch (err) {
+            list.innerHTML = '<div class="flex flex-col items-center justify-center h-32 text-red-500"><p>Ошибка загрузки</p></div>';
+        }
+    }
+
+    async function performSwap(dayMealId, recipeId) {
+        const reason = document.getElementById('swapReason').value;
+        try {
+            const resp = await fetch(`/meal-swap/${dayMealId}/swap`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ recipe_id: recipeId, reason: reason || null })
+            });
+            const data = await resp.json();
+            if (data.success) {
+                closeSwapModal();
+                window.location.reload();
+            } else {
+                alert(data.message || 'Ошибка замены');
+            }
+        } catch (err) {
+            alert('Ошибка сети');
+        }
+    }
+
+    async function resetSwap(dayMealId) {
+        if (!confirm('Вернуть оригинальный рецепт?')) return;
+        try {
+            const resp = await fetch(`/meal-swap/${dayMealId}/reset`, {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            const data = await resp.json();
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert(data.message || 'Ошибка сброса');
+            }
+        } catch (err) {
+            alert('Ошибка сети');
+        }
+    }
+
+    // Закрытие по Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeSwapModal();
+    });
+    </script>
+    @endif
 </x-app-layout>

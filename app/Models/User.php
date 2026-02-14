@@ -182,6 +182,14 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
+     * Замены рецептов в меню
+     */
+    public function mealSwaps()
+    {
+        return $this->hasMany(UserMealSwap::class);
+    }
+
+    /**
      * Активный персональный план
      */
     public function activePersonalPlan()
