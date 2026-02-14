@@ -28,7 +28,7 @@ class DiagnosticsController extends Controller
 
     public function __construct()
     {
-        $this->secretKey = env('DIAGNOSTICS_KEY', '');
+        $this->secretKey = config('services.diagnostics.key', '');
     }
 
     public function index(Request $request)
@@ -131,7 +131,7 @@ class DiagnosticsController extends Controller
         }
 
         // Расширения PHP
-        $requiredExtensions = ['pdo', 'pdo_mysql', 'mbstring', 'openssl', 'tokenizer', 'xml', 'ctype', 'json', 'bcmath', 'gd'];
+        $requiredExtensions = ['pdo', 'pdo_pgsql', 'mbstring', 'openssl', 'tokenizer', 'xml', 'ctype', 'json', 'bcmath', 'gd'];
         $missingExtensions = [];
         foreach ($requiredExtensions as $ext) {
             if (!extension_loaded($ext)) {
@@ -161,9 +161,9 @@ class DiagnosticsController extends Controller
             $pdo = DB::connection()->getPdo();
             $this->addCheck($category, 'Подключение', 'ok', 'Подключение к БД успешно');
 
-            // Версия MySQL
-            $version = DB::selectOne('SELECT VERSION() as version')->version;
-            $this->addCheck($category, 'Версия MySQL', 'ok', "MySQL {$version}");
+            // Версия PostgreSQL
+            $version = DB::selectOne('SHOW server_version')->server_version;
+            $this->addCheck($category, 'Версия PostgreSQL', 'ok', "PostgreSQL {$version}");
 
             // Имя БД
             $dbName = DB::connection()->getDatabaseName();
@@ -409,8 +409,8 @@ class DiagnosticsController extends Controller
         $category = 'Платёжные системы';
 
         // YooKassa
-        $yooKassaShopId = config('services.yookassa.shop_id') ?? env('YOOKASSA_SHOP_ID');
-        $yooKassaSecret = config('services.yookassa.secret_key') ?? env('YOOKASSA_SECRET_KEY');
+        $yooKassaShopId = config('services.yookassa.shop_id');
+        $yooKassaSecret = config('services.yookassa.secret_key');
 
         if (!empty($yooKassaShopId) && !empty($yooKassaSecret)) {
             $this->addCheck($category, 'YooKassa', 'ok', 'Настройки YooKassa заданы');
@@ -422,8 +422,8 @@ class DiagnosticsController extends Controller
         }
 
         // CloudPayments
-        $cpPublicId = config('services.cloudpayments.public_id') ?? env('CLOUDPAYMENTS_PUBLIC_ID');
-        $cpApiSecret = config('services.cloudpayments.api_secret') ?? env('CLOUDPAYMENTS_API_SECRET');
+        $cpPublicId = config('services.cloudpayments.public_id');
+        $cpApiSecret = config('services.cloudpayments.secret_key');
 
         if (!empty($cpPublicId) && !empty($cpApiSecret)) {
             $this->addCheck($category, 'CloudPayments', 'ok', 'Настройки CloudPayments заданы');

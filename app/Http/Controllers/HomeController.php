@@ -79,7 +79,7 @@ class HomeController extends Controller
             'message' => 'required|string|max:2000',
         ]);
 
-        Mail::to('noreply@rawplan.ru')->send(new ContactFormMail($request->only(['name', 'email', 'subject', 'message'])));
+        Mail::to(config('mail.from.address', 'support@rawplan.ru'))->send(new ContactFormMail($request->only(['name', 'email', 'subject', 'message'])));
 
         return back()->with('success', 'Ваше сообщение отправлено! Мы свяжемся с вами в ближайшее время.');
     }

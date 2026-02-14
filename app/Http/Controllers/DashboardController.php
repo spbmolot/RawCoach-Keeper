@@ -100,14 +100,19 @@ class DashboardController extends Controller
             ? Carbon::parse($request->get('date'))->startOfWeek()
             : Carbon::now()->startOfWeek();
         
+        $endDate = $startDate->copy()->addDays(6);
         $hasSubscription = $user->hasActiveSubscription();
+        
+        // Batch-загрузка всех дней за неделю одним запросом
+        $daysMap = $this->getDaysForPeriod($user, $startDate, $endDate);
+        
         $weekDays = collect();
         for ($i = 0; $i < 7; $i++) {
             $date = $startDate->copy()->addDays($i);
-            $day = $this->getDayForDate($user, $date);
+            $key = $date->month . '-' . $date->day;
+            $day = $daysMap[$key] ?? null;
             
             if ($day && $hasSubscription) {
-                $day->load(['meals.recipe.ingredients']);
                 $swaps = $this->swapService->getSwapsForDay($user, $day->id);
                 $this->swapService->applySwaps($day->meals, $swaps);
             }
@@ -115,7 +120,7 @@ class DashboardController extends Controller
             $weekDays->push([
                 'date' => $date,
                 'day' => $day,
-                'recipes_count' => $day ? $day->meals()->count() : 0,
+                'recipes_count' => $day ? $day->meals->count() : 0,
             ]);
         }
 
@@ -171,23 +176,13 @@ class DashboardController extends Controller
             ? Carbon::parse($request->get('end_date'))
             : $startDate->copy()->addDays(6);
 
-        // Получаем дни за период
-        $days = collect();
-        $currentDate = $startDate->copy();
-        while ($currentDate <= $endDate) {
-            $day = $this->getDayForDate($user, $currentDate);
-            if ($day) {
-                $days->push($day);
-            }
-            $currentDate->addDay();
-        }
+        // Batch-загрузка дней за период одним запросом
+        $daysMap = $this->getDaysForPeriod($user, $startDate, $endDate);
         
         // Собираем все рецепты из дней (с учётом замен)
         $hasSubscription = $user->hasActiveSubscription();
         $recipes = collect();
-        foreach ($days as $day) {
-            $day->load(['meals.recipe.ingredients']);
-            
+        foreach ($daysMap as $day) {
             if ($hasSubscription) {
                 $swaps = $this->swapService->getSwapsForDay($user, $day->id);
                 $this->swapService->applySwaps($day->meals, $swaps);
@@ -226,23 +221,13 @@ class DashboardController extends Controller
         $startDate = Carbon::parse($request->get('start_date'));
         $endDate = Carbon::parse($request->get('end_date'));
         
-        // Получаем дни за период
-        $days = collect();
-        $currentDate = $startDate->copy();
-        while ($currentDate <= $endDate) {
-            $day = $this->getDayForDate($user, $currentDate);
-            if ($day) {
-                $days->push($day);
-            }
-            $currentDate->addDay();
-        }
+        // Batch-загрузка дней за период
+        $daysMap = $this->getDaysForPeriod($user, $startDate, $endDate);
         
         // Собираем все рецепты из дней (с учётом замен)
         $hasSubscription = $user->hasActiveSubscription();
         $recipes = collect();
-        foreach ($days as $day) {
-            $day->load(['meals.recipe.ingredients']);
-            
+        foreach ($daysMap as $day) {
             if ($hasSubscription) {
                 $swaps = $this->swapService->getSwapsForDay($user, $day->id);
                 $this->swapService->applySwaps($day->meals, $swaps);
@@ -419,14 +404,56 @@ class DashboardController extends Controller
     }
 
     /**
+     * Batch-загрузка дней за период (оптимизация N+1)
+     * Возвращает коллекцию indexed by "month-dayNumber"
+     */
+    private function getDaysForPeriod($user, Carbon $startDate, Carbon $endDate)
+    {
+        // Группируем запрашиваемые дни по month+year
+        $periods = collect();
+        $current = $startDate->copy();
+        while ($current <= $endDate) {
+            $key = $current->year . '-' . $current->month;
+            if (!$periods->has($key)) {
+                $periods[$key] = [
+                    'month' => $current->month,
+                    'year' => $current->year,
+                    'days' => collect(),
+                ];
+            }
+            $periods[$key]['days']->push($current->day);
+            $current->addDay();
+        }
+
+        $result = collect();
+        foreach ($periods as $period) {
+            $days = Day::whereHas('menu', function($query) use ($user, $period) {
+                    $query->where('month', $period['month'])
+                        ->where('year', $period['year'])
+                        ->where('is_published', true);
+                    $this->filterMenuBySubscription($query, $user);
+                })
+                ->whereIn('day_number', $period['days']->toArray())
+                ->with(['menu', 'meals.recipe.ingredients'])
+                ->get();
+
+            foreach ($days as $day) {
+                $result[$period['month'] . '-' . $day->day_number] = $day;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * Фильтрация меню по подписке пользователя
      */
     private function filterMenuBySubscription($query, $user)
     {
         $subscription = $user->activeSubscription()->with('plan')->first();
         
-        // Root-пользователи имеют доступ ко всему контенту
-        if ($user->hasRole('root')) {
+        // Администраторы имеют доступ ко всему контенту
+        if ($user->hasRole('admin')) {
             return; // Без фильтрации — доступно всё
         }
 

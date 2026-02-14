@@ -46,6 +46,10 @@ return [
         'webhook_secret' => env('YOOKASSA_WEBHOOK_SECRET'),
     ],
 
+    'diagnostics' => [
+        'key' => env('DIAGNOSTICS_KEY', ''),
+    ],
+
     'google' => [
         'analytics_id' => env('GOOGLE_ANALYTICS_ID'),
     ],

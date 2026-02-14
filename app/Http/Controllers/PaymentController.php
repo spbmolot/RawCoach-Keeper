@@ -6,20 +6,14 @@ use Illuminate\Http\Request;
 use App\Models\Payment;
 use App\Models\UserSubscription;
 use App\Models\Coupon;
-use App\Services\SubscriptionService;
 use App\Services\Payments\YooKassaService;
 use App\Services\Payments\CloudPaymentsService;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use App\Events\PaymentProcessed;
-use App\Events\SubscriptionStatusChanged;
 
 class PaymentController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth')->except(['webhook']);
+        $this->middleware('auth');
     }
 
     /**
@@ -123,33 +117,6 @@ class PaymentController extends Controller
     }
 
     /**
-     * Обработка вебхука от платежной системы
-     */
-    public function webhook(Request $request, string $provider)
-    {
-        if (!in_array($provider, ['yookassa', 'cloudpayments'])) {
-            abort(404);
-        }
-
-        try {
-            if ($provider === 'yookassa') {
-                $this->handleYooKassaWebhook($request);
-            } else {
-                $this->handleCloudPaymentsWebhook($request);
-            }
-
-            return response()->json(['status' => 'success']);
-
-        } catch (\Exception $e) {
-            \Log::error("Webhook error ({$provider}): " . $e->getMessage(), [
-                'request_data' => $request->all()
-            ]);
-            
-            return response()->json(['error' => 'Webhook processing failed'], 500);
-        }
-    }
-
-    /**
      * История платежей пользователя
      */
     public function history()
@@ -244,94 +211,4 @@ class PaymentController extends Controller
         ];
     }
 
-    /**
-     * Обработка вебхука YooKassa
-     */
-    private function handleYooKassaWebhook(Request $request): void
-    {
-        $data = $request->all();
-        $paymentId = $data['object']['id'] ?? null;
-        $status = $data['object']['status'] ?? null;
-
-        if (!$paymentId) {
-            throw new \Exception('Payment ID not found in webhook');
-        }
-
-        $payment = Payment::where('external_id', $paymentId)->first();
-        if (!$payment) {
-            throw new \Exception('Payment not found: ' . $paymentId);
-        }
-        // Map YooKassa statuses to internal
-        $mapped = match($status) {
-            'succeeded' => 'paid',
-            'canceled' => 'cancelled',
-            default => 'pending'
-        };
-
-        $this->updatePaymentStatus($payment, $mapped, $data);
-    }
-
-    /**
-     * Обработка вебхука CloudPayments
-     */
-    private function handleCloudPaymentsWebhook(Request $request): void
-    {
-        $data = $request->all();
-        $paymentId = $data['TransactionId'] ?? null;
-        $status = $data['Status'] ?? null;
-
-        if (!$paymentId) {
-            throw new \Exception('Transaction ID not found in webhook');
-        }
-
-        $payment = Payment::where('external_id', $paymentId)->first();
-        if (!$payment) {
-            throw new \Exception('Payment not found: ' . $paymentId);
-        }
-
-        // Конвертируем статус CloudPayments в наш формат
-        $mappedStatus = $this->mapCloudPaymentsStatus($status);
-        $this->updatePaymentStatus($payment, $mappedStatus, $data);
-    }
-
-    /**
-     * Обновление статуса платежа
-     */
-    private function updatePaymentStatus(Payment $payment, string $status, array $webhookData): void
-    {
-        $subscriptionService = app(SubscriptionService::class);
-        
-        $payment->update([
-            'status' => $status,
-            'webhook_payload' => $webhookData,
-            'processed_at' => Carbon::now(),
-        ]);
-
-        // Если платеж успешен, активируем подписку через единый сервис
-        if ($status === 'paid' && $payment->subscription_id) {
-            $subscriptionService->activateSubscription($payment);
-        }
-
-        // Если платеж отклонен, деактивируем подписку через единый сервис
-        if ($status === 'failed' && $payment->subscription_id) {
-            $subscriptionService->deactivateSubscription($payment, 'Платеж отклонен');
-        }
-
-        // Dispatch payment event
-        event(new PaymentProcessed($payment, $status));
-    }
-
-    /**
-     * Маппинг статусов CloudPayments
-     */
-    private function mapCloudPaymentsStatus(string $status): string
-    {
-        return match($status) {
-            'Completed' => 'paid',
-            'Authorized' => 'pending',
-            'Declined' => 'failed',
-            'Cancelled' => 'cancelled',
-            default => 'pending'
-        };
-    }
 }
